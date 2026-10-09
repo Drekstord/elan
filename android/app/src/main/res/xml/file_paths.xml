@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dossiers exposés au menu de partage : uniquement le cache (images de partage temporaires). -->
+<paths>
+    <cache-path name="partage" path="." />
+</paths>

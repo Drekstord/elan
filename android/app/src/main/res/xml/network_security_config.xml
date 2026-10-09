@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Serveur auto-hébergé : un NAS joint par le réseau local ou un VPN répond souvent en http.
+  L'app n'accepte http que pour une adresse privée (192.168.x.x, 10.x.x.x, nas.local…),
+  voir isPrivateHost dans lib/core/server/server_config.dart ; sur Internet, https obligatoire.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

@@ -1,0 +1,57 @@
+# Test du serveur auto-hébergé (dossier serveur) sur une machine Linux avec Docker, comme un NAS :
+# démarrage, comptes, règles d'accès, synchro de l'app, sauvegarde et restauration.
+# Voir .github/scripts/tester-serveur.sh. Aucun secret nécessaire : le serveur de test est jetable.
+name: Serveur auto-hébergé
+
+on:
+  push:
+    paths:
+      - 'serveur/**'
+      - 'lib/core/server/**'
+      - 'lib/core/sync/**'
+      - 'test/server/**'
+      - '.github/scripts/tester-serveur.sh'
+      - '.github/workflows/serveur.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  serveur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      # Avant le serveur : le cache de Flutter parcourt le dépôt, dont la base (illisible une fois créée).
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.6'
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Démarrage du serveur
+        run: bash .github/scripts/tester-serveur.sh demarrer
+
+      - name: Comptes, données, fichiers, tableau de bord
+        run: bash .github/scripts/tester-serveur.sh verifier
+
+      - name: Code de synchro de l'app contre le serveur
+        run: flutter test --tags serveur --run-skipped test/server
+
+      - name: Sauvegarde, perte de la base, restauration
+        run: bash .github/scripts/tester-serveur.sh restaurer
+
+      - name: Journaux du serveur
+        if: failure()
+        working-directory: serveur
+        run: docker compose ps -a && docker compose logs --tail=100
+
+      # Le serveur de test est jetable ; sa base, illisible hors du conteneur, gênerait le nettoyage de Flutter.
+      - name: Arrêt et effacement du serveur de test
+        if: always()
+        working-directory: serveur
+        run: docker compose down -v && sudo rm -rf donnees

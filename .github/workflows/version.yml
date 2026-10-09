@@ -1,0 +1,192 @@
+# Fichiers d'une version, construits à chaque étiquette (v2.8.0…) et joints à la release :
+#   ELAN-vX.apk                    app Android
+#   ELAN-Installation-vX.exe       installateur Windows (un seul fichier)
+#   ELAN-serveur-vX.zip            serveur auto-hébergé (dossier serveur/)
+# Aussi à la main, sans release : onglet Actions > Version > Run workflow (fichiers dans l'onglet Actions).
+#
+# Secrets du dépôt requis (Settings > Secrets and variables > Actions), voir docs/INSTALLATION.md :
+#   SUPABASE_URL, SUPABASE_ANON_KEY            serveur intégré à l'app (clé publique « anon »)
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+#                                              clé de signature : la même que celle de l'app déjà installée,
+#                                              sinon Android refuse la mise à jour.
+name: Version
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write # publier la release
+
+env:
+  FLUTTER_VERSION: '3.47.6'
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Serveur intégré (depuis les secrets)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Secrets SUPABASE_URL / SUPABASE_ANON_KEY manquants (voir docs/INSTALLATION.md)."
+            exit 1
+          fi
+          jq -n --arg url "$SUPABASE_URL" --arg key "$SUPABASE_ANON_KEY" \
+            '{SUPABASE_URL: $url, SUPABASE_ANON_KEY: $key}' > config/supabase.json
+
+      - name: Clé de signature (depuis les secrets)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Secret ANDROID_KEYSTORE_BASE64 manquant : sans la bonne clé, le téléphone refuserait la mise à jour."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/elan-signature.jks
+          {
+            echo "storeFile=elan-signature.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      - run: flutter pub get
+
+      - name: Tests
+        run: flutter test
+
+      - name: Construction de l'APK
+        run: |
+          flutter build apk --release --dart-define-from-file=config/supabase.json
+          cp build/app/outputs/flutter-apk/app-release.apk "ELAN-${GITHUB_REF_NAME}.apk"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android
+          path: ELAN-${{ github.ref_name }}.apk
+          retention-days: 30
+
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Serveur intégré (depuis les secrets)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          @{ SUPABASE_URL = $env:SUPABASE_URL; SUPABASE_ANON_KEY = $env:SUPABASE_ANON_KEY } |
+            ConvertTo-Json | Set-Content -Encoding utf8NoBOM config/supabase.json
+
+      - name: Construction de l'app Windows
+        run: |
+          flutter pub get
+          flutter build windows --release --dart-define-from-file=config/supabase.json
+
+      # Sans ces bibliothèques de Microsoft (souvent déjà présentes, pas toujours), l'app ne démarre pas.
+      - name: Bibliothèques C++ de Microsoft jointes à l'app
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          $crt = Get-ChildItem "$vs\VC\Redist\MSVC\*\x64\Microsoft.VC14*.CRT" -Directory | Sort-Object FullName | Select-Object -Last 1
+          if (-not $crt) { throw 'Bibliothèques C++ introuvables' }
+          Copy-Item "$crt\msvcp140*.dll", "$crt\vcruntime140*.dll" build\windows\x64\runner\Release\
+          Get-ChildItem build\windows\x64\runner\Release\*.dll | Select-Object Name
+
+      - name: Installateur
+        run: |
+          $version = (Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9.]+)').Matches[0].Groups[1].Value
+          $iscc = Get-Command iscc -ErrorAction SilentlyContinue
+          if (-not $iscc) {
+            choco install innosetup -y --no-progress | Out-Null
+            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          }
+          & $iscc /Qp "/DVersion=$version" "/DSource=$PWD\build\windows\x64\runner\Release" scripts\windows\elan.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup : erreur $LASTEXITCODE" }
+          Move-Item "dist\ELAN-Installation-v$version.exe" "ELAN-Installation-$env:GITHUB_REF_NAME.exe"
+
+      - name: Essai de l'installateur (installation silencieuse, lancement, désinstallation)
+        run: |
+          Start-Process ".\ELAN-Installation-$env:GITHUB_REF_NAME.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/TASKS=bureau' -Wait
+          $app = "$env:LOCALAPPDATA\Programs\ELAN"
+          foreach ($f in 'elan.exe', 'flutter_windows.dll', 'vcruntime140.dll', 'data\flutter_assets\AssetManifest.bin') {
+            if (-not (Test-Path "$app\$f")) { throw "$f manquant après installation" }
+          }
+          if (-not (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\ÉLAN.lnk")) { throw 'raccourci du menu Démarrer manquant' }
+          $p = Start-Process "$app\elan.exe" -PassThru
+          Start-Sleep 15
+          if ($p.HasExited) { throw "ÉLAN s'est arrêté au lancement (code $($p.ExitCode))" }
+          Stop-Process $p
+          Start-Process "$app\unins000.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES' -Wait
+          Start-Sleep 3
+          if (Test-Path "$app\elan.exe") { throw 'désinstallation incomplète' }
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          path: ELAN-Installation-${{ github.ref_name }}.exe
+          retention-days: 30
+
+  publication:
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Paquet du serveur auto-hébergé (NAS)
+        run: |
+          mkdir paquet
+          cp -r serveur paquet/elan-serveur
+          rm paquet/elan-serveur/systeme/import_v1_cloud.sql  # propre au serveur en ligne d'origine
+          (cd paquet && zip -qr "../ELAN-serveur-${GITHUB_REF_NAME}.zip" elan-serveur)
+
+      - uses: actions/download-artifact@v8
+        with:
+          merge-multiple: true
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: serveur
+          path: ELAN-serveur-${{ github.ref_name }}.zip
+          retention-days: 30
+
+      - name: Publication dans la release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ELAN-${{ github.ref_name }}.apk
+            ELAN-Installation-${{ github.ref_name }}.exe
+            ELAN-serveur-${{ github.ref_name }}.zip
+          generate_release_notes: true

@@ -1,0 +1,8 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # Horodatages en texte ISO 8601 : précision à la milliseconde,
+          # indispensable pour comparer les versions lors de la synchro.
+          store_date_time_values_as_text: true

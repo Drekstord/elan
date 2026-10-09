@@ -1,0 +1,5 @@
+tags:
+  screenshots:
+    skip: "Captures de design : flutter test --tags screenshots --run-skipped --update-goldens"
+  serveur:
+    skip: "Contre un vrai serveur auto-hébergé : voir .github/workflows/serveur.yml"

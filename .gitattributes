@@ -1,0 +1,5 @@
+# Scripts et réglages du serveur : lus sous Linux (NAS), fins de ligne Unix obligatoires.
+*.sh text eol=lf
+serveur/** text eol=lf
+serveur/*.cmd text eol=crlf
+serveur/**/*.ps1 text eol=crlf

@@ -1,0 +1,1512 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for French (`fr`).
+class AppLocalizationsFr extends AppLocalizations {
+  AppLocalizationsFr([String locale = 'fr']) : super(locale);
+
+  @override
+  String get appTitle => 'ÉLAN';
+
+  @override
+  String get appTagline => 'Sport & Impact';
+
+  @override
+  String get signInTitle => 'Connexion';
+
+  @override
+  String get signInIntro => 'Connecte-toi avec le compte créé pour toi sur ÉLAN.';
+
+  @override
+  String get emailLabel => 'Adresse e-mail';
+
+  @override
+  String get passwordLabel => 'Mot de passe';
+
+  @override
+  String get signInButton => 'Se connecter';
+
+  @override
+  String get signInInvalidEmail => 'Adresse e-mail invalide.';
+
+  @override
+  String get signInMissingPassword => 'Saisis ton mot de passe.';
+
+  @override
+  String get signInWrongCredentials => 'E-mail ou mot de passe incorrect.';
+
+  @override
+  String get signInRateLimited => 'Trop de tentatives. Patiente une minute avant de réessayer.';
+
+  @override
+  String get signInOffline => 'Impossible de joindre le serveur. Vérifie ta connexion.';
+
+  @override
+  String get signInForgotten => 'Mot de passe oublié ? Demande à l\'administrateur d\'ÉLAN de le réinitialiser.';
+
+  @override
+  String get navCourses => 'Courses';
+
+  @override
+  String get navImpact => 'Impact';
+
+  @override
+  String get navEvolution => 'Évolution';
+
+  @override
+  String get navRecords => 'Records';
+
+  @override
+  String get navSettings => 'Réglages';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get save => 'Enregistrer';
+
+  @override
+  String get delete => 'Supprimer';
+
+  @override
+  String get edit => 'Modifier';
+
+  @override
+  String get close => 'Fermer';
+
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get typeOfficial => 'Course officielle';
+
+  @override
+  String get typeConqueror => 'Défi The Conqueror';
+
+  @override
+  String get statusUpcoming => 'À venir';
+
+  @override
+  String get statusAwaiting => 'Résultat à saisir';
+
+  @override
+  String get statusAwaitingShort => 'À saisir';
+
+  @override
+  String get statusCompleted => 'Terminée';
+
+  @override
+  String get causeSante => 'Santé & recherche';
+
+  @override
+  String get causeEnvironnement => 'Environnement & climat';
+
+  @override
+  String get causePrecarite => 'Précarité & faim';
+
+  @override
+  String get causeEnfance => 'Enfance & éducation';
+
+  @override
+  String get causeAnimaux => 'Protection animale';
+
+  @override
+  String get causeHandicap => 'Handicap & inclusion';
+
+  @override
+  String get causeAutre => 'Autre cause';
+
+  @override
+  String get metricTrees => 'Arbres plantés';
+
+  @override
+  String get metricOceanBottles => 'Bouteilles plastiques retirées';
+
+  @override
+  String get metricCareSessions => 'Séances de soins';
+
+  @override
+  String get metricResearchHours => 'Heures de recherche';
+
+  @override
+  String get metricMeals => 'Repas distribués';
+
+  @override
+  String get metricCareKits => 'Kits de soins';
+
+  @override
+  String get metricAnimalMeals => 'Repas pour animaux';
+
+  @override
+  String get metricNone => 'Aucune équivalence';
+
+  @override
+  String get distance5k => '5 km';
+
+  @override
+  String get distance10k => '10 km';
+
+  @override
+  String get distanceHalf => 'Semi-marathon';
+
+  @override
+  String get distanceMarathon => 'Marathon';
+
+  @override
+  String get statDistance => 'Distance';
+
+  @override
+  String get statDonations => 'Fonds engagés';
+
+  @override
+  String get statRaces => 'Courses';
+
+  @override
+  String get statTime => 'Temps de course';
+
+  @override
+  String get statElevation => 'Dénivelé +';
+
+  @override
+  String get statPace => 'Allure moyenne';
+
+  @override
+  String get coursesEmpty => 'Aucune course pour l\'instant. Ajoute ta première course ou inscris une course à venir.';
+
+  @override
+  String get coursesNoMatch => 'Aucune course ne correspond.';
+
+  @override
+  String get coursesAdd => 'Nouvelle course';
+
+  @override
+  String get coursesSearch => 'Rechercher une course, une association…';
+
+  @override
+  String get filterAll => 'Toutes';
+
+  @override
+  String get filterCharity => 'Solidaires';
+
+  @override
+  String get kindAll => 'Toutes';
+
+  @override
+  String get kindOfficial => 'Officielles';
+
+  @override
+  String get kindChallenge => 'Défis';
+
+  @override
+  String get filterReset => 'Effacer les filtres';
+
+  @override
+  String get filterSolidarity => 'Volet solidaire';
+
+  @override
+  String get filterSolidarityAll => 'Solidaires ou non';
+
+  @override
+  String get filterSolidarityOnly => 'Solidaires uniquement';
+
+  @override
+  String summaryCourses(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses',
+      one: '1 course',
+      zero: 'Aucune course',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String summaryOfficial(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses officielles',
+      one: '1 course officielle',
+      zero: 'Aucune course officielle',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String summaryChallenges(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count défis',
+      one: '1 défi',
+      zero: 'Aucun défi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String summarySolidarity(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'solidaires', one: 'solidaire');
+    return '$_temp0';
+  }
+
+  @override
+  String get sectionAwaiting => 'Résultat à saisir';
+
+  @override
+  String get sectionUpcoming => 'À venir';
+
+  @override
+  String get sectionDone => 'Terminées';
+
+  @override
+  String sectionSummary(int count, String distance) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count courses', one: '1 course');
+    return '$_temp0 · $distance';
+  }
+
+  @override
+  String get filterCause => 'Cause';
+
+  @override
+  String get sortRaceDate => 'Date de course';
+
+  @override
+  String get sortAddedDate => 'Date d\'ajout';
+
+  @override
+  String get sortTooltip => 'Trier';
+
+  @override
+  String get sortAscending => 'Plus anciennes d\'abord';
+
+  @override
+  String get sortDescending => 'Plus récentes d\'abord';
+
+  @override
+  String awaitingBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses attendent ton résultat',
+      one: '1 course attend ton résultat',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recordBadge => 'Record';
+
+  @override
+  String get nextRace => 'Prochaine course';
+
+  @override
+  String get last12Months => 'Kilomètres sur les 12 derniers mois';
+
+  @override
+  String get formNewTitle => 'Nouvelle course';
+
+  @override
+  String get formEditTitle => 'Modifier la course';
+
+  @override
+  String get formPlanned => 'Course à venir';
+
+  @override
+  String get formPlannedHint => 'Inscris-la maintenant, tu saisiras ton temps après la course.';
+
+  @override
+  String get formName => 'Nom de la course';
+
+  @override
+  String get formDate => 'Date';
+
+  @override
+  String get formDistance => 'Distance (km)';
+
+  @override
+  String get formDuration => 'Temps (h:mm:ss)';
+
+  @override
+  String get formElevation => 'Dénivelé positif (m)';
+
+  @override
+  String get formImportGpx => 'Importer un fichier GPX';
+
+  @override
+  String formGpxImported(String distance, String duration) {
+    return 'Trace importée : $distance, $duration.';
+  }
+
+  @override
+  String get formGpxError => 'Ce fichier GPX est illisible.';
+
+  @override
+  String get formTeam => 'Défi en équipe';
+
+  @override
+  String get formChallengeDistance => 'Distance totale du défi (km)';
+
+  @override
+  String get formTeamSize => 'Nombre de membres';
+
+  @override
+  String formPersonalShare(String distance) {
+    return 'Ta part : $distance';
+  }
+
+  @override
+  String get formCharity => 'Course solidaire';
+
+  @override
+  String get formCharityHint => 'Liée à une association et à des dons.';
+
+  @override
+  String get formAssociation => 'Association';
+
+  @override
+  String get formChooseAssociation => 'Choisir une association';
+
+  @override
+  String get formSponsor => 'Parrainage (€ par km)';
+
+  @override
+  String get formRegistration => 'Don sur l\'inscription (€)';
+
+  @override
+  String get formFundraising => 'Collecte / cagnotte (€)';
+
+  @override
+  String formDonationTotal(String amount) {
+    return 'Total engagé : $amount';
+  }
+
+  @override
+  String get formImpact => 'Équivalence annoncée par l\'organisateur';
+
+  @override
+  String get formImpactHint => 'Facultatif. Uniquement si l\'organisateur l\'annonce (ex. 4 arbres plantés).';
+
+  @override
+  String get formImpactUnit => 'Unité';
+
+  @override
+  String get formImpactQuantity => 'Quantité';
+
+  @override
+  String get formPhotos => 'Souvenirs';
+
+  @override
+  String get formMedal => 'Médaille';
+
+  @override
+  String get formBib => 'Dossard';
+
+  @override
+  String get formAddPhoto => 'Ajouter une photo';
+
+  @override
+  String get formNotes => 'Notes';
+
+  @override
+  String get issueMissingTitle => 'Donne un nom à la course.';
+
+  @override
+  String get issueDistance => 'La distance doit être supérieure à 0.';
+
+  @override
+  String get issueNegative => 'Une valeur négative est impossible.';
+
+  @override
+  String get issueCompletedInFuture => 'Cette date est dans le futur : coche « Course à venir ».';
+
+  @override
+  String get issuePlannedWithResult => 'Une course à venir n\'a pas encore de temps.';
+
+  @override
+  String get issueTeamSize => 'Nombre de membres invalide.';
+
+  @override
+  String get issueImpactQuantity => 'La quantité doit être positive.';
+
+  @override
+  String issueImpactCap(String max) {
+    return 'Au-delà du plafond annoncé ($max maximum).';
+  }
+
+  @override
+  String get issueInvalidNumber => 'Nombre invalide.';
+
+  @override
+  String get issueInvalidDuration => 'Format attendu : h:mm:ss';
+
+  @override
+  String get assoSearchHint => 'Nom de l\'association';
+
+  @override
+  String get assoCatalog => 'Associations courantes';
+
+  @override
+  String get assoOfficial => 'Répertoire officiel';
+
+  @override
+  String get assoSearching => 'Recherche dans le répertoire officiel…';
+
+  @override
+  String get assoSearchOffline => 'Recherche en ligne indisponible. Choisis dans la liste ou saisis le nom.';
+
+  @override
+  String assoFree(String name) {
+    return 'Utiliser « $name »';
+  }
+
+  @override
+  String get assoCause => 'Cause soutenue';
+
+  @override
+  String get assoNoResult => 'Aucun résultat.';
+
+  @override
+  String get detailNotFound => 'Cette course n\'existe plus.';
+
+  @override
+  String get detailPerformance => 'Performance';
+
+  @override
+  String get detailTime => 'Temps';
+
+  @override
+  String get detailPace => 'Allure';
+
+  @override
+  String get detailSpeed => 'Vitesse';
+
+  @override
+  String get detailUpcomingInfo => 'Course prévue. Tu pourras saisir ton résultat à partir du jour J.';
+
+  @override
+  String get detailAwaitingInfo => 'La course a eu lieu : saisis ton temps pour l\'ajouter à tes totaux et records.';
+
+  @override
+  String get detailEnterResult => 'Saisir mon résultat';
+
+  @override
+  String detailTeam(int count, String distance) {
+    return 'En équipe de $count · défi de $distance';
+  }
+
+  @override
+  String get detailSolidarity => 'Volet solidaire';
+
+  @override
+  String get detailSponsor => 'Parrainage';
+
+  @override
+  String get detailRegistration => 'Inscription';
+
+  @override
+  String get detailFundraising => 'Collecte';
+
+  @override
+  String get detailDonationTotal => 'Total engagé';
+
+  @override
+  String get detailDeclaredImpact => 'Impact annoncé';
+
+  @override
+  String get deleteCourseTitle => 'Supprimer cette course ?';
+
+  @override
+  String get deleteCourseBody => 'Elle sera supprimée sur tous tes appareils.';
+
+  @override
+  String get resultTitle => 'Mon résultat';
+
+  @override
+  String get shareTitle => 'Partager la course';
+
+  @override
+  String get shareSave => 'Enregistrer l\'image';
+
+  @override
+  String get shareShare => 'Partager';
+
+  @override
+  String get shareSaved => 'Image enregistrée.';
+
+  @override
+  String shareFor(String association) {
+    return 'pour $association';
+  }
+
+  @override
+  String get impactTitle => 'Mon impact';
+
+  @override
+  String get impactHonesty =>
+      'Seuls l\'argent réellement engagé et les équivalences annoncées par les organisateurs sont comptés.';
+
+  @override
+  String impactCharityRaces(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses solidaires',
+      one: '1 course solidaire',
+      zero: 'Aucune course solidaire',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String impactCharityDistance(String distance) {
+    return '$distance courus pour une cause';
+  }
+
+  @override
+  String get impactDeclared => 'Impact annoncé';
+
+  @override
+  String impactKmFor(String cause) {
+    return 'Courus pour $cause';
+  }
+
+  @override
+  String get reportTitle => 'Bilan d\'engagement';
+
+  @override
+  String get reportAction => 'Faire un bilan pour un rapport';
+
+  @override
+  String get reportPresetSchool => 'Année scolaire';
+
+  @override
+  String reportPresetYear(int year) {
+    return 'Année $year';
+  }
+
+  @override
+  String get reportPresetLast12 => '12 derniers mois';
+
+  @override
+  String get reportPresetCustom => 'Dates choisies';
+
+  @override
+  String reportFrom(String date) {
+    return 'Du $date';
+  }
+
+  @override
+  String reportTo(String date) {
+    return 'Au $date';
+  }
+
+  @override
+  String get reportCharityOnly => 'Seulement les courses solidaires';
+
+  @override
+  String get reportTextTitle => 'Texte pour ton rapport';
+
+  @override
+  String get reportCopyText => 'Copier le texte';
+
+  @override
+  String get reportCopyTable => 'Copier le tableau';
+
+  @override
+  String get reportCopied => 'Texte copié : colle-le dans ton rapport.';
+
+  @override
+  String get reportTableCopied => 'Tableau copié : colle-le dans Word ou Excel.';
+
+  @override
+  String get reportImageTitle => 'Image du bilan';
+
+  @override
+  String get reportEmpty => 'Aucune course terminée sur cette période.';
+
+  @override
+  String reportHeading(String from, String to) {
+    return 'Bilan ÉLAN du $from au $to';
+  }
+
+  @override
+  String get reportSectionSolidarity => 'ENGAGEMENT SOLIDAIRE';
+
+  @override
+  String reportCharityLine(int count, String distance) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses solidaires, soit $distance courus pour des causes.',
+      one: '1 course solidaire, soit $distance courus pour une cause.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reportDonationLine(String amount) {
+    return '$amount engagés (dons, parrainages et collectes).';
+  }
+
+  @override
+  String reportDeclaredLine(String list) {
+    return 'Impact annoncé par les organisateurs : $list.';
+  }
+
+  @override
+  String reportCausesLine(String list) {
+    return 'Causes soutenues : $list.';
+  }
+
+  @override
+  String reportAssociationsLine(String list) {
+    return 'Associations soutenues : $list.';
+  }
+
+  @override
+  String get reportNoCharity => 'Aucune course solidaire sur la période.';
+
+  @override
+  String get reportSectionCourses => 'DÉTAIL DES COURSES';
+
+  @override
+  String get reportSectionSport => 'ACTIVITÉ SPORTIVE';
+
+  @override
+  String reportSportLine(int count, String distance) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses terminées',
+      one: '1 course terminée',
+    );
+    return '$_temp0, $distance au total.';
+  }
+
+  @override
+  String reportTimeLine(String time) {
+    return 'Temps de course : $time.';
+  }
+
+  @override
+  String reportElevationLine(String elevation) {
+    return 'Dénivelé positif : $elevation.';
+  }
+
+  @override
+  String reportPeriod(String from, String to) {
+    return 'Du $from au $to';
+  }
+
+  @override
+  String get reportAnd => 'et';
+
+  @override
+  String get reportStyleProse => 'Rédigé';
+
+  @override
+  String get reportStyleBullets => 'Points clés';
+
+  @override
+  String get reportExcel => 'Fichier Excel';
+
+  @override
+  String get reportTotal => 'Total';
+
+  @override
+  String get reportSheetName => 'Bilan';
+
+  @override
+  String reportSheetSubtitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count courses', one: '1 course');
+    return 'Généré par ÉLAN · $_temp0';
+  }
+
+  @override
+  String get fileSaved => 'Fichier enregistré.';
+
+  @override
+  String get datePickerToday => 'Aujourd\'hui';
+
+  @override
+  String reportProseIntro(int count, String from, String to, String distance) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count courses', one: 'une course');
+    return 'Du $from au $to, j\'ai participé à $_temp0, pour un total de $distance parcourus.';
+  }
+
+  @override
+  String get reportProseNoCharity => 'Aucune de ces courses n\'était solidaire.';
+
+  @override
+  String reportProseAllCharity(int count, String distance) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Toutes étaient solidaires',
+      one: 'Elle était solidaire',
+    );
+    return '$_temp0, soit $distance courus au profit de causes.';
+  }
+
+  @override
+  String reportProseCharity(int count, String distance) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count d\'entre elles étaient solidaires',
+      one: 'L\'une d\'elles était solidaire',
+    );
+    return '$_temp0, soit $distance courus au profit de causes.';
+  }
+
+  @override
+  String reportProseChallenges(int count, String distance) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ce total comprend $count défis au long cours (The Conqueror), qui représentent $distance à eux seuls.',
+      one: 'Ce total comprend un défi au long cours (The Conqueror), qui représente $distance à lui seul.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reportProseDonations(String amount) {
+    return 'Ces courses ont permis d\'engager $amount en faveur d\'associations (dons, parrainages et collectes).';
+  }
+
+  @override
+  String reportProseDonationsCauses(String amount, String causes) {
+    return 'Ces courses ont permis d\'engager $amount en faveur d\'associations (dons, parrainages et collectes), notamment pour $causes.';
+  }
+
+  @override
+  String reportProseDeclared(String list) {
+    return 'Les organisateurs annoncent par ailleurs un impact concret : $list.';
+  }
+
+  @override
+  String reportProseAssociations(int count, String list) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Les associations soutenues sont $list.',
+      one: 'L\'association soutenue est $list.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reportProseRaces(String list) {
+    return 'Courses solidaires : $list.';
+  }
+
+  @override
+  String reportProseSport(String parts) {
+    return 'Sur le plan sportif, cela représente $parts.';
+  }
+
+  @override
+  String reportProseTime(String time) {
+    return '$time de course';
+  }
+
+  @override
+  String reportProseElevation(String elevation) {
+    return '$elevation de dénivelé positif';
+  }
+
+  @override
+  String reportProsePace(String pace) {
+    return 'une allure moyenne de $pace';
+  }
+
+  @override
+  String reportPaceLine(String pace) {
+    return 'Allure moyenne : $pace.';
+  }
+
+  @override
+  String get reportChallengeTag => 'défi';
+
+  @override
+  String reportDistanceTime(String distance, String time) {
+    return '$distance en $time';
+  }
+
+  @override
+  String get reportTableHeader =>
+      'Date\tCourse\tType\tDistance (km)\tTemps\tAllure (min/km)\tD+ (m)\tAssociation\tCause\tFonds engagés (€)\tImpact annoncé';
+
+  @override
+  String get reportWordHeader => 'Date\tCourse\tDistance et temps\tAssociation et cause\tFonds engagés\tImpact annoncé';
+
+  @override
+  String get reportCopyForWord => 'Pour Word (tableau compact)';
+
+  @override
+  String get reportCopyForExcel => 'Pour Excel (toutes les colonnes)';
+
+  @override
+  String get reportCardTitle => 'Bilan d\'engagement';
+
+  @override
+  String reportCardFor(String list) {
+    return 'Pour $list';
+  }
+
+  @override
+  String get impactCharityDistanceLabel => 'Distance solidaire';
+
+  @override
+  String get impactByCause => 'Par cause';
+
+  @override
+  String get impactAssociations => 'Associations soutenues';
+
+  @override
+  String get impactByYear => 'Fonds engagés par année';
+
+  @override
+  String get impactByYearHint => 'Dons, parrainages et collectes des courses solidaires terminées.';
+
+  @override
+  String get legendDonations => 'Fonds engagés (€)';
+
+  @override
+  String get impactEmpty => 'Aucune course solidaire terminée pour l\'instant.';
+
+  @override
+  String get docTitle => 'Justificatifs';
+
+  @override
+  String get docAdd => 'Ajouter un justificatif';
+
+  @override
+  String docAdded(String course) {
+    return 'Justificatif ajouté à « $course ».';
+  }
+
+  @override
+  String get docTooBig => 'Fichier trop lourd : 10 Mo maximum.';
+
+  @override
+  String get docUnavailable => 'Justificatif indisponible pour le moment : vérifie ta connexion.';
+
+  @override
+  String get docRemoveTitle => 'Retirer ce justificatif ?';
+
+  @override
+  String docRemoveBody(String name) {
+    return '« $name » sera supprimé sur tous tes appareils.';
+  }
+
+  @override
+  String docAddedOn(String date) {
+    return 'ajouté le $date';
+  }
+
+  @override
+  String get docActions => 'Actions';
+
+  @override
+  String get docOpen => 'Ouvrir';
+
+  @override
+  String get docSave => 'Enregistrer';
+
+  @override
+  String get docRemove => 'Retirer';
+
+  @override
+  String get docEmptyCourse => 'Aucun justificatif. Ajoute la facture d\'inscription ou le reçu de don (PDF ou photo).';
+
+  @override
+  String get docZip => 'Tout exporter (ZIP)';
+
+  @override
+  String docZipMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count justificatifs indisponibles n\'ont pas été inclus (hors connexion ?).',
+      one: '1 justificatif indisponible n\'a pas été inclus (hors connexion ?).',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get docAllDates => 'Toutes les dates';
+
+  @override
+  String get docSearch => 'Rechercher une course, une association, un fichier…';
+
+  @override
+  String docCount(int count, int courses) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count justificatifs',
+      one: '1 justificatif',
+    );
+    String _temp1 = intl.Intl.pluralLogic(courses, locale: localeName, other: '$courses courses', one: '1 course');
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String get docEmpty =>
+      'Aucun justificatif pour l\'instant. Ajoute-les depuis la fiche d\'une course ou avec le bouton ci-dessous.';
+
+  @override
+  String get docNoMatch => 'Aucun justificatif sur cette période.';
+
+  @override
+  String get docChooseCourse => 'Rattacher à quelle course ?';
+
+  @override
+  String get docKindConfirmation => 'Mail de confirmation';
+
+  @override
+  String get docKindInvoice => 'Facture';
+
+  @override
+  String get docKindReceipt => 'Reçu de don';
+
+  @override
+  String get docKindResult => 'Résultat de course';
+
+  @override
+  String get docKindOther => 'Autre document';
+
+  @override
+  String get docChooseKind => 'Quel type de justificatif ?';
+
+  @override
+  String get docChangeKind => 'Changer le type';
+
+  @override
+  String get reportDocsZip => 'Justificatifs (ZIP)';
+
+  @override
+  String get assoTitle => 'Association';
+
+  @override
+  String get assoNotFound => 'Aucune course solidaire terminée pour cette association.';
+
+  @override
+  String get assoCourses => 'Courses pour cette association';
+
+  @override
+  String get assoExport => 'Récapitulatif à partager';
+
+  @override
+  String get assoCardTitle => 'Récapitulatif';
+
+  @override
+  String assoRecapTitle(String name) {
+    return 'Récapitulatif ÉLAN : $name';
+  }
+
+  @override
+  String assoRecapLine(int count, String from, String to, String distance) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses solidaires',
+      one: '1 course solidaire',
+    );
+    return '$_temp0 du $from au $to, soit $distance courus pour l\'association.';
+  }
+
+  @override
+  String assoRecapLineOne(String date, String distance) {
+    return '1 course solidaire le $date, soit $distance courus pour l\'association.';
+  }
+
+  @override
+  String assoCauses(int count, String list) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'Causes soutenues', one: 'Cause soutenue');
+    return '$_temp0 : $list.';
+  }
+
+  @override
+  String assoOpen(String name) {
+    return 'Voir le récapitulatif de $name';
+  }
+
+  @override
+  String docCountShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count justificatifs',
+      one: '1 justificatif',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get evolutionTitle => 'Évolution';
+
+  @override
+  String get rangeLast12 => '12 derniers mois';
+
+  @override
+  String get rangeLast12Short => '12 mois';
+
+  @override
+  String get rangeByMonth => 'Par mois';
+
+  @override
+  String get rangeByYear => 'Par année';
+
+  @override
+  String get summaryLast12 => 'Sur les 12 derniers mois';
+
+  @override
+  String summaryYear(int year) {
+    return 'En $year';
+  }
+
+  @override
+  String summaryAll(int year) {
+    return 'Depuis $year';
+  }
+
+  @override
+  String get compareLast12 => 'Flèches : variation par rapport aux 12 mois précédents.';
+
+  @override
+  String compareYearToDate(int year, String date) {
+    return 'Flèches : variation par rapport à $year à la même date ($date).';
+  }
+
+  @override
+  String compareYear(int year) {
+    return 'Flèches : variation par rapport à $year.';
+  }
+
+  @override
+  String get deltaNew => 'nouveau';
+
+  @override
+  String get periodEmpty => 'Aucune course terminée sur cette période.';
+
+  @override
+  String periodCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses',
+      one: '1 course',
+      zero: 'aucune course',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chartKmByMonth => 'Kilomètres par mois';
+
+  @override
+  String get chartKmByYear => 'Kilomètres par année';
+
+  @override
+  String get chartKmHint => 'Distance des courses terminées. Touche une barre pour voir ses courses.';
+
+  @override
+  String get legendDistance => 'Distance courue (km)';
+
+  @override
+  String chartCumulativeTitle(int year) {
+    return 'Cumul de l\'année $year';
+  }
+
+  @override
+  String get chartCumulativeHint =>
+      'Kilomètres accumulés depuis le 1er janvier, comparés à l\'année précédente. Chaque marche est une course.';
+
+  @override
+  String cumulativeAt(String date) {
+    return 'au $date';
+  }
+
+  @override
+  String get cumulativeYear => 'sur l\'année';
+
+  @override
+  String get chartPaceTitle => 'Allure de chaque course officielle';
+
+  @override
+  String get legendPace => 'Une course chronométrée';
+
+  @override
+  String get viewChart => 'Graphique';
+
+  @override
+  String get viewTable => 'Tableau';
+
+  @override
+  String get chartPaceHint => 'En minutes par kilomètre. Plus le point est haut, plus tu as couru vite.';
+
+  @override
+  String get chartEmpty => 'Pas encore assez de courses terminées pour tracer une évolution.';
+
+  @override
+  String get tablePeriod => 'Période';
+
+  @override
+  String get tableRaces => 'Courses';
+
+  @override
+  String get recordsTitle => 'Records';
+
+  @override
+  String get recordsEmpty => 'Termine au moins une course chronométrée pour voir tes records.';
+
+  @override
+  String get recordsByDistance => 'Meilleurs temps';
+
+  @override
+  String get recordsLongest => 'Plus longues distances';
+
+  @override
+  String get recordsElevation => 'Plus gros dénivelés';
+
+  @override
+  String get recordsAllTime => 'Tous les temps';
+
+  @override
+  String recordsEmptyYear(int year) {
+    return 'Aucune course chronométrée en $year.';
+  }
+
+  @override
+  String get galleryTitle => 'Médailles et dossards';
+
+  @override
+  String get galleryAll => 'Tout';
+
+  @override
+  String get galleryMedals => 'Médailles';
+
+  @override
+  String get galleryBibs => 'Dossards';
+
+  @override
+  String get galleryEmpty =>
+      'Aucune photo pour l\'instant. Ajoute la médaille ou le dossard dans le formulaire d\'une course.';
+
+  @override
+  String galleryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count photos', one: '1 photo');
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsAccount => 'Compte';
+
+  @override
+  String settingsSignedInAs(String email) {
+    return 'Connecté en tant que $email';
+  }
+
+  @override
+  String get settingsChangePassword => 'Changer de mot de passe';
+
+  @override
+  String get settingsNewPassword => 'Nouveau mot de passe';
+
+  @override
+  String get settingsPasswordTooShort => '8 caractères minimum.';
+
+  @override
+  String get settingsPasswordChanged => 'Mot de passe modifié.';
+
+  @override
+  String get settingsSignOut => 'Se déconnecter';
+
+  @override
+  String get settingsSignOutTitle => 'Se déconnecter ?';
+
+  @override
+  String settingsSignOutPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count modifications ne sont pas encore envoyées. Elles restent sur cet appareil et partiront à ta prochaine connexion.',
+      one: '1 modification n\'est pas encore envoyée. Elle reste sur cet appareil et partira à ta prochaine connexion.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsSignOutClean => 'Tes courses restent sur le cloud et sur cet appareil.';
+
+  @override
+  String get settingsAppearance => 'Apparence';
+
+  @override
+  String get themeSystem => 'Système';
+
+  @override
+  String get themeLight => 'Clair';
+
+  @override
+  String get themeDark => 'Sombre';
+
+  @override
+  String get backupSection => 'Sauvegarde';
+
+  @override
+  String get backupHint =>
+      'Une copie de toutes tes courses (toutes les colonnes), indépendante du cloud, à garder où tu veux.';
+
+  @override
+  String get backupExcel => 'Exporter en Excel';
+
+  @override
+  String get backupCsv => 'Exporter en CSV';
+
+  @override
+  String backupTitle(String date) {
+    return 'Sauvegarde ÉLAN du $date';
+  }
+
+  @override
+  String get backupSheetName => 'Courses';
+
+  @override
+  String get backupDate => 'Date';
+
+  @override
+  String get backupCourse => 'Course';
+
+  @override
+  String get backupType => 'Type';
+
+  @override
+  String get backupStatus => 'Statut';
+
+  @override
+  String get backupDistance => 'Distance (km)';
+
+  @override
+  String get backupTime => 'Temps';
+
+  @override
+  String get backupPace => 'Allure (min/km)';
+
+  @override
+  String get backupElevation => 'D+ (m)';
+
+  @override
+  String get backupTeam => 'Équipe (membres)';
+
+  @override
+  String get backupChallenge => 'Distance du défi (km)';
+
+  @override
+  String get backupCharity => 'Solidaire';
+
+  @override
+  String get backupAssociation => 'Association';
+
+  @override
+  String get backupCause => 'Cause';
+
+  @override
+  String get backupSponsor => 'Parrainage (€/km)';
+
+  @override
+  String get backupRegistration => 'Don à l\'inscription (€)';
+
+  @override
+  String get backupFundraising => 'Collecte (€)';
+
+  @override
+  String get backupTotal => 'Total engagé (€)';
+
+  @override
+  String get backupMetric => 'Équivalence annoncée';
+
+  @override
+  String get backupQuantity => 'Quantité';
+
+  @override
+  String get backupDocuments => 'Justificatifs';
+
+  @override
+  String get backupNotes => 'Notes';
+
+  @override
+  String get backupCreated => 'Ajoutée le';
+
+  @override
+  String get backupUpdated => 'Modifiée le';
+
+  @override
+  String get backupYes => 'Oui';
+
+  @override
+  String get backupNo => 'Non';
+
+  @override
+  String get reminderSetting => 'Rappel le soir de la course';
+
+  @override
+  String reminderSettingHint(String time) {
+    return 'Une notification à $time le jour J pour saisir ton temps.';
+  }
+
+  @override
+  String get reminderTime => 'Heure du rappel';
+
+  @override
+  String reminderTitle(String title) {
+    return 'Ta course : $title';
+  }
+
+  @override
+  String get reminderBody => 'Saisis ton temps pour l\'ajouter à tes totaux et à tes records.';
+
+  @override
+  String get settingsWallpaperColors => 'Couleurs du fond d\'écran';
+
+  @override
+  String get settingsWallpaperColorsHint =>
+      'Material You : l\'app prend les couleurs de ton téléphone. Désactive pour garder les couleurs ÉLAN.';
+
+  @override
+  String get syncTitle => 'Synchronisation';
+
+  @override
+  String get syncNow => 'Synchroniser maintenant';
+
+  @override
+  String get syncUpToDate => 'Tout est synchronisé';
+
+  @override
+  String get syncRunning => 'Synchronisation en cours';
+
+  @override
+  String syncPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count modifications en attente',
+      one: '1 modification en attente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get syncFailed => 'Synchronisation en échec';
+
+  @override
+  String syncLast(String date) {
+    return 'Dernière synchronisation : $date';
+  }
+
+  @override
+  String syncImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses de l\'ancienne version importées.',
+      one: '1 course de l\'ancienne version importée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get serverTitle => 'Serveur';
+
+  @override
+  String get serverIntro =>
+      'ÉLAN enregistre tes courses sur un serveur. Par défaut, c\'est celui d\'ÉLAN ; tu peux aussi utiliser ton propre serveur, par exemple installé sur un NAS.';
+
+  @override
+  String get serverIntroCustomOnly =>
+      'Indique le serveur où ÉLAN enregistre tes courses, par exemple installé sur un NAS.';
+
+  @override
+  String get serverBuiltIn => 'Serveur ÉLAN';
+
+  @override
+  String get serverBuiltInHint => 'Par défaut';
+
+  @override
+  String get serverCustom => 'Mon serveur';
+
+  @override
+  String get serverCustomHint => 'Auto-hébergé, par exemple sur un NAS';
+
+  @override
+  String get serverAddress => 'Adresse du serveur';
+
+  @override
+  String get serverAddressHint => 'http://192.168.1.20:8000';
+
+  @override
+  String get serverKey => 'Clé publique';
+
+  @override
+  String get serverFieldsHelp =>
+      'Les deux valeurs sont dans le fichier connexion-app.txt créé lors de l\'installation du serveur.';
+
+  @override
+  String get serverPaste => 'Coller';
+
+  @override
+  String get serverSave => 'Vérifier et enregistrer';
+
+  @override
+  String get serverChecking => 'Vérification du serveur…';
+
+  @override
+  String get serverErrorAddress => 'Adresse invalide. Exemple : http://192.168.1.20:8000';
+
+  @override
+  String get serverErrorHttp =>
+      'Sur Internet, l\'adresse doit commencer par https:// (en http, le mot de passe circulerait en clair). http n\'est accepté que sur le réseau local ou le VPN.';
+
+  @override
+  String get serverErrorKey => 'Clé publique manquante ou incomplète.';
+
+  @override
+  String get serverWrongKey => 'Le serveur refuse cette clé. Vérifie la clé publique.';
+
+  @override
+  String get serverNotReady =>
+      'Serveur joint, mais sa base n\'est pas prête : vérifie que le service « migrations » s\'est bien terminé.';
+
+  @override
+  String get serverNotSupabase =>
+      'Cette adresse répond, mais ce n\'est pas un serveur ÉLAN. Vérifie le port (8000 par défaut).';
+
+  @override
+  String get serverUnreachable =>
+      'Serveur injoignable. Vérifie l\'adresse, que le VPN est actif et que le serveur est démarré.';
+
+  @override
+  String serverLabel(String name) {
+    return 'Serveur : $name';
+  }
+
+  @override
+  String get signInShowPassword => 'Afficher le mot de passe';
+
+  @override
+  String get signInHidePassword => 'Masquer le mot de passe';
+
+  @override
+  String get signInForgottenCustom =>
+      'Mot de passe oublié ? Il se réinitialise depuis le tableau de bord de ton serveur.';
+}

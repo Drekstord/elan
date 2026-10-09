@@ -1,0 +1,1000 @@
+{
+  "@@locale": "fr",
+  "appTitle": "ÉLAN",
+  "appTagline": "Sport & Impact",
+  "signInTitle": "Connexion",
+  "signInIntro": "Connecte-toi avec le compte créé pour toi sur ÉLAN.",
+  "emailLabel": "Adresse e-mail",
+  "passwordLabel": "Mot de passe",
+  "signInButton": "Se connecter",
+  "signInInvalidEmail": "Adresse e-mail invalide.",
+  "signInMissingPassword": "Saisis ton mot de passe.",
+  "signInWrongCredentials": "E-mail ou mot de passe incorrect.",
+  "signInRateLimited": "Trop de tentatives. Patiente une minute avant de réessayer.",
+  "signInOffline": "Impossible de joindre le serveur. Vérifie ta connexion.",
+  "signInForgotten": "Mot de passe oublié ? Demande à l'administrateur d'ÉLAN de le réinitialiser.",
+  "navCourses": "Courses",
+  "navImpact": "Impact",
+  "navEvolution": "Évolution",
+  "navRecords": "Records",
+  "navSettings": "Réglages",
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "close": "Fermer",
+  "retry": "Réessayer",
+  "typeOfficial": "Course officielle",
+  "typeConqueror": "Défi The Conqueror",
+  "statusUpcoming": "À venir",
+  "statusAwaiting": "Résultat à saisir",
+  "statusAwaitingShort": "À saisir",
+  "statusCompleted": "Terminée",
+  "causeSante": "Santé & recherche",
+  "causeEnvironnement": "Environnement & climat",
+  "causePrecarite": "Précarité & faim",
+  "causeEnfance": "Enfance & éducation",
+  "causeAnimaux": "Protection animale",
+  "causeHandicap": "Handicap & inclusion",
+  "causeAutre": "Autre cause",
+  "metricTrees": "Arbres plantés",
+  "metricOceanBottles": "Bouteilles plastiques retirées",
+  "metricCareSessions": "Séances de soins",
+  "metricResearchHours": "Heures de recherche",
+  "metricMeals": "Repas distribués",
+  "metricCareKits": "Kits de soins",
+  "metricAnimalMeals": "Repas pour animaux",
+  "metricNone": "Aucune équivalence",
+  "distance5k": "5 km",
+  "distance10k": "10 km",
+  "distanceHalf": "Semi-marathon",
+  "distanceMarathon": "Marathon",
+  "statDistance": "Distance",
+  "statDonations": "Fonds engagés",
+  "statRaces": "Courses",
+  "statTime": "Temps de course",
+  "statElevation": "Dénivelé +",
+  "statPace": "Allure moyenne",
+  "coursesEmpty": "Aucune course pour l'instant. Ajoute ta première course ou inscris une course à venir.",
+  "coursesNoMatch": "Aucune course ne correspond.",
+  "coursesAdd": "Nouvelle course",
+  "coursesSearch": "Rechercher une course, une association…",
+  "filterAll": "Toutes",
+  "filterCharity": "Solidaires",
+  "kindAll": "Toutes",
+  "kindOfficial": "Officielles",
+  "kindChallenge": "Défis",
+  "filterReset": "Effacer les filtres",
+  "filterSolidarity": "Volet solidaire",
+  "filterSolidarityAll": "Solidaires ou non",
+  "filterSolidarityOnly": "Solidaires uniquement",
+  "summaryCourses": "{count, plural, =0{Aucune course} =1{1 course} other{{count} courses}}",
+  "@summaryCourses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryOfficial": "{count, plural, =0{Aucune course officielle} =1{1 course officielle} other{{count} courses officielles}}",
+  "@summaryOfficial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryChallenges": "{count, plural, =0{Aucun défi} =1{1 défi} other{{count} défis}}",
+  "@summaryChallenges": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summarySolidarity": "{count, plural, =1{solidaire} other{solidaires}}",
+  "@summarySolidarity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sectionAwaiting": "Résultat à saisir",
+  "sectionUpcoming": "À venir",
+  "sectionDone": "Terminées",
+  "sectionSummary": "{count, plural, =1{1 course} other{{count} courses}} · {distance}",
+  "@sectionSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "filterCause": "Cause",
+  "sortRaceDate": "Date de course",
+  "sortAddedDate": "Date d'ajout",
+  "sortTooltip": "Trier",
+  "sortAscending": "Plus anciennes d'abord",
+  "sortDescending": "Plus récentes d'abord",
+  "awaitingBanner": "{count, plural, =1{1 course attend ton résultat} other{{count} courses attendent ton résultat}}",
+  "@awaitingBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recordBadge": "Record",
+  "nextRace": "Prochaine course",
+  "last12Months": "Kilomètres sur les 12 derniers mois",
+  "formNewTitle": "Nouvelle course",
+  "formEditTitle": "Modifier la course",
+  "formPlanned": "Course à venir",
+  "formPlannedHint": "Inscris-la maintenant, tu saisiras ton temps après la course.",
+  "formName": "Nom de la course",
+  "formDate": "Date",
+  "formDistance": "Distance (km)",
+  "formDuration": "Temps (h:mm:ss)",
+  "formElevation": "Dénivelé positif (m)",
+  "formImportGpx": "Importer un fichier GPX",
+  "formGpxImported": "Trace importée : {distance}, {duration}.",
+  "@formGpxImported": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "formGpxError": "Ce fichier GPX est illisible.",
+  "formTeam": "Défi en équipe",
+  "formChallengeDistance": "Distance totale du défi (km)",
+  "formTeamSize": "Nombre de membres",
+  "formPersonalShare": "Ta part : {distance}",
+  "@formPersonalShare": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "formCharity": "Course solidaire",
+  "formCharityHint": "Liée à une association et à des dons.",
+  "formAssociation": "Association",
+  "formChooseAssociation": "Choisir une association",
+  "formSponsor": "Parrainage (€ par km)",
+  "formRegistration": "Don sur l'inscription (€)",
+  "formFundraising": "Collecte / cagnotte (€)",
+  "formDonationTotal": "Total engagé : {amount}",
+  "@formDonationTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "formImpact": "Équivalence annoncée par l'organisateur",
+  "formImpactHint": "Facultatif. Uniquement si l'organisateur l'annonce (ex. 4 arbres plantés).",
+  "formImpactUnit": "Unité",
+  "formImpactQuantity": "Quantité",
+  "formPhotos": "Souvenirs",
+  "formMedal": "Médaille",
+  "formBib": "Dossard",
+  "formAddPhoto": "Ajouter une photo",
+  "formNotes": "Notes",
+  "issueMissingTitle": "Donne un nom à la course.",
+  "issueDistance": "La distance doit être supérieure à 0.",
+  "issueNegative": "Une valeur négative est impossible.",
+  "issueCompletedInFuture": "Cette date est dans le futur : coche « Course à venir ».",
+  "issuePlannedWithResult": "Une course à venir n'a pas encore de temps.",
+  "issueTeamSize": "Nombre de membres invalide.",
+  "issueImpactQuantity": "La quantité doit être positive.",
+  "issueImpactCap": "Au-delà du plafond annoncé ({max} maximum).",
+  "@issueImpactCap": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
+  "issueInvalidNumber": "Nombre invalide.",
+  "issueInvalidDuration": "Format attendu : h:mm:ss",
+  "assoSearchHint": "Nom de l'association",
+  "assoCatalog": "Associations courantes",
+  "assoOfficial": "Répertoire officiel",
+  "assoSearching": "Recherche dans le répertoire officiel…",
+  "assoSearchOffline": "Recherche en ligne indisponible. Choisis dans la liste ou saisis le nom.",
+  "assoFree": "Utiliser « {name} »",
+  "@assoFree": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "assoCause": "Cause soutenue",
+  "assoNoResult": "Aucun résultat.",
+  "detailNotFound": "Cette course n'existe plus.",
+  "detailPerformance": "Performance",
+  "detailTime": "Temps",
+  "detailPace": "Allure",
+  "detailSpeed": "Vitesse",
+  "detailUpcomingInfo": "Course prévue. Tu pourras saisir ton résultat à partir du jour J.",
+  "detailAwaitingInfo": "La course a eu lieu : saisis ton temps pour l'ajouter à tes totaux et records.",
+  "detailEnterResult": "Saisir mon résultat",
+  "detailTeam": "En équipe de {count} · défi de {distance}",
+  "@detailTeam": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "detailSolidarity": "Volet solidaire",
+  "detailSponsor": "Parrainage",
+  "detailRegistration": "Inscription",
+  "detailFundraising": "Collecte",
+  "detailDonationTotal": "Total engagé",
+  "detailDeclaredImpact": "Impact annoncé",
+  "deleteCourseTitle": "Supprimer cette course ?",
+  "deleteCourseBody": "Elle sera supprimée sur tous tes appareils.",
+  "resultTitle": "Mon résultat",
+  "shareTitle": "Partager la course",
+  "shareSave": "Enregistrer l'image",
+  "shareShare": "Partager",
+  "shareSaved": "Image enregistrée.",
+  "shareFor": "pour {association}",
+  "@shareFor": {
+    "placeholders": {
+      "association": {
+        "type": "String"
+      }
+    }
+  },
+  "impactTitle": "Mon impact",
+  "impactHonesty": "Seuls l'argent réellement engagé et les équivalences annoncées par les organisateurs sont comptés.",
+  "impactCharityRaces": "{count, plural, =0{Aucune course solidaire} =1{1 course solidaire} other{{count} courses solidaires}}",
+  "@impactCharityRaces": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "impactCharityDistance": "{distance} courus pour une cause",
+  "@impactCharityDistance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "impactDeclared": "Impact annoncé",
+  "impactKmFor": "Courus pour {cause}",
+  "@impactKmFor": {
+    "placeholders": {
+      "cause": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTitle": "Bilan d'engagement",
+  "reportAction": "Faire un bilan pour un rapport",
+  "reportPresetSchool": "Année scolaire",
+  "reportPresetYear": "Année {year}",
+  "@reportPresetYear": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "reportPresetLast12": "12 derniers mois",
+  "reportPresetCustom": "Dates choisies",
+  "reportFrom": "Du {date}",
+  "@reportFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTo": "Au {date}",
+  "@reportTo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCharityOnly": "Seulement les courses solidaires",
+  "reportTextTitle": "Texte pour ton rapport",
+  "reportCopyText": "Copier le texte",
+  "reportCopyTable": "Copier le tableau",
+  "reportCopied": "Texte copié : colle-le dans ton rapport.",
+  "reportTableCopied": "Tableau copié : colle-le dans Word ou Excel.",
+  "reportImageTitle": "Image du bilan",
+  "reportEmpty": "Aucune course terminée sur cette période.",
+  "reportHeading": "Bilan ÉLAN du {from} au {to}",
+  "@reportHeading": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSectionSolidarity": "ENGAGEMENT SOLIDAIRE",
+  "reportCharityLine": "{count, plural, =1{1 course solidaire, soit {distance} courus pour une cause.} other{{count} courses solidaires, soit {distance} courus pour des causes.}}",
+  "@reportCharityLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDonationLine": "{amount} engagés (dons, parrainages et collectes).",
+  "@reportDonationLine": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDeclaredLine": "Impact annoncé par les organisateurs : {list}.",
+  "@reportDeclaredLine": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCausesLine": "Causes soutenues : {list}.",
+  "@reportCausesLine": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "reportAssociationsLine": "Associations soutenues : {list}.",
+  "@reportAssociationsLine": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "reportNoCharity": "Aucune course solidaire sur la période.",
+  "reportSectionCourses": "DÉTAIL DES COURSES",
+  "reportSectionSport": "ACTIVITÉ SPORTIVE",
+  "reportSportLine": "{count, plural, =1{1 course terminée} other{{count} courses terminées}}, {distance} au total.",
+  "@reportSportLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTimeLine": "Temps de course : {time}.",
+  "@reportTimeLine": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reportElevationLine": "Dénivelé positif : {elevation}.",
+  "@reportElevationLine": {
+    "placeholders": {
+      "elevation": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPeriod": "Du {from} au {to}",
+  "@reportPeriod": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "reportAnd": "et",
+  "reportStyleProse": "Rédigé",
+  "reportStyleBullets": "Points clés",
+  "reportExcel": "Fichier Excel",
+  "reportTotal": "Total",
+  "reportSheetName": "Bilan",
+  "reportSheetSubtitle": "Généré par ÉLAN · {count, plural, =1{1 course} other{{count} courses}}",
+  "@reportSheetSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fileSaved": "Fichier enregistré.",
+  "datePickerToday": "Aujourd'hui",
+  "reportProseIntro": "Du {from} au {to}, j'ai participé à {count, plural, =1{une course} other{{count} courses}}, pour un total de {distance} parcourus.",
+  "@reportProseIntro": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseNoCharity": "Aucune de ces courses n'était solidaire.",
+  "reportProseAllCharity": "{count, plural, =1{Elle était solidaire} other{Toutes étaient solidaires}}, soit {distance} courus au profit de causes.",
+  "@reportProseAllCharity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseCharity": "{count, plural, =1{L'une d'elles était solidaire} other{{count} d'entre elles étaient solidaires}}, soit {distance} courus au profit de causes.",
+  "@reportProseCharity": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseChallenges": "{count, plural, =1{Ce total comprend un défi au long cours (The Conqueror), qui représente {distance} à lui seul.} other{Ce total comprend {count} défis au long cours (The Conqueror), qui représentent {distance} à eux seuls.}}",
+  "@reportProseChallenges": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseDonations": "Ces courses ont permis d'engager {amount} en faveur d'associations (dons, parrainages et collectes).",
+  "@reportProseDonations": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseDonationsCauses": "Ces courses ont permis d'engager {amount} en faveur d'associations (dons, parrainages et collectes), notamment pour {causes}.",
+  "@reportProseDonationsCauses": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "causes": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseDeclared": "Les organisateurs annoncent par ailleurs un impact concret : {list}.",
+  "@reportProseDeclared": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseAssociations": "{count, plural, =1{L'association soutenue est {list}.} other{Les associations soutenues sont {list}.}}",
+  "@reportProseAssociations": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseRaces": "Courses solidaires : {list}.",
+  "@reportProseRaces": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseSport": "Sur le plan sportif, cela représente {parts}.",
+  "@reportProseSport": {
+    "placeholders": {
+      "parts": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseTime": "{time} de course",
+  "@reportProseTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProseElevation": "{elevation} de dénivelé positif",
+  "@reportProseElevation": {
+    "placeholders": {
+      "elevation": {
+        "type": "String"
+      }
+    }
+  },
+  "reportProsePace": "une allure moyenne de {pace}",
+  "@reportProsePace": {
+    "placeholders": {
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "reportPaceLine": "Allure moyenne : {pace}.",
+  "@reportPaceLine": {
+    "placeholders": {
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "reportChallengeTag": "défi",
+  "reportDistanceTime": "{distance} en {time}",
+  "@reportDistanceTime": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reportTableHeader": "Date\tCourse\tType\tDistance (km)\tTemps\tAllure (min/km)\tD+ (m)\tAssociation\tCause\tFonds engagés (€)\tImpact annoncé",
+  "reportWordHeader": "Date\tCourse\tDistance et temps\tAssociation et cause\tFonds engagés\tImpact annoncé",
+  "reportCopyForWord": "Pour Word (tableau compact)",
+  "reportCopyForExcel": "Pour Excel (toutes les colonnes)",
+  "reportCardTitle": "Bilan d'engagement",
+  "reportCardFor": "Pour {list}",
+  "@reportCardFor": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "impactCharityDistanceLabel": "Distance solidaire",
+  "impactByCause": "Par cause",
+  "impactAssociations": "Associations soutenues",
+  "impactByYear": "Fonds engagés par année",
+  "impactByYearHint": "Dons, parrainages et collectes des courses solidaires terminées.",
+  "legendDonations": "Fonds engagés (€)",
+  "impactEmpty": "Aucune course solidaire terminée pour l'instant.",
+  "docTitle": "Justificatifs",
+  "docAdd": "Ajouter un justificatif",
+  "docAdded": "Justificatif ajouté à « {course} ».",
+  "@docAdded": {
+    "placeholders": {
+      "course": {
+        "type": "String"
+      }
+    }
+  },
+  "docTooBig": "Fichier trop lourd : 10 Mo maximum.",
+  "docUnavailable": "Justificatif indisponible pour le moment : vérifie ta connexion.",
+  "docRemoveTitle": "Retirer ce justificatif ?",
+  "docRemoveBody": "« {name} » sera supprimé sur tous tes appareils.",
+  "@docRemoveBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "docAddedOn": "ajouté le {date}",
+  "@docAddedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "docActions": "Actions",
+  "docOpen": "Ouvrir",
+  "docSave": "Enregistrer",
+  "docRemove": "Retirer",
+  "docEmptyCourse": "Aucun justificatif. Ajoute la facture d'inscription ou le reçu de don (PDF ou photo).",
+  "docZip": "Tout exporter (ZIP)",
+  "docZipMissing": "{count, plural, =1{1 justificatif indisponible n'a pas été inclus (hors connexion ?).} other{{count} justificatifs indisponibles n'ont pas été inclus (hors connexion ?).}}",
+  "@docZipMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "docAllDates": "Toutes les dates",
+  "docSearch": "Rechercher une course, une association, un fichier…",
+  "docCount": "{count, plural, =1{1 justificatif} other{{count} justificatifs}} · {courses, plural, =1{1 course} other{{courses} courses}}",
+  "@docCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "courses": {
+        "type": "int"
+      }
+    }
+  },
+  "docEmpty": "Aucun justificatif pour l'instant. Ajoute-les depuis la fiche d'une course ou avec le bouton ci-dessous.",
+  "docNoMatch": "Aucun justificatif sur cette période.",
+  "docChooseCourse": "Rattacher à quelle course ?",
+  "docKindConfirmation": "Mail de confirmation",
+  "docKindInvoice": "Facture",
+  "docKindReceipt": "Reçu de don",
+  "docKindResult": "Résultat de course",
+  "docKindOther": "Autre document",
+  "docChooseKind": "Quel type de justificatif ?",
+  "docChangeKind": "Changer le type",
+  "reportDocsZip": "Justificatifs (ZIP)",
+  "assoTitle": "Association",
+  "assoNotFound": "Aucune course solidaire terminée pour cette association.",
+  "assoCourses": "Courses pour cette association",
+  "assoExport": "Récapitulatif à partager",
+  "assoCardTitle": "Récapitulatif",
+  "assoRecapTitle": "Récapitulatif ÉLAN : {name}",
+  "@assoRecapTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "assoRecapLine": "{count, plural, =1{1 course solidaire} other{{count} courses solidaires}} du {from} au {to}, soit {distance} courus pour l'association.",
+  "@assoRecapLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "assoRecapLineOne": "1 course solidaire le {date}, soit {distance} courus pour l'association.",
+  "@assoRecapLineOne": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "assoCauses": "{count, plural, =1{Cause soutenue} other{Causes soutenues}} : {list}.",
+  "@assoCauses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "assoOpen": "Voir le récapitulatif de {name}",
+  "@assoOpen": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "docCountShort": "{count, plural, =1{1 justificatif} other{{count} justificatifs}}",
+  "@docCountShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "evolutionTitle": "Évolution",
+  "rangeLast12": "12 derniers mois",
+  "rangeLast12Short": "12 mois",
+  "rangeByMonth": "Par mois",
+  "rangeByYear": "Par année",
+  "summaryLast12": "Sur les 12 derniers mois",
+  "summaryYear": "En {year}",
+  "@summaryYear": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryAll": "Depuis {year}",
+  "@summaryAll": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "compareLast12": "Flèches : variation par rapport aux 12 mois précédents.",
+  "compareYearToDate": "Flèches : variation par rapport à {year} à la même date ({date}).",
+  "@compareYearToDate": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "compareYear": "Flèches : variation par rapport à {year}.",
+  "@compareYear": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "deltaNew": "nouveau",
+  "periodEmpty": "Aucune course terminée sur cette période.",
+  "periodCount": "{count, plural, =0{aucune course} =1{1 course} other{{count} courses}}",
+  "@periodCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chartKmByMonth": "Kilomètres par mois",
+  "chartKmByYear": "Kilomètres par année",
+  "chartKmHint": "Distance des courses terminées. Touche une barre pour voir ses courses.",
+  "legendDistance": "Distance courue (km)",
+  "chartCumulativeTitle": "Cumul de l'année {year}",
+  "@chartCumulativeTitle": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "chartCumulativeHint": "Kilomètres accumulés depuis le 1er janvier, comparés à l'année précédente. Chaque marche est une course.",
+  "cumulativeAt": "au {date}",
+  "@cumulativeAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cumulativeYear": "sur l'année",
+  "chartPaceTitle": "Allure de chaque course officielle",
+  "legendPace": "Une course chronométrée",
+  "viewChart": "Graphique",
+  "viewTable": "Tableau",
+  "chartPaceHint": "En minutes par kilomètre. Plus le point est haut, plus tu as couru vite.",
+  "chartEmpty": "Pas encore assez de courses terminées pour tracer une évolution.",
+  "tablePeriod": "Période",
+  "tableRaces": "Courses",
+  "recordsTitle": "Records",
+  "recordsEmpty": "Termine au moins une course chronométrée pour voir tes records.",
+  "recordsByDistance": "Meilleurs temps",
+  "recordsLongest": "Plus longues distances",
+  "recordsElevation": "Plus gros dénivelés",
+  "recordsAllTime": "Tous les temps",
+  "recordsEmptyYear": "Aucune course chronométrée en {year}.",
+  "@recordsEmptyYear": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "galleryTitle": "Médailles et dossards",
+  "galleryAll": "Tout",
+  "galleryMedals": "Médailles",
+  "galleryBibs": "Dossards",
+  "galleryEmpty": "Aucune photo pour l'instant. Ajoute la médaille ou le dossard dans le formulaire d'une course.",
+  "galleryCount": "{count, plural, =1{1 photo} other{{count} photos}}",
+  "@galleryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsAccount": "Compte",
+  "settingsSignedInAs": "Connecté en tant que {email}",
+  "@settingsSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsChangePassword": "Changer de mot de passe",
+  "settingsNewPassword": "Nouveau mot de passe",
+  "settingsPasswordTooShort": "8 caractères minimum.",
+  "settingsPasswordChanged": "Mot de passe modifié.",
+  "settingsSignOut": "Se déconnecter",
+  "settingsSignOutTitle": "Se déconnecter ?",
+  "settingsSignOutPending": "{count, plural, =1{1 modification n'est pas encore envoyée. Elle reste sur cet appareil et partira à ta prochaine connexion.} other{{count} modifications ne sont pas encore envoyées. Elles restent sur cet appareil et partiront à ta prochaine connexion.}}",
+  "@settingsSignOutPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSignOutClean": "Tes courses restent sur le cloud et sur cet appareil.",
+  "settingsAppearance": "Apparence",
+  "themeSystem": "Système",
+  "themeLight": "Clair",
+  "themeDark": "Sombre",
+  "backupSection": "Sauvegarde",
+  "backupHint": "Une copie de toutes tes courses (toutes les colonnes), indépendante du cloud, à garder où tu veux.",
+  "backupExcel": "Exporter en Excel",
+  "backupCsv": "Exporter en CSV",
+  "backupTitle": "Sauvegarde ÉLAN du {date}",
+  "@backupTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupSheetName": "Courses",
+  "backupDate": "Date",
+  "backupCourse": "Course",
+  "backupType": "Type",
+  "backupStatus": "Statut",
+  "backupDistance": "Distance (km)",
+  "backupTime": "Temps",
+  "backupPace": "Allure (min/km)",
+  "backupElevation": "D+ (m)",
+  "backupTeam": "Équipe (membres)",
+  "backupChallenge": "Distance du défi (km)",
+  "backupCharity": "Solidaire",
+  "backupAssociation": "Association",
+  "backupCause": "Cause",
+  "backupSponsor": "Parrainage (€/km)",
+  "backupRegistration": "Don à l'inscription (€)",
+  "backupFundraising": "Collecte (€)",
+  "backupTotal": "Total engagé (€)",
+  "backupMetric": "Équivalence annoncée",
+  "backupQuantity": "Quantité",
+  "backupDocuments": "Justificatifs",
+  "backupNotes": "Notes",
+  "backupCreated": "Ajoutée le",
+  "backupUpdated": "Modifiée le",
+  "backupYes": "Oui",
+  "backupNo": "Non",
+  "reminderSetting": "Rappel le soir de la course",
+  "reminderSettingHint": "Une notification à {time} le jour J pour saisir ton temps.",
+  "@reminderSettingHint": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderTime": "Heure du rappel",
+  "reminderTitle": "Ta course : {title}",
+  "@reminderTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderBody": "Saisis ton temps pour l'ajouter à tes totaux et à tes records.",
+  "settingsWallpaperColors": "Couleurs du fond d'écran",
+  "settingsWallpaperColorsHint": "Material You : l'app prend les couleurs de ton téléphone. Désactive pour garder les couleurs ÉLAN.",
+  "syncTitle": "Synchronisation",
+  "syncNow": "Synchroniser maintenant",
+  "syncUpToDate": "Tout est synchronisé",
+  "syncRunning": "Synchronisation en cours",
+  "syncPending": "{count, plural, =1{1 modification en attente} other{{count} modifications en attente}}",
+  "@syncPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncFailed": "Synchronisation en échec",
+  "syncLast": "Dernière synchronisation : {date}",
+  "@syncLast": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "syncImported": "{count, plural, =1{1 course de l'ancienne version importée.} other{{count} courses de l'ancienne version importées.}}",
+  "@syncImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "serverTitle": "Serveur",
+  "serverIntro": "ÉLAN enregistre tes courses sur un serveur. Par défaut, c'est celui d'ÉLAN ; tu peux aussi utiliser ton propre serveur, par exemple installé sur un NAS.",
+  "serverIntroCustomOnly": "Indique le serveur où ÉLAN enregistre tes courses, par exemple installé sur un NAS.",
+  "serverBuiltIn": "Serveur ÉLAN",
+  "serverBuiltInHint": "Par défaut",
+  "serverCustom": "Mon serveur",
+  "serverCustomHint": "Auto-hébergé, par exemple sur un NAS",
+  "serverAddress": "Adresse du serveur",
+  "serverAddressHint": "http://192.168.1.20:8000",
+  "serverKey": "Clé publique",
+  "serverFieldsHelp": "Les deux valeurs sont dans le fichier connexion-app.txt créé lors de l'installation du serveur.",
+  "serverPaste": "Coller",
+  "serverSave": "Vérifier et enregistrer",
+  "serverChecking": "Vérification du serveur…",
+  "serverErrorAddress": "Adresse invalide. Exemple : http://192.168.1.20:8000",
+  "serverErrorHttp": "Sur Internet, l'adresse doit commencer par https:// (en http, le mot de passe circulerait en clair). http n'est accepté que sur le réseau local ou le VPN.",
+  "serverErrorKey": "Clé publique manquante ou incomplète.",
+  "serverWrongKey": "Le serveur refuse cette clé. Vérifie la clé publique.",
+  "serverNotReady": "Serveur joint, mais sa base n'est pas prête : vérifie que le service « migrations » s'est bien terminé.",
+  "serverNotSupabase": "Cette adresse répond, mais ce n'est pas un serveur ÉLAN. Vérifie le port (8000 par défaut).",
+  "serverUnreachable": "Serveur injoignable. Vérifie l'adresse, que le VPN est actif et que le serveur est démarré.",
+  "serverLabel": "Serveur : {name}",
+  "@serverLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "signInShowPassword": "Afficher le mot de passe",
+  "signInHidePassword": "Masquer le mot de passe",
+  "signInForgottenCustom": "Mot de passe oublié ? Il se réinitialise depuis le tableau de bord de ton serveur."
+}
