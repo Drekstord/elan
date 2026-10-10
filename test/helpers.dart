@@ -64,6 +64,20 @@ class FakeBackend implements Backend, ServerAccounts {
   @override
   Future<void> changePassword(String newPassword, {String? current}) async {}
 
+  /// Préférences gardées par le faux serveur (null : serveur qui n'en garde pas).
+  Map<String, dynamic>? preferences;
+
+  /// Serveur injoignable pour les préférences.
+  bool failPreferences = false;
+
+  @override
+  Future<Map<String, dynamic>?> readPreferences() async =>
+      failPreferences ? throw const AuthError(AuthFailure.offline) : preferences;
+
+  @override
+  Future<void> writePreferences(Map<String, dynamic> value) async =>
+      failPreferences ? throw const AuthError(AuthFailure.offline) : preferences = Map.of(value);
+
   @override
   Future<bool> needsFirstAccount() async => firstAccount;
 

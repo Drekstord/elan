@@ -162,6 +162,14 @@ void main() {
     expect(back.durationS, 1680);
   });
 
+  test('préférences du compte : gardées par le serveur, relues telles quelles', () async {
+    expect(await owner.readPreferences(), isNull);
+    await owner.writePreferences({'goal_year_m': 500000, 'goal_updated_ms': 1790000000000});
+    expect(await owner.readPreferences(), {'goal_year_m': 500000, 'goal_updated_ms': 1790000000000});
+    await owner.writePreferences({'goal_year_m': 0, 'goal_updated_ms': 1790000000001});
+    expect((await owner.readPreferences())!['goal_year_m'], 0);
+  });
+
   test('fichiers : envoi, lecture, remplacement, suppression', () async {
     final gateway = owner.gateway;
     final key = '${owner.currentUser!.id}/docs/facture-app.pdf';

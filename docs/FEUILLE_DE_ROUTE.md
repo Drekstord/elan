@@ -32,8 +32,11 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 | 25 | Objectifs : temps visé par course, objectif annuel de kilomètres | ✅ terminé |
 | 26 | Classement officiel (général et catégorie) | ✅ terminé |
 | 27 | Bilan de l'année à partager | ✅ terminé |
-| 28 | App en anglais | ✅ terminé (messages de synchronisation et catalogue d'associations restés en français) |
+| 28 | App en anglais | ✅ terminé, complété au point 32 |
 | 29 | Import d'un triathlon depuis un fichier de montre (FIT) | ✅ terminé, à confirmer sur un vrai fichier de montre |
+| 30 | Comparaison d'une édition à l'autre | ✅ terminé |
+| 31 | Courses à venir vers l'agenda (.ics) | ✅ terminé |
+| 32 | Finitions : classement à la saisie du résultat, objectif annuel synchronisé, anglais complet | ✅ terminé |
 
 Écartés : objectifs annuels (non souhaités).
 
@@ -265,7 +268,7 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
   1:12 », « manqué de 0:35 » ou « atteint ».
 - **Objectif annuel** de kilomètres courus, sur l'accueil : avancement, pourcentage, et avance ou
   retard sur le rythme de l'année. Le widget Android affiche « 207 / 500 ».
-- L'objectif annuel est enregistré sur l'appareil (il ne se synchronise pas entre téléphone et PC).
+- L'objectif annuel suit d'un appareil à l'autre depuis le point 32.
 
 ## 26. Classement officiel ✅
 
@@ -294,8 +297,7 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 - **Réglages > Apparence > Langue** : Système, Français ou English. « Système » suit la langue de
   l'appareil ; une langue que l'app ne parle pas donne le français.
 - Un test vérifie que chaque texte français a sa traduction, avec les mêmes variables.
-- Restent en français : les messages d'erreur de synchronisation, les descriptions du catalogue
-  d'associations, la taille des fichiers (« Ko », « Mo ») et le CSV (format prévu pour Excel en français).
+- Reste en français : le CSV (format prévu pour Excel en français). Le reste a été traduit au point 32.
 
 ## 29. Import d'un triathlon depuis un fichier de montre ✅
 
@@ -307,3 +309,30 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 - **Limite connue** : la lecture suit la spécification du format et elle est testée sur des fichiers
   fabriqués pour les tests, pas encore sur un fichier sorti d'une montre. À confirmer sur un vrai
   fichier ; en cas d'écart, les valeurs restent modifiables avant l'enregistrement.
+
+## 30. Comparaison d'une édition à l'autre ✅
+
+- Sur la fiche d'une course, une carte « Éditions précédentes » : l'écart avec la dernière édition
+  (« 2:10 de mieux qu'en 2025 »), puis chaque édition avec son temps et son classement.
+- Les éditions sont reconnues toutes seules : même nom au millésime et au numéro d'édition près
+  (« 10 km de Valfleuri 2026 », « 10 km de Valfleuri, 12e édition »), même type d'épreuve, distance
+  voisine (10 %). Il n'y a pas de rattachement manuel : deux noms vraiment différents ne se comparent pas.
+- Pour une course à venir, la carte rappelle les éditions passées, utile pour fixer un temps visé.
+
+## 31. Courses à venir vers l'agenda ✅
+
+- Fiche d'une course à venir : bouton « Ajouter à l'agenda ». Réglages > Sauvegarde : toutes les
+  courses à venir d'un coup.
+- Un fichier .ics (format lu par tous les agendas), un événement d'une journée par course, avec le
+  type, la distance et le temps visé en note.
+- Réimporter le fichier met les événements à jour au lieu de les dupliquer. La course n'a pas de
+  lieu dans l'app : l'événement n'en a donc pas.
+
+## 32. Finitions ✅
+
+- **Saisir mon résultat** : la place et le nombre d'arrivants se saisissent dans la même fenêtre.
+- **Objectif annuel synchronisé** : il suit d'un appareil à l'autre, le changement le plus récent
+  l'emporte. Serveur en ligne : rien à faire. Serveur personnel : mettre le serveur à jour (version
+  1.1, voir son guide) ; sans cela l'objectif reste sur chaque appareil, comme avant.
+- **Anglais complet** : messages de synchronisation, tailles de fichier et descriptions des
+  associations du catalogue.

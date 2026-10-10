@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:intl/intl.dart';
+
 import 'package:drift/drift.dart';
 import 'package:pocketbase/pocketbase.dart' as pb;
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -138,44 +140,79 @@ class SyncEngine {
   }
 }
 
-/// Message lisible pour l'utilisateur à partir d'une erreur de synchro.
+/// Message lisible pour l'utilisateur à partir d'une erreur de synchro, dans la langue de l'app.
 String describeSyncError(Object error) {
+  final english = (Intl.defaultLocale ?? 'fr').startsWith('en');
+  String say(String fr, String en) => english ? en : fr;
+  final offlineMessage = say(
+    'Pas de connexion. Les modifications partiront au retour du réseau.',
+    'No connection. Your changes will be sent when the network is back.',
+  );
+  final expired = say('Session expirée. Reconnecte-toi.', 'Session expired. Sign in again.');
+  String outdated(String what, String whatEn, String script) => say(
+    '$what : base du serveur pas à jour (supabase/$script).',
+    '$whatEn: server database not up to date (supabase/$script).',
+  );
+
   // Serveur personnel (serveur ÉLAN).
   if (error is pb.ClientException) {
-    if (error.statusCode == 0) return 'Pas de connexion. Les modifications partiront au retour du réseau.';
-    if (error.statusCode == 401 || error.statusCode == 403) return 'Session expirée. Reconnecte-toi.';
-    if (error.statusCode == 429) return 'Le serveur est très sollicité. Nouvel essai dans un instant.';
-    if (error.statusCode == 404) return 'Serveur pas à jour : mets à jour le serveur ÉLAN, puis réessaie.';
-    return 'Erreur du serveur (${error.statusCode}) : ${error.response['message'] ?? 'réessaie plus tard'}';
+    if (error.statusCode == 0) return offlineMessage;
+    if (error.statusCode == 401 || error.statusCode == 403) return expired;
+    if (error.statusCode == 429) {
+      return say(
+        'Le serveur est très sollicité. Nouvel essai dans un instant.',
+        'The server is very busy. Trying again in a moment.',
+      );
+    }
+    if (error.statusCode == 404) {
+      return say(
+        'Serveur pas à jour : mets à jour le serveur ÉLAN, puis réessaie.',
+        'Server not up to date: update the ÉLAN server, then try again.',
+      );
+    }
+    final detail = error.response['message'] ?? say('réessaie plus tard', 'try again later');
+    return say('Erreur du serveur (${error.statusCode}) : $detail', 'Server error (${error.statusCode}): $detail');
   }
   bool offline(String s) =>
       s.contains('SocketException') || s.contains('ClientException') || s.contains('Failed host lookup');
-  if (error is SocketException || error is TimeoutException || offline(error.toString())) {
-    return 'Pas de connexion. Les modifications partiront au retour du réseau.';
-  }
+  if (error is SocketException || error is TimeoutException || offline(error.toString())) return offlineMessage;
   // Serveur ÉLAN en ligne (Supabase).
-  if (error is AuthException) return 'Session expirée. Reconnecte-toi.';
+  if (error is AuthException) return expired;
   if (error is PostgrestException) {
     if (error.code == '42P01' || error.code == 'PGRST205') {
-      return 'Table « courses » introuvable : base du serveur pas à jour (supabase/001_schema.sql).';
+      return outdated('Table « courses » introuvable', 'Table “courses” not found', '001_schema.sql');
     }
-    if (error.code == '42501') return 'Accès refusé par le serveur (règles RLS).';
+    if (error.code == '42501') {
+      return say('Accès refusé par le serveur (règles RLS).', 'Access denied by the server (RLS rules).');
+    }
     if (error.code == 'PGRST204' && error.message.contains('multisport')) {
-      return 'Triathlons non enregistrés sur le serveur : base pas à jour (supabase/003_multisport.sql).';
+      return outdated(
+        'Triathlons non enregistrés sur le serveur',
+        'Triathlons not saved on the server',
+        '003_multisport.sql',
+      );
     }
     if (error.code == 'PGRST204' && error.message.contains('details')) {
-      return 'Objectifs et classements non enregistrés sur le serveur : base pas à jour (supabase/004_details.sql).';
+      return outdated(
+        'Objectifs et classements non enregistrés sur le serveur',
+        'Targets and rankings not saved on the server',
+        '004_details.sql',
+      );
     }
     if (error.code == 'PGRST204' && error.message.contains('documents')) {
-      return 'Colonne « documents » absente : base du serveur pas à jour (supabase/002_justificatifs.sql).';
+      return outdated('Colonne « documents » absente', 'Column “documents” missing', '002_justificatifs.sql');
     }
-    return 'Erreur serveur : ${error.message}';
+    return say('Erreur serveur : ${error.message}', 'Server error: ${error.message}');
   }
   if (error is StorageException) {
     if (error.message.toLowerCase().contains('mime')) {
-      return 'Type de fichier refusé par le stockage : base du serveur pas à jour (supabase/002_justificatifs.sql).';
+      return outdated(
+        'Type de fichier refusé par le stockage',
+        'File type refused by the storage',
+        '002_justificatifs.sql',
+      );
     }
-    return 'Envoi de fichier impossible : ${error.message}';
+    return say('Envoi de fichier impossible : ${error.message}', 'File upload failed: ${error.message}');
   }
-  return 'Synchronisation impossible : $error';
+  return say('Synchronisation impossible : $error', 'Sync failed: $error');
 }

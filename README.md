@@ -24,6 +24,8 @@
 - **Objectifs** : un temps visé par course, et un objectif annuel de kilomètres avec l'avance ou le retard sur le rythme.
 - **Classement officiel** : place au général et dans la catégorie, traduite en « dans les 15 % premiers ».
 - Import d'un fichier de montre **GPX** ou **FIT** (distance, durée, dénivelé ; disciplines et transitions d'un triathlon).
+- **Éditions précédentes** d'une même course comparées d'une année sur l'autre.
+- **Courses à venir vers l'agenda** (fichier .ics).
 - **Bilan de l'année** à partager en image.
 - App en **français** et en **anglais**.
 - Liste en blocs (à saisir, à venir, puis par année), recherche et filtres : *Officielles / Défis* et *Solidaires / par cause*.

@@ -75,6 +75,11 @@ abstract class Backend {
   Future<bool> needsFirstAccount();
   Future<void> createFirstAccount(String email, String password);
 
+  /// Préférences du compte gardées par le serveur, pour qu'elles suivent d'un appareil à l'autre
+  /// (objectif annuel…). Null si le serveur n'en a pas, ou s'il est trop ancien pour les garder.
+  Future<Map<String, dynamic>?> readPreferences();
+  Future<void> writePreferences(Map<String, dynamic> preferences);
+
   /// Gestion des comptes, ou null si ce serveur ne la propose pas dans l'app.
   ServerAccounts? get accounts;
 

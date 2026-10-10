@@ -12,7 +12,11 @@ import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../records/domain/personal_records.dart';
 import '../../records/records_providers.dart';
+import '../../../app/widgets/image_export.dart';
+import '../../impact/data/association_catalog.dart';
 import '../courses_providers.dart';
+import '../data/calendar_export.dart';
+import '../domain/editions.dart';
 import '../domain/course.dart';
 import 'multisport_view.dart';
 import '../domain/course_rules.dart';
@@ -88,6 +92,19 @@ class _Detail extends ConsumerWidget {
               icon: const Icon(Icons.ios_share),
               onPressed: () => showShareCard(context, course),
             ),
+          if (status == CourseStatus.upcoming)
+            IconButton(
+              tooltip: t.calendarAdd,
+              icon: const Icon(Icons.event_outlined),
+              onPressed: () => exportFile(
+                context,
+                coursesToIcs([course], now: DateTime.now(), description: (c) => calendarDescription(c, t)),
+                fileName: exportFileName('elan', course.title, extension: 'ics'),
+                mimeType: 'text/calendar',
+                extension: 'ics',
+                savedMessage: t.calendarSaved,
+              ),
+            ),
           IconButton(
             tooltip: t.edit,
             icon: const Icon(Icons.edit_outlined),
@@ -150,6 +167,11 @@ class _Detail extends ConsumerWidget {
           _PerformanceBand(course: course),
           if (course.isMultisport) ...[gap, MultisportCard(course: course)],
           if (course.ranking case final ranking?) ...[gap, _RankingCard(ranking: ranking)],
+          if (previousEditions(course, ref.watch(coursesProvider).value ?? const []) case final editions
+              when editions.isNotEmpty) ...[
+            gap,
+            _EditionsCard(course: course, editions: editions),
+          ],
           const SizedBox(height: Space.md),
         ],
         right: [
@@ -211,6 +233,87 @@ class _Detail extends ConsumerWidget {
     LongestRecord() => t.recordsLongest,
     ElevationRecord() => t.recordsElevation,
   };
+}
+
+/// La même course les années d'avant : l'écart avec la dernière édition, puis chaque édition.
+class _EditionsCard extends StatelessWidget {
+  final Course course;
+
+  /// De la plus récente à la plus ancienne.
+  final List<Course> editions;
+
+  const _EditionsCard({required this.course, required this.editions});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final p = context.palette;
+    final small = Theme.of(context).textTheme.bodySmall?.copyWith(color: p.textMuted);
+    final last = editions.where((c) => c.hasTime).firstOrNull;
+    final delta = course.isCompleted && course.hasTime && last != null ? course.durationS - last.durationS : null;
+    final year = last?.raceDate.year;
+
+    return SectionCard(
+      title: t.editionsTitle,
+      children: [
+        if (delta != null && year != null) ...[
+          Row(
+            children: [
+              Icon(
+                delta < 0 ? Icons.trending_up : (delta > 0 ? Icons.trending_down : Icons.trending_flat),
+                color: delta < 0 ? p.record : p.textMuted,
+              ),
+              const SizedBox(width: Space.sm),
+              Expanded(
+                child: Text(
+                  delta == 0
+                      ? t.editionsSame(year)
+                      : delta < 0
+                      ? t.editionsFaster(formatGap(-delta), year)
+                      : t.editionsSlower(formatGap(delta), year),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: Space.sm),
+        ],
+        for (final c in editions)
+          InkWell(
+            onTap: () => context.push(Routes.course(c.id)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: Space.sm),
+              child: MergeSemantics(
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 52,
+                      child: Text('${c.raceDate.year}', style: TextStyles.figure(p.textMuted, size: 18)),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          if (c.ranking?.overall != null)
+                            Text(rankLabel(c.ranking!.overall, c.ranking!.finishers, t), style: small),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: Space.sm),
+                    Text(
+                      c.hasTime ? formatDuration(c.durationS) : formatKm(c.distanceM),
+                      style: TextStyles.figure(p.text, size: 18),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        Text(t.editionsHint, style: small),
+      ],
+    );
+  }
 }
 
 /// Classement officiel : la place, le nombre d'arrivants et ce que ça représente.
@@ -393,7 +496,14 @@ class _SolidarityCard extends StatelessWidget {
             subtitle: course.associationCause == null ? null : Text(course.associationCause!.label(t)),
           ),
         if (course.associationDescription != null) ...[
-          Text(course.associationDescription!, style: TextStyle(color: p.textMuted)),
+          Text(
+            associationDescription(
+              id: course.associationId,
+              stored: course.associationDescription,
+              language: formatLocale,
+            )!,
+            style: TextStyle(color: p.textMuted),
+          ),
           const SizedBox(height: Space.md),
         ],
         for (final (label, cents) in lines)
@@ -447,6 +557,8 @@ class _ResultDialogState extends ConsumerState<ResultDialog> {
   late final _duration = TextEditingController();
   late final _distance = TextEditingController(text: metersToKmInput(widget.course.distanceM));
   late final _elevation = TextEditingController(text: widget.course.elevationGainM?.toString());
+  final _rank = TextEditingController();
+  final _finishers = TextEditingController();
   String? _error;
 
   @override
@@ -454,6 +566,8 @@ class _ResultDialogState extends ConsumerState<ResultDialog> {
     _duration.dispose();
     _distance.dispose();
     _elevation.dispose();
+    _rank.dispose();
+    _finishers.dispose();
     super.dispose();
   }
 
@@ -463,12 +577,30 @@ class _ResultDialogState extends ConsumerState<ResultDialog> {
     final km = parseDecimal(_distance.text);
     if (duration == null || duration <= 0) return setState(() => _error = t.issueInvalidDuration);
     if (km == null || km <= 0) return setState(() => _error = t.issueDistance);
-    final done = completeWithResult(
-      widget.course,
-      durationS: duration,
-      distanceM: (km * 1000).round(),
-      elevationGainM: int.tryParse(_elevation.text.trim()),
-    );
+    // Classement facultatif : vide, ou un nombre positif.
+    int? place(TextEditingController c) => c.text.trim().isEmpty ? null : (int.tryParse(c.text.trim()) ?? -1);
+    final rank = place(_rank);
+    final finishers = place(_finishers);
+    if ((rank ?? 1) <= 0 || (finishers ?? 1) <= 0) return setState(() => _error = t.issueInvalidNumber);
+    if (rank != null && finishers != null && rank > finishers) {
+      return setState(() => _error = t.issueRankAboveFinishers);
+    }
+    final existing = widget.course.ranking;
+    final done =
+        completeWithResult(
+          widget.course,
+          durationS: duration,
+          distanceM: (km * 1000).round(),
+          elevationGainM: int.tryParse(_elevation.text.trim()),
+        ).copyWith(
+          ranking: Ranking(
+            overall: rank ?? existing?.overall,
+            finishers: finishers ?? existing?.finishers,
+            category: existing?.category,
+            categoryFinishers: existing?.categoryFinishers,
+            categoryName: existing?.categoryName,
+          ),
+        );
     await ref.read(courseRepositoryProvider).save(done);
     if (mounted) Navigator.pop(context);
   }
@@ -501,6 +633,33 @@ class _ResultDialogState extends ConsumerState<ResultDialog> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(labelText: t.formElevation),
             ),
+            if (widget.course.type != CourseType.theConqueror) ...[
+              const SizedBox(height: Space.md),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(t.resultRanking, style: const TextStyle(fontWeight: FontWeight.w600)),
+              ),
+              const SizedBox(height: Space.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _rank,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(labelText: t.formRank),
+                    ),
+                  ),
+                  const SizedBox(width: Space.md),
+                  Expanded(
+                    child: TextField(
+                      controller: _finishers,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(labelText: t.formFinishers),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             if (_error != null) ...[
               const SizedBox(height: Space.md),
               Text(_error!, style: TextStyle(color: context.palette.danger)),

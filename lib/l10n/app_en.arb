@@ -530,7 +530,7 @@
   "goalSet": "Set a yearly goal",
   "goalEdit": "Edit the goal",
   "goalDialogField": "Kilometres to run in {year}",
-  "goalDialogHint": "Leave empty to remove the goal. It is stored on this device.",
+  "goalDialogHint": "Leave empty to remove the goal. It follows you on your other devices.",
   "goalProgress": "{done} of {goal}",
   "goalAhead": "{km} ahead of the pace for the year.",
   "goalBehind": "{km} behind the pace for the year.",
@@ -555,5 +555,15 @@
   "formImportFile": "Import a watch file (GPX or FIT)",
   "formFitImported": "File imported: {summary}.",
   "formFitError": "This FIT file cannot be read.",
-  "formFitUnknown": "Unrecognised sequence: only the disciplines of a triathlon, duathlon or aquathlon are imported. Enter the times by hand."
+  "formFitUnknown": "Unrecognised sequence: only the disciplines of a triathlon, duathlon or aquathlon are imported. Enter the times by hand.",
+  "editionsTitle": "Previous editions",
+  "editionsFaster": "{time} better than in {year}",
+  "editionsSlower": "{time} slower than in {year}",
+  "editionsSame": "Same time as in {year}",
+  "editionsHint": "Races with the same name and a similar distance.",
+  "calendarAdd": "Add to calendar",
+  "calendarExportAll": "Upcoming races to calendar (.ics)",
+  "calendarSaved": "Calendar file saved: open it to add the races.",
+  "calendarTarget": "Target time: {time}",
+  "resultRanking": "Ranking (optional)"
 }

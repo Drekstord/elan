@@ -90,3 +90,27 @@ const List<Association> associationCatalog = [
         'atteintes et financer la recherche sur le syndrome de Rett.',
   ),
 ];
+
+/// Les mêmes descriptions en anglais, par identifiant du catalogue.
+const Map<String, String> _descriptionsEn = {
+  'the-conqueror':
+      'Virtual challenges: each completed challenge funds tree planting (up to 4) '
+      'and the removal of plastic bottles (up to 40).',
+  'afm-telethon': 'Curing rare genetic and neuromuscular diseases through biomedical research.',
+  'wings-for-life': 'Finding a cure for spinal cord injury. Entry fees go to research.',
+  'restos-du-coeur': 'Helping people in need, in particular through free meals.',
+  'ruban-rose-odyssea': 'Raising awareness of breast cancer screening and funding research.',
+  'msf': 'Emergency medical aid for people affected by conflict, epidemics or disasters.',
+  'wwf-france': 'Protecting biodiversity and fighting climate change.',
+  'secours-populaire': 'Acting against poverty and exclusion in France and around the world.',
+  'spa': 'Fighting animal cruelty, sheltering abandoned animals and finding them homes.',
+  'action-contre-la-faim': 'Preventing, detecting and treating undernutrition around the world.',
+  'snsm': 'Sea rescue and beach lifeguarding, carried out by volunteers.',
+  'afsr-syndrome-rett':
+      'Supporting families, medical care and rehabilitation for people with Rett syndrome, and funding research.',
+};
+
+/// Description d'une association dans la langue de l'app : celle du catalogue en anglais quand
+/// elle existe, sinon le texte enregistré avec la course.
+String? associationDescription({required String? id, required String? stored, required String language}) =>
+    language == 'en' && id != null && stored != null ? (_descriptionsEn[id] ?? stored) : stored;

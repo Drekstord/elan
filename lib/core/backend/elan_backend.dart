@@ -106,6 +106,22 @@ class ElanBackend implements Backend {
     await signIn(email, password);
   }
 
+  // Serveur personnel : champ « preferences » du compte (ajouté par la mise à jour 1.1 du serveur).
+  // Un serveur plus ancien ignore ce champ : rien n'est gardé, et rien ne casse.
+  @override
+  Future<Map<String, dynamic>?> readPreferences() async {
+    final user = currentUser;
+    if (user == null) return null;
+    final raw = (await _users.getOne(user.id)).data['preferences'];
+    return raw is Map && raw.isNotEmpty ? raw.cast<String, dynamic>() : null;
+  }
+
+  @override
+  Future<void> writePreferences(Map<String, dynamic> preferences) async {
+    final user = currentUser;
+    if (user != null) await _users.update(user.id, body: {'preferences': preferences});
+  }
+
   @override
   ServerAccounts? get accounts => (currentUser?.isOwner ?? false) ? _ElanAccounts(this) : null;
 

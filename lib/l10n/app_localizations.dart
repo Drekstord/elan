@@ -3275,7 +3275,7 @@ abstract class AppLocalizations {
   /// No description provided for @goalDialogHint.
   ///
   /// In fr, this message translates to:
-  /// **'Laisse vide pour retirer l\'objectif. Il est enregistré sur cet appareil.'**
+  /// **'Laisse vide pour retirer l\'objectif. Il te suit sur tes autres appareils.'**
   String get goalDialogHint;
 
   /// No description provided for @goalProgress.
@@ -3427,6 +3427,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Enchaînement non reconnu : seules les disciplines d\'un triathlon, d\'un duathlon ou d\'un aquathlon sont importées. Saisis les temps à la main.'**
   String get formFitUnknown;
+
+  /// No description provided for @editionsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Éditions précédentes'**
+  String get editionsTitle;
+
+  /// No description provided for @editionsFaster.
+  ///
+  /// In fr, this message translates to:
+  /// **'{time} de mieux qu\'en {year}'**
+  String editionsFaster(String time, int year);
+
+  /// No description provided for @editionsSlower.
+  ///
+  /// In fr, this message translates to:
+  /// **'{time} de plus qu\'en {year}'**
+  String editionsSlower(String time, int year);
+
+  /// No description provided for @editionsSame.
+  ///
+  /// In fr, this message translates to:
+  /// **'Même temps qu\'en {year}'**
+  String editionsSame(int year);
+
+  /// No description provided for @editionsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses du même nom et de distance voisine.'**
+  String get editionsHint;
+
+  /// No description provided for @calendarAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter à l\'agenda'**
+  String get calendarAdd;
+
+  /// No description provided for @calendarExportAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Courses à venir vers l\'agenda (.ics)'**
+  String get calendarExportAll;
+
+  /// No description provided for @calendarSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier d\'agenda enregistré : ouvre-le pour ajouter les courses.'**
+  String get calendarSaved;
+
+  /// No description provided for @calendarTarget.
+  ///
+  /// In fr, this message translates to:
+  /// **'Temps visé : {time}'**
+  String calendarTarget(String time);
+
+  /// No description provided for @resultRanking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Classement (facultatif)'**
+  String get resultRanking;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

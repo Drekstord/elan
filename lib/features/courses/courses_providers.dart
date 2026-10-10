@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/backend/backend.dart';
+import '../../core/database/database.dart';
 import '../../core/providers.dart';
 import 'domain/course.dart';
 import 'domain/course_query.dart';
@@ -54,19 +56,55 @@ final courseStatsProvider = Provider<CourseStats>(
 
 /// Objectif annuel de kilomètres courus, en mètres ; null si aucun n'est fixé.
 /// Enregistré sur l'appareil, avec les données du compte.
+///
+/// L'appareil garde sa copie (l'app marche hors ligne) ; le serveur garde la dernière version
+/// connue, pour qu'un objectif fixé sur le téléphone se retrouve sur l'ordinateur. Entre les
+/// deux, le changement le plus récent l'emporte.
 class YearGoalController extends AsyncNotifier<int?> {
   static const _key = 'goal.year_m';
+  static const _stampKey = 'goal.updated_ms';
 
   @override
   Future<int?> build() async {
-    final value = int.tryParse(await ref.watch(databaseProvider).readMeta(_key) ?? '');
-    return value != null && value > 0 ? value : null;
+    final db = ref.watch(databaseProvider);
+    final backend = ref.watch(backendProvider);
+    final local = int.tryParse(await db.readMeta(_key) ?? '') ?? 0;
+    final stamp = int.tryParse(await db.readMeta(_stampKey) ?? '') ?? 0;
+    unawaited(_reconcile(db, backend, local, stamp));
+    return local > 0 ? local : null;
+  }
+
+  Future<void> _reconcile(AppDatabase db, Backend backend, int local, int stamp) async {
+    try {
+      final remote = await backend.readPreferences();
+      final remoteStamp = (remote?['goal_updated_ms'] as num?)?.toInt() ?? 0;
+      if (remoteStamp > stamp) {
+        final value = (remote?['goal_year_m'] as num?)?.toInt() ?? 0;
+        await db.writeMeta(_key, '$value');
+        await db.writeMeta(_stampKey, '$remoteStamp');
+        if (ref.mounted) state = AsyncData(value > 0 ? value : null);
+      } else if (stamp > remoteStamp) {
+        await backend.writePreferences({...?remote, 'goal_year_m': local, 'goal_updated_ms': stamp});
+      }
+    } catch (_) {
+      // Hors ligne ou serveur indisponible : l'objectif de l'appareil reste, nouvel essai plus tard.
+    }
   }
 
   Future<void> set(int? meters) async {
-    final value = meters != null && meters > 0 ? meters : null;
-    await ref.read(databaseProvider).writeMeta(_key, '${value ?? 0}');
-    state = AsyncData(value);
+    final value = meters != null && meters > 0 ? meters : 0;
+    final stamp = DateTime.now().millisecondsSinceEpoch;
+    final db = ref.read(databaseProvider);
+    await db.writeMeta(_key, '$value');
+    await db.writeMeta(_stampKey, '$stamp');
+    state = AsyncData(value > 0 ? value : null);
+    try {
+      final backend = ref.read(backendProvider);
+      final remote = await backend.readPreferences();
+      await backend.writePreferences({...?remote, 'goal_year_m': value, 'goal_updated_ms': stamp});
+    } catch (_) {
+      // Envoyé à la prochaine ouverture de l'app.
+    }
   }
 }
 

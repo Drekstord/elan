@@ -1981,7 +1981,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get goalDialogHint => 'Leave empty to remove the goal. It is stored on this device.';
+  String get goalDialogHint => 'Leave empty to remove the goal. It follows you on your other devices.';
 
   @override
   String goalProgress(String done, String goal) {
@@ -2077,4 +2077,42 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get formFitUnknown =>
       'Unrecognised sequence: only the disciplines of a triathlon, duathlon or aquathlon are imported. Enter the times by hand.';
+
+  @override
+  String get editionsTitle => 'Previous editions';
+
+  @override
+  String editionsFaster(String time, int year) {
+    return '$time better than in $year';
+  }
+
+  @override
+  String editionsSlower(String time, int year) {
+    return '$time slower than in $year';
+  }
+
+  @override
+  String editionsSame(int year) {
+    return 'Same time as in $year';
+  }
+
+  @override
+  String get editionsHint => 'Races with the same name and a similar distance.';
+
+  @override
+  String get calendarAdd => 'Add to calendar';
+
+  @override
+  String get calendarExportAll => 'Upcoming races to calendar (.ics)';
+
+  @override
+  String get calendarSaved => 'Calendar file saved: open it to add the races.';
+
+  @override
+  String calendarTarget(String time) {
+    return 'Target time: $time';
+  }
+
+  @override
+  String get resultRanking => 'Ranking (optional)';
 }

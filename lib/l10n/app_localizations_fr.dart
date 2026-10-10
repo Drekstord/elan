@@ -1997,7 +1997,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get goalDialogHint => 'Laisse vide pour retirer l\'objectif. Il est enregistré sur cet appareil.';
+  String get goalDialogHint => 'Laisse vide pour retirer l\'objectif. Il te suit sur tes autres appareils.';
 
   @override
   String goalProgress(String done, String goal) {
@@ -2098,4 +2098,42 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get formFitUnknown =>
       'Enchaînement non reconnu : seules les disciplines d\'un triathlon, d\'un duathlon ou d\'un aquathlon sont importées. Saisis les temps à la main.';
+
+  @override
+  String get editionsTitle => 'Éditions précédentes';
+
+  @override
+  String editionsFaster(String time, int year) {
+    return '$time de mieux qu\'en $year';
+  }
+
+  @override
+  String editionsSlower(String time, int year) {
+    return '$time de plus qu\'en $year';
+  }
+
+  @override
+  String editionsSame(int year) {
+    return 'Même temps qu\'en $year';
+  }
+
+  @override
+  String get editionsHint => 'Courses du même nom et de distance voisine.';
+
+  @override
+  String get calendarAdd => 'Ajouter à l\'agenda';
+
+  @override
+  String get calendarExportAll => 'Courses à venir vers l\'agenda (.ics)';
+
+  @override
+  String get calendarSaved => 'Fichier d\'agenda enregistré : ouvre-le pour ajouter les courses.';
+
+  @override
+  String calendarTarget(String time) {
+    return 'Temps visé : $time';
+  }
+
+  @override
+  String get resultRanking => 'Classement (facultatif)';
 }

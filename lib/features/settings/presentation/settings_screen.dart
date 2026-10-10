@@ -13,6 +13,8 @@ import '../../../core/providers.dart';
 import '../../../core/server/server_config.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../app/widgets/image_export.dart';
+import '../../../app/labels.dart';
+import '../../courses/data/calendar_export.dart';
 import '../../courses/domain/course.dart';
 import '../backup.dart';
 import '../auto_backup.dart';
@@ -343,6 +345,8 @@ class _BackupCard extends ConsumerWidget {
     final now = DateTime.now();
     final today = calendarDate(now.year, now.month, now.day);
     final stamp = formatIsoDate(today);
+    final upcoming = courses.where((c) => !c.isDeleted && c.statusOn(today) == CourseStatus.upcoming).toList()
+      ..sort((a, b) => a.raceDate.compareTo(b.raceDate));
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(Space.md),
@@ -382,6 +386,20 @@ class _BackupCard extends ConsumerWidget {
                         ),
                   icon: const Icon(Icons.description_outlined),
                   label: Text(t.backupCsv),
+                ),
+                OutlinedButton.icon(
+                  onPressed: upcoming.isEmpty
+                      ? null
+                      : () => exportFile(
+                          context,
+                          coursesToIcs(upcoming, now: DateTime.now(), description: (c) => calendarDescription(c, t)),
+                          fileName: 'elan-courses-a-venir.ics',
+                          mimeType: 'text/calendar',
+                          extension: 'ics',
+                          savedMessage: t.calendarSaved,
+                        ),
+                  icon: const Icon(Icons.event_outlined),
+                  label: Text(t.calendarExportAll),
                 ),
               ],
             ),

@@ -12,10 +12,13 @@ import '../../courses/data/file_import.dart';
 import '../../courses/domain/course.dart';
 import '../documents.dart';
 
-/// « 245 Ko », « 1,2 Mo ».
-String formatBytes(int bytes) => bytes < 1024 * 1024
-    ? '${(bytes / 1024).ceil()} Ko'
-    : '${(bytes / (1024 * 1024)).toStringAsFixed(1).replaceAll('.', ',')} Mo';
+/// « 245 Ko », « 1,2 Mo » ; en anglais « 245 KB », « 1.2 MB ».
+String formatBytes(int bytes) {
+  final english = formatLocale == 'en';
+  if (bytes < 1024 * 1024) return '${(bytes / 1024).ceil()} ${english ? 'KB' : 'Ko'}';
+  final mega = (bytes / (1024 * 1024)).toStringAsFixed(1);
+  return english ? '$mega MB' : '${mega.replaceAll('.', ',')} Mo';
+}
 
 extension DocumentKindLabel on DocumentKind {
   String label(AppLocalizations t) => switch (this) {

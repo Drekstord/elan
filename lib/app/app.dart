@@ -2,6 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../l10n/app_localizations.dart';
 import 'format.dart';
@@ -22,6 +23,7 @@ class ElanApp extends ConsumerWidget {
     final locale = resolveLocale(ref.watch(languageProvider), WidgetsBinding.instance.platformDispatcher.locales);
     // Les nombres et les dates suivent la langue de l'app.
     formatLocale = locale.languageCode;
+    Intl.defaultLocale = locale.languageCode;
     // Le fond d'écran fournit ses couleurs sur Android 12+ ; ailleurs (ou si l'option
     // est coupée), palette ÉLAN.
     return DynamicColorBuilder(

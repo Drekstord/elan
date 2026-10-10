@@ -167,11 +167,21 @@ String rankingSummary(Ranking r, AppLocalizations t) => [
     [?r.categoryName, if (r.category != null) rankLabel(r.category, r.categoryFinishers, t)].join(' '),
 ].join(' · ');
 
+/// Écart entre deux temps, sans zéro inutile : « 1:12 », « 1:01:40 ».
+String formatGap(int s) => s >= 3600
+    ? '${s ~/ 3600}:${(s % 3600 ~/ 60).toString().padLeft(2, '0')}:${(s % 60).toString().padLeft(2, '0')}'
+    : '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
+
+/// Note d'un événement d'agenda : « Course officielle · 21,1 km · Temps visé : 1:45:00 ».
+String calendarDescription(Course c, AppLocalizations t) => [
+  c.typeLabel(t),
+  if (c.multisport case final m?) multisportSummary(m, t) else formatKm(c.distanceM),
+  if (c.targetDurationS != null) t.calendarTarget(formatDuration(c.targetDurationS!)),
+].join(' · ');
+
 /// Écart au temps visé : « Objectif battu de 1:12 ».
 String? targetLabel(Course c, AppLocalizations t) {
-  String time(int s) => s >= 3600
-      ? '${s ~/ 3600}:${(s % 3600 ~/ 60).toString().padLeft(2, '0')}:${(s % 60).toString().padLeft(2, '0')}'
-      : '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
+  const time = formatGap;
   final target = c.targetDurationS;
   if (target == null) return null;
   final delta = c.targetDeltaS;

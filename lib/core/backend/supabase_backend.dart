@@ -48,6 +48,18 @@ class SupabaseBackend implements Backend {
   Future<void> createFirstAccount(String email, String password) =>
       throw const AuthError(AuthFailure.unknown, 'Les comptes de ce serveur sont créés par son administrateur.');
 
+  // Serveur en ligne : les préférences vivent dans les données du compte, sans table à créer.
+  @override
+  Future<Map<String, dynamic>?> readPreferences() async {
+    final user = (await _client.auth.getUser()).user;
+    final raw = user?.userMetadata?['elan'];
+    return raw is Map ? raw.cast<String, dynamic>() : null;
+  }
+
+  @override
+  Future<void> writePreferences(Map<String, dynamic> preferences) =>
+      _client.auth.updateUser(UserAttributes(data: {'elan': preferences}));
+
   @override
   ServerAccounts? get accounts => null;
 

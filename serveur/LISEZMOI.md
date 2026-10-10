@@ -200,6 +200,10 @@ Les mises à jour sont rares. Tes données ne bougent pas : elles sont dans `don
   (Selon la version de ton NAS, les intitulés peuvent varier légèrement.)
 - **Ligne de commande** : `docker compose pull`, puis `docker compose up -d`.
 
+**Version 1.1 (avec l'app 2.13)** : le serveur garde l'objectif annuel de chacun, pour qu'il suive du
+téléphone à l'ordinateur. Sans cette mise à jour, tout fonctionne comme avant : l'objectif reste
+simplement sur chaque appareil.
+
 Si l'app affiche « Ce serveur est plus récent que l'app », mets l'app à jour.
 Si elle affiche « Serveur pas à jour », mets le serveur à jour.
 
