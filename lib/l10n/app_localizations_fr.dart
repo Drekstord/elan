@@ -1446,20 +1446,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get serverCustom => 'Mon serveur';
 
   @override
-  String get serverCustomHint => 'Auto-hébergé, par exemple sur un NAS';
+  String get serverCustomHint => 'Installé chez toi, par exemple sur un NAS';
 
   @override
   String get serverAddress => 'Adresse du serveur';
 
   @override
   String get serverAddressHint => 'http://192.168.1.20:8000';
-
-  @override
-  String get serverKey => 'Clé publique';
-
-  @override
-  String get serverFieldsHelp =>
-      'Les deux valeurs sont dans le fichier connexion-app.txt créé lors de l\'installation du serveur.';
 
   @override
   String get serverPaste => 'Coller';
@@ -1478,26 +1471,160 @@ class AppLocalizationsFr extends AppLocalizations {
       'Sur Internet, l\'adresse doit commencer par https:// (en http, le mot de passe circulerait en clair). http n\'est accepté que sur le réseau local ou le VPN.';
 
   @override
-  String get serverErrorKey => 'Clé publique manquante ou incomplète.';
-
-  @override
-  String get serverWrongKey => 'Le serveur refuse cette clé. Vérifie la clé publique.';
-
-  @override
-  String get serverNotReady =>
-      'Serveur joint, mais sa base n\'est pas prête : vérifie que le service « migrations » s\'est bien terminé.';
-
-  @override
-  String get serverNotSupabase =>
-      'Cette adresse répond, mais ce n\'est pas un serveur ÉLAN. Vérifie le port (8000 par défaut).';
-
-  @override
   String get serverUnreachable =>
       'Serveur injoignable. Vérifie l\'adresse, que le VPN est actif et que le serveur est démarré.';
 
   @override
   String serverLabel(String name) {
     return 'Serveur : $name';
+  }
+
+  @override
+  String get autoBackupTitle => 'Sauvegarde automatique';
+
+  @override
+  String get autoBackupHint =>
+      'Chaque semaine, une copie des courses (Excel) et des photos et justificatifs dans un dossier de ton choix : Proton Drive, disque externe… Les 8 dernières copies Excel sont gardées.';
+
+  @override
+  String get autoBackupEnable => 'Sauvegarder chaque semaine';
+
+  @override
+  String autoBackupFolder(String path) {
+    return 'Dossier : $path';
+  }
+
+  @override
+  String get autoBackupNoFolder => 'Aucun dossier choisi';
+
+  @override
+  String get autoBackupChoose => 'Choisir le dossier';
+
+  @override
+  String get autoBackupNow => 'Sauvegarder maintenant';
+
+  @override
+  String autoBackupLast(String date) {
+    return 'Dernière sauvegarde : $date';
+  }
+
+  @override
+  String get autoBackupNever => 'Pas encore de sauvegarde';
+
+  @override
+  String get autoBackupRunning => 'Sauvegarde en cours…';
+
+  @override
+  String autoBackupCopied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nouveaux fichiers copiés',
+      one: '1 nouveau fichier copié',
+      zero: 'Aucun nouveau fichier',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String autoBackupMissing(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichiers introuvables pour l\'instant, réessayés la prochaine fois',
+      one: '1 fichier introuvable pour l\'instant, réessayé la prochaine fois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String autoBackupError(String error) {
+    return 'Sauvegarde impossible : $error';
+  }
+
+  @override
+  String get gpxBatchAction => 'Importer des fichiers GPX';
+
+  @override
+  String get gpxBatchTitle => 'Import GPX';
+
+  @override
+  String gpxBatchDefaultTitle(String date) {
+    return 'Course du $date';
+  }
+
+  @override
+  String gpxBatchCreated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count courses ajoutées.',
+      one: '1 course ajoutée.',
+      zero: 'Aucune course ajoutée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String gpxBatchDuplicates(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count traces déjà présentes, ignorées.',
+      one: '1 trace déjà présente, ignorée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String gpxBatchUndated(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count traces sans date, ignorées.',
+      one: '1 trace sans date, ignorée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String gpxBatchUnreadable(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichiers illisibles.',
+      one: '1 fichier illisible.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get gpxBatchHint =>
+      'Elles sont rangées en courses officielles : ouvre-les pour compléter le titre, l\'association…';
+
+  @override
+  String updateAvailable(String version) {
+    return 'ÉLAN $version est disponible.';
+  }
+
+  @override
+  String get updateDownload => 'Télécharger';
+
+  @override
+  String get updateLater => 'Plus tard';
+
+  @override
+  String get updateUpToDate => 'Tu as la dernière version.';
+
+  @override
+  String get updateCheck => 'Rechercher une mise à jour';
+
+  @override
+  String get settingsAbout => 'À propos';
+
+  @override
+  String settingsVersion(String version) {
+    return 'ÉLAN $version';
   }
 
   @override
@@ -1508,5 +1635,97 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get signInForgottenCustom =>
-      'Mot de passe oublié ? Il se réinitialise depuis le tableau de bord de ton serveur.';
+      'Mot de passe oublié ? Le propriétaire du serveur peut t\'en donner un nouveau, dans Réglages > Comptes du serveur.';
+
+  @override
+  String get serverAddressHelp =>
+      'C\'est l\'adresse affichée sur la page d\'accueil de ton serveur (bouton « Copier l\'adresse »).';
+
+  @override
+  String get serverNotElan =>
+      'Cette adresse répond, mais ce n\'est pas un serveur ÉLAN. Vérifie le port (8000 par défaut).';
+
+  @override
+  String get serverTooRecent => 'Ce serveur est plus récent que l\'app. Mets l\'app à jour, puis réessaie.';
+
+  @override
+  String get signInIntroCustom => 'Connecte-toi avec le compte créé pour toi sur ce serveur.';
+
+  @override
+  String get firstAccountTitle => 'Premier compte';
+
+  @override
+  String get firstAccountIntro =>
+      'Ce serveur est tout neuf. Crée le premier compte : il sera le propriétaire du serveur et pourra ajouter les comptes de ses proches.';
+
+  @override
+  String get firstAccountButton => 'Créer mon compte';
+
+  @override
+  String get firstAccountTaken => 'Ce serveur a déjà un compte. Connecte-toi, ou demande un compte à son propriétaire.';
+
+  @override
+  String get passwordConfirmLabel => 'Confirmer le mot de passe';
+
+  @override
+  String get passwordMismatch => 'Les deux mots de passe sont différents.';
+
+  @override
+  String get settingsCurrentPassword => 'Mot de passe actuel';
+
+  @override
+  String get settingsWrongCurrentPassword => 'Mot de passe actuel incorrect.';
+
+  @override
+  String get accountsTitle => 'Comptes du serveur';
+
+  @override
+  String get accountsIntro => 'Chaque personne a son compte et ne voit que ses propres courses.';
+
+  @override
+  String get accountsManage => 'Gérer les comptes';
+
+  @override
+  String get accountsOwner => 'Propriétaire du serveur';
+
+  @override
+  String get accountsYou => 'Toi';
+
+  @override
+  String get accountsAdd => 'Ajouter un compte';
+
+  @override
+  String get accountsAddIntro =>
+      'Choisis son e-mail et un mot de passe provisoire, puis transmets-les lui. La personne pourra changer son mot de passe dans Réglages.';
+
+  @override
+  String get accountsCreated => 'Compte créé.';
+
+  @override
+  String get accountsEmailTaken => 'Un compte existe déjà avec cette adresse.';
+
+  @override
+  String get accountsReset => 'Donner un nouveau mot de passe';
+
+  @override
+  String get accountsResetDone => 'Mot de passe remplacé.';
+
+  @override
+  String get accountsDelete => 'Supprimer le compte';
+
+  @override
+  String accountsDeleteConfirm(String email) {
+    return 'Supprimer le compte $email ? Ses courses, photos et justificatifs enregistrés sur le serveur seront effacés définitivement.';
+  }
+
+  @override
+  String get accountsDeleted => 'Compte supprimé.';
+
+  @override
+  String get accountsError => 'Action impossible. Vérifie la connexion au serveur.';
+
+  @override
+  String accountsActions(String email) {
+    return 'Actions pour $email';
+  }
 }

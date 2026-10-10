@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
+import 'package:pocketbase/pocketbase.dart' as pb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../database/database.dart';
@@ -139,25 +140,34 @@ class SyncEngine {
 
 /// Message lisible pour l'utilisateur à partir d'une erreur de synchro.
 String describeSyncError(Object error) {
+  // Serveur personnel (serveur ÉLAN).
+  if (error is pb.ClientException) {
+    if (error.statusCode == 0) return 'Pas de connexion. Les modifications partiront au retour du réseau.';
+    if (error.statusCode == 401 || error.statusCode == 403) return 'Session expirée. Reconnecte-toi.';
+    if (error.statusCode == 429) return 'Le serveur est très sollicité. Nouvel essai dans un instant.';
+    if (error.statusCode == 404) return 'Serveur pas à jour : mets à jour le serveur ÉLAN, puis réessaie.';
+    return 'Erreur du serveur (${error.statusCode}) : ${error.response['message'] ?? 'réessaie plus tard'}';
+  }
   bool offline(String s) =>
       s.contains('SocketException') || s.contains('ClientException') || s.contains('Failed host lookup');
   if (error is SocketException || error is TimeoutException || offline(error.toString())) {
     return 'Pas de connexion. Les modifications partiront au retour du réseau.';
   }
+  // Serveur ÉLAN en ligne (Supabase).
   if (error is AuthException) return 'Session expirée. Reconnecte-toi.';
   if (error is PostgrestException) {
     if (error.code == '42P01' || error.code == 'PGRST205') {
-      return 'Table « courses » introuvable : base du serveur pas à jour (serveur/systeme/migrations).';
+      return 'Table « courses » introuvable : base du serveur pas à jour (supabase/001_schema.sql).';
     }
     if (error.code == '42501') return 'Accès refusé par le serveur (règles RLS).';
     if (error.code == 'PGRST204' && error.message.contains('documents')) {
-      return 'Colonne « documents » absente : base du serveur pas à jour (serveur/systeme/migrations).';
+      return 'Colonne « documents » absente : base du serveur pas à jour (supabase/002_justificatifs.sql).';
     }
     return 'Erreur serveur : ${error.message}';
   }
   if (error is StorageException) {
     if (error.message.toLowerCase().contains('mime')) {
-      return 'Type de fichier refusé par le stockage : base du serveur pas à jour (serveur/systeme/migrations).';
+      return 'Type de fichier refusé par le stockage : base du serveur pas à jour (supabase/002_justificatifs.sql).';
     }
     return 'Envoi de fichier impossible : ${error.message}';
   }

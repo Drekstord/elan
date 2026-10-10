@@ -133,31 +133,21 @@ La première construction prend 5 à 10 minutes. Résultat : **`dist\ELAN.apk`**
 Construction à la demande, sans étiquette : onglet **Actions** > **Version** > **Run workflow** ;
 l'APK (et l'installateur Windows) se téléchargent ensuite depuis la page de l'exécution (rubrique *Artifacts*, 30 jours).
 
-Les secrets nécessaires (configuration Supabase, clé de signature de ce PC) sont enregistrés dans le dépôt :
+Les secrets nécessaires (configuration Supabase, clé de signature d'ÉLAN) sont enregistrés dans le dépôt :
 *Settings > Secrets and variables > Actions*. Ils ne sont jamais écrits dans le code.
 
 **Ou depuis le PC** : refaire l'étape 3, puis réinstaller `ELAN.apk` (méthode A ou B) : Android propose
 **Mettre à jour**, tes données sont conservées.
 
 > **Important : clé de signature.** Android n'accepte une mise à jour que si elle est signée
-> avec la même clé. Par défaut, l'APK est signé avec la clé de débogage **de ce PC** ; GitHub
-> utilise la même (copie dans le secret `ANDROID_KEYSTORE_BASE64`), ses APK mettent donc l'app à jour.
-> Si tu construis un jour l'APK depuis un autre PC, il faudra désinstaller l'app du téléphone avant
-> (les courses sont dans le cloud : il suffit de se reconnecter). Pour éviter ça, crée une clé personnelle
-> (facultatif, ci-dessous) et garde-la précieusement.
-
-### (Facultatif) Créer une clé de signature personnelle
-1. Dans un terminal (Android Studio fournit `keytool`) :
-   ```powershell
-   & "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -genkey -v -keystore "$env:USERPROFILE\elan-release.jks" -keyalg RSA -keysize 2048 -validity 10000 -alias elan
-   ```
-   Choisir un mot de passe et le noter dans ton gestionnaire de mots de passe.
-2. Créer le fichier `android\key.properties` (ignoré par git) :
-   ```properties
-   storeFile=C:/Users/<ton-nom>/elan-release.jks
-   storePassword=<mot de passe>
-   keyAlias=elan
-   keyPassword=<mot de passe>
-   ```
-3. Désinstaller une dernière fois l'app du téléphone, reconstruire l'APK, réinstaller.
-   Sauvegarder `elan-release.jks` (Proton Drive par exemple) : sans elle, plus de mise à jour possible.
+> avec la même clé. Depuis la version 2.9, ÉLAN a **sa propre clé** (RSA 4096, valable jusqu'en 2054) :
+> - `android/app/elan-release.jks` et son mot de passe dans `android/key.properties`, sur ce PC
+>   (ignorés par git, sauvegardés par Proton Drive avec le dossier du projet) ;
+> - une copie dans les secrets GitHub, pour les APK construits par GitHub.
+>
+> **Garde aussi ces deux fichiers dans ton gestionnaire de mots de passe** : sans eux, plus aucune
+> mise à jour possible (il faudrait désinstaller l'app partout et repartir d'une nouvelle clé).
+>
+> Passage de l'ancienne clé (débogage de ce PC, jusqu'à la 2.8) à la nouvelle : **une seule fois**,
+> synchroniser, désinstaller ÉLAN du téléphone, installer la nouvelle version, se reconnecter.
+> Les courses sont sur le serveur, rien n'est perdu. Les mises à jour suivantes se font par-dessus.

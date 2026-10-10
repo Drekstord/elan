@@ -971,20 +971,14 @@
   "serverBuiltIn": "Serveur ÉLAN",
   "serverBuiltInHint": "Par défaut",
   "serverCustom": "Mon serveur",
-  "serverCustomHint": "Auto-hébergé, par exemple sur un NAS",
+  "serverCustomHint": "Installé chez toi, par exemple sur un NAS",
   "serverAddress": "Adresse du serveur",
   "serverAddressHint": "http://192.168.1.20:8000",
-  "serverKey": "Clé publique",
-  "serverFieldsHelp": "Les deux valeurs sont dans le fichier connexion-app.txt créé lors de l'installation du serveur.",
   "serverPaste": "Coller",
   "serverSave": "Vérifier et enregistrer",
   "serverChecking": "Vérification du serveur…",
   "serverErrorAddress": "Adresse invalide. Exemple : http://192.168.1.20:8000",
   "serverErrorHttp": "Sur Internet, l'adresse doit commencer par https:// (en http, le mot de passe circulerait en clair). http n'est accepté que sur le réseau local ou le VPN.",
-  "serverErrorKey": "Clé publique manquante ou incomplète.",
-  "serverWrongKey": "Le serveur refuse cette clé. Vérifie la clé publique.",
-  "serverNotReady": "Serveur joint, mais sa base n'est pas prête : vérifie que le service « migrations » s'est bien terminé.",
-  "serverNotSupabase": "Cette adresse répond, mais ce n'est pas un serveur ÉLAN. Vérifie le port (8000 par défaut).",
   "serverUnreachable": "Serveur injoignable. Vérifie l'adresse, que le VPN est actif et que le serveur est démarré.",
   "serverLabel": "Serveur : {name}",
   "@serverLabel": {
@@ -994,7 +988,161 @@
       }
     }
   },
+  "autoBackupTitle": "Sauvegarde automatique",
+  "autoBackupHint": "Chaque semaine, une copie des courses (Excel) et des photos et justificatifs dans un dossier de ton choix : Proton Drive, disque externe… Les 8 dernières copies Excel sont gardées.",
+  "autoBackupEnable": "Sauvegarder chaque semaine",
+  "autoBackupFolder": "Dossier : {path}",
+  "@autoBackupFolder": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "autoBackupNoFolder": "Aucun dossier choisi",
+  "autoBackupChoose": "Choisir le dossier",
+  "autoBackupNow": "Sauvegarder maintenant",
+  "autoBackupLast": "Dernière sauvegarde : {date}",
+  "@autoBackupLast": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "autoBackupNever": "Pas encore de sauvegarde",
+  "autoBackupRunning": "Sauvegarde en cours…",
+  "autoBackupCopied": "{count, plural, =0{Aucun nouveau fichier} =1{1 nouveau fichier copié} other{{count} nouveaux fichiers copiés}}",
+  "@autoBackupCopied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "autoBackupMissing": "{count, plural, =1{1 fichier introuvable pour l'instant, réessayé la prochaine fois} other{{count} fichiers introuvables pour l'instant, réessayés la prochaine fois}}",
+  "@autoBackupMissing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "autoBackupError": "Sauvegarde impossible : {error}",
+  "@autoBackupError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "gpxBatchAction": "Importer des fichiers GPX",
+  "gpxBatchTitle": "Import GPX",
+  "gpxBatchDefaultTitle": "Course du {date}",
+  "@gpxBatchDefaultTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "gpxBatchCreated": "{count, plural, =0{Aucune course ajoutée.} =1{1 course ajoutée.} other{{count} courses ajoutées.}}",
+  "@gpxBatchCreated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gpxBatchDuplicates": "{count, plural, =1{1 trace déjà présente, ignorée.} other{{count} traces déjà présentes, ignorées.}}",
+  "@gpxBatchDuplicates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gpxBatchUndated": "{count, plural, =1{1 trace sans date, ignorée.} other{{count} traces sans date, ignorées.}}",
+  "@gpxBatchUndated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gpxBatchUnreadable": "{count, plural, =1{1 fichier illisible.} other{{count} fichiers illisibles.}}",
+  "@gpxBatchUnreadable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gpxBatchHint": "Elles sont rangées en courses officielles : ouvre-les pour compléter le titre, l'association…",
+  "updateAvailable": "ÉLAN {version} est disponible.",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateDownload": "Télécharger",
+  "updateLater": "Plus tard",
+  "updateUpToDate": "Tu as la dernière version.",
+  "updateCheck": "Rechercher une mise à jour",
+  "settingsAbout": "À propos",
+  "settingsVersion": "ÉLAN {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "signInShowPassword": "Afficher le mot de passe",
   "signInHidePassword": "Masquer le mot de passe",
-  "signInForgottenCustom": "Mot de passe oublié ? Il se réinitialise depuis le tableau de bord de ton serveur."
+  "signInForgottenCustom": "Mot de passe oublié ? Le propriétaire du serveur peut t'en donner un nouveau, dans Réglages > Comptes du serveur.",
+  "serverAddressHelp": "C'est l'adresse affichée sur la page d'accueil de ton serveur (bouton « Copier l'adresse »).",
+  "serverNotElan": "Cette adresse répond, mais ce n'est pas un serveur ÉLAN. Vérifie le port (8000 par défaut).",
+  "serverTooRecent": "Ce serveur est plus récent que l'app. Mets l'app à jour, puis réessaie.",
+  "signInIntroCustom": "Connecte-toi avec le compte créé pour toi sur ce serveur.",
+  "firstAccountTitle": "Premier compte",
+  "firstAccountIntro": "Ce serveur est tout neuf. Crée le premier compte : il sera le propriétaire du serveur et pourra ajouter les comptes de ses proches.",
+  "firstAccountButton": "Créer mon compte",
+  "firstAccountTaken": "Ce serveur a déjà un compte. Connecte-toi, ou demande un compte à son propriétaire.",
+  "passwordConfirmLabel": "Confirmer le mot de passe",
+  "passwordMismatch": "Les deux mots de passe sont différents.",
+  "settingsCurrentPassword": "Mot de passe actuel",
+  "settingsWrongCurrentPassword": "Mot de passe actuel incorrect.",
+  "accountsTitle": "Comptes du serveur",
+  "accountsIntro": "Chaque personne a son compte et ne voit que ses propres courses.",
+  "accountsManage": "Gérer les comptes",
+  "accountsOwner": "Propriétaire du serveur",
+  "accountsYou": "Toi",
+  "accountsAdd": "Ajouter un compte",
+  "accountsAddIntro": "Choisis son e-mail et un mot de passe provisoire, puis transmets-les lui. La personne pourra changer son mot de passe dans Réglages.",
+  "accountsCreated": "Compte créé.",
+  "accountsEmailTaken": "Un compte existe déjà avec cette adresse.",
+  "accountsReset": "Donner un nouveau mot de passe",
+  "accountsResetDone": "Mot de passe remplacé.",
+  "accountsDelete": "Supprimer le compte",
+  "accountsDeleteConfirm": "Supprimer le compte {email} ? Ses courses, photos et justificatifs enregistrés sur le serveur seront effacés définitivement.",
+  "@accountsDeleteConfirm": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDeleted": "Compte supprimé.",
+  "accountsError": "Action impossible. Vérifie la connexion au serveur.",
+  "accountsActions": "Actions pour {email}",
+  "@accountsActions": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  }
 }

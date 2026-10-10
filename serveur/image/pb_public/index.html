@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Serveur ÉLAN</title>
+  <style>
+    :root { --fond: #f2ede3; --carte: #fdfbf6; --texte: #17301f; --doux: #55645a; --vert: #386d27; --trait: #d9d2c3; }
+    @media (prefers-color-scheme: dark) {
+      :root { --fond: #101a13; --carte: #17241b; --texte: #f1eee6; --doux: #a9b5ac; --vert: #8fcf6f; --trait: #2c3b30; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px 16px; background: var(--fond); color: var(--texte);
+           font: 17px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { max-width: 620px; margin: 0 auto; }
+    h1 { font-size: 30px; letter-spacing: .06em; margin: 0 0 4px; }
+    h1 + p { color: var(--doux); margin: 0 0 24px; }
+    section { background: var(--carte); border: 1px solid var(--trait); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    h2 { font-size: 15px; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 12px; }
+    .etat { font-size: 20px; font-weight: 700; color: var(--vert); margin: 0 0 6px; }
+    .adresse { display: block; font: 600 19px/1.4 ui-monospace, Consolas, monospace; background: var(--fond);
+               border: 1px solid var(--trait); border-radius: 8px; padding: 12px 14px; margin: 10px 0; word-break: break-all; }
+    button { font: inherit; font-weight: 600; color: var(--carte); background: var(--vert); border: 0; border-radius: 8px;
+             padding: 10px 16px; min-height: 48px; cursor: pointer; }
+    ol { margin: 0; padding-left: 22px; }
+    li { margin-bottom: 8px; }
+    small { color: var(--doux); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>ÉLAN</h1>
+  <p>Serveur personnel</p>
+
+  <section aria-live="polite">
+    <h2>État</h2>
+    <p class="etat" id="etat">Vérification…</p>
+    <p id="detail"></p>
+  </section>
+
+  <section>
+    <h2>Adresse à saisir dans l'app</h2>
+    <code class="adresse" id="adresse"></code>
+    <button type="button" id="copier">Copier l'adresse</button>
+    <p><small>C'est l'adresse de cette page. Elle fonctionne depuis les appareils qui peuvent ouvrir cette page :
+      même réseau Wi-Fi, ou VPN vers chez toi.</small></p>
+  </section>
+
+  <section>
+    <h2>Dans l'app ÉLAN</h2>
+    <ol>
+      <li>Sur l'écran de connexion, touche <strong>Serveur</strong>, tout en bas.</li>
+      <li>Choisis <strong>Mon serveur</strong> et colle l'adresse ci-dessus.</li>
+      <li id="etape-compte">Connecte-toi avec ton e-mail et ton mot de passe.</li>
+    </ol>
+  </section>
+</main>
+<script>
+  const adresse = location.origin;
+  document.getElementById('adresse').textContent = adresse;
+  document.getElementById('copier').addEventListener('click', async (e) => {
+    try { await navigator.clipboard.writeText(adresse); e.target.textContent = 'Adresse copiée'; }
+    catch (_) { e.target.textContent = 'Sélectionne l\'adresse et copie-la'; }
+  });
+  fetch('/api/elan/etat').then((r) => r.json()).then((etat) => {
+    document.getElementById('etat').textContent = '✓ Le serveur fonctionne';
+    if (etat.premierCompte) {
+      document.getElementById('detail').textContent =
+        'Aucun compte pour l\'instant. Le premier compte se crée dans l\'app : il sera le propriétaire du serveur.';
+      document.getElementById('etape-compte').innerHTML =
+        'Choisis ton e-mail et ton mot de passe : <strong>tu crées le premier compte</strong>, propriétaire du serveur.';
+    } else {
+      document.getElementById('detail').textContent =
+        'Les comptes sont créés par le propriétaire du serveur, dans l\'app : Réglages > Comptes du serveur.';
+    }
+  }).catch(() => {
+    document.getElementById('etat').textContent = 'Le serveur ne répond pas correctement';
+    document.getElementById('detail').textContent = 'Redémarre le conteneur, puis recharge cette page.';
+  });
+</script>
+</body>
+</html>

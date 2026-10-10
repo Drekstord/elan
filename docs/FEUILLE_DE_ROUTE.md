@@ -16,10 +16,17 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 | 9 | Types de justificatifs (mail de confirmation, facture, résultat…) | ✅ terminé |
 | 10 | Chiffres qui défilent au lancement | ✅ terminé |
 | 11 | Accessibilité (RGAA) | ✅ terminé (partiellement conforme, voir ACCESSIBILITE.md) |
-| 12 | Serveur auto-hébergé (Docker sur NAS) | ✅ terminé |
+| 12 | Serveur personnel (Docker sur NAS) | ✅ terminé, refait au point 21 |
 | 13 | Choix du serveur dans l'app | ✅ terminé |
-| 14 | Guide d'auto-hébergement | ✅ terminé |
+| 14 | Guide du serveur personnel | ✅ terminé, refait au point 21 |
 | 15 | Installateur Windows (.exe) | ✅ terminé |
+| 16 | Clé de signature Android dédiée | ✅ terminé |
+| 17 | Sauvegarde automatique depuis l'app | ✅ terminé |
+| 18 | Widget Android (prochaine course, km de l'année) | ✅ terminé |
+| 19 | Import de plusieurs GPX d'un coup | ✅ terminé |
+| 20 | Avertissement « nouvelle version disponible » | ✅ terminé |
+| 21 | Serveur personnel refait : un seul conteneur, zéro réglage | ✅ terminé |
+| 22 | Dépôt public sous licence libre (GPL-3.0) | ✅ terminé |
 
 Écartés : objectifs annuels (non souhaités).
 
@@ -35,7 +42,7 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 
 ## 2. Justificatifs (factures d'inscription) ✅
 
-> Prérequis cloud : exécuter une fois `serveur/systeme/migrations/002_justificatifs.sql` (voir [CLOUD.md](CLOUD.md)).
+> Prérequis cloud : exécuter une fois `supabase/002_justificatifs.sql` (voir [CLOUD.md](CLOUD.md)).
 
 - Joindre un ou plusieurs justificatifs (**PDF ou photo**, 10 Mo max) **à une course**, depuis sa fiche ; stockés dans le cloud comme les photos (privés, synchronisés).
 - **Écran « Justificatifs »** (depuis Impact) : tous les justificatifs, chacun rattaché à sa course
@@ -106,29 +113,23 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
   alternatifs, noms des boutons à icône, lecture des graphiques par lecteur d'écran, grands textes
   sans débordement, cibles tactiles suffisantes, animations réductibles, déclaration d'accessibilité.
 
-## 12. Serveur auto-hébergé (Docker sur NAS) ✅
+## 12. Serveur personnel (Docker sur NAS) ✅
 
-- Dossier `serveur` : Supabase réduit à ce qu'utilise ÉLAN (base, comptes, données, fichiers,
-  tableau de bord), un seul port ouvert (8000), inscriptions fermées, aucun e-mail.
-- Base mise à jour toute seule au démarrage (`serveur/systeme/migrations`, chaque fichier une seule fois).
-- Sauvegarde de la base chaque nuit, 14 gardées ; restauration en une commande.
-- Secrets générés par un outil (Windows ou Linux) ; paquet `ELAN-serveur-vX.zip` joint aux releases.
-- Testé de bout en bout sur GitHub à chaque modification : démarrage, comptes, règles d'accès,
-  synchro de l'app, sauvegarde, perte de la base, restauration.
+- Première version : Supabase auto-hébergé (8 conteneurs, un dossier de réglages, des clés à générer
+  et à recopier). Elle fonctionnait mais restait trop complexe pour qui ne connaît pas Docker.
+  **Remplacée par le point 21.**
 
 ## 13. Choix du serveur dans l'app ✅
 
-- Écran de connexion > **Serveur** : serveur ÉLAN (par défaut) ou « Mon serveur » (adresse + clé
-  publique, avec boutons Coller). Le serveur est vérifié avant d'être enregistré, avec un message
-  clair en cas de problème (injoignable, mauvaise clé, base pas prête).
+- Écran de connexion > **Serveur** : serveur ÉLAN (par défaut) ou « Mon serveur ». Le serveur est
+  vérifié avant d'être enregistré, avec un message clair en cas de problème.
 - Le même APK sert à tout le monde ; le serveur en cours est rappelé dans Réglages.
 - http accepté seulement pour une adresse de réseau local ou de VPN ; https obligatoire sur Internet.
+- Depuis le point 21 : une adresse suffit, plus de clé à recopier.
 
-## 14. Guide d'auto-hébergement ✅
+## 14. Guide du serveur personnel ✅
 
-- [serveur/LISEZMOI.md](../serveur/LISEZMOI.md), aussi dans le paquet : préparation,
-  installation (Synology ou SSH), comptes, branchement de l'app, accès hors de chez soi,
-  sauvegardes, mises à jour, dépannage.
+- [serveur/LISEZMOI.md](../serveur/LISEZMOI.md). Réécrit au point 21.
 
 ## 15. Installateur Windows (.exe) ✅
 
@@ -139,3 +140,80 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 - Bibliothèques C++ de Microsoft incluses : fonctionne sur un PC neuf.
 - Essayé par GitHub à chaque construction : installation silencieuse, lancement, désinstallation.
 - Non signé : avertissement de Windows au premier lancement (« Exécuter quand même »).
+
+## 16. Clé de signature Android dédiée ✅
+
+- Remplacer la clé de débogage de ce PC par une clé propre à ÉLAN, gardée en lieu sûr.
+- À faire avant que d'autres personnes installent l'app : changer de clé oblige à désinstaller
+  l'app une fois (les données sont sur le serveur : il suffit de se reconnecter).
+- Fait : clé RSA 4096 valable jusqu'en 2054, sur ce PC (ignorée par git) et dans les secrets GitHub ;
+  détails et passage à la nouvelle clé dans [INSTALLATION.md](INSTALLATION.md).
+
+## 17. Sauvegarde automatique depuis l'app ✅
+
+- Chaque semaine (réglable), l'app enregistre toute seule dans un dossier choisi : les courses
+  (Excel) et une copie des photos et justificatifs. Les dernières copies sont gardées.
+- Complète l'offre gratuite de Supabase, sans sauvegarde restaurable soi-même.
+- Fait, sur ordinateur (Réglages > Sauvegarde automatique) : dossier `ELAN` avec un classeur daté par
+  semaine (8 gardés) et `Photos et justificatifs/<année>/` aux noms lisibles, chaque fichier copié une
+  seule fois. Vérifiée au démarrage, au retour dans l'app et toutes les 6 h. Sur Android, Android
+  limite l'écriture dans un dossier choisi : l'ordinateur, synchronisé, s'en charge.
+
+## 18. Widget Android ✅
+
+- Sur l'écran d'accueil du téléphone : la prochaine course avec son compte à rebours (J-12) et les
+  kilomètres de l'année. Un appui ouvre l'app. (Le compte à rebours existe déjà dans l'app.)
+- Fait : widget 3 × 2 redimensionnable, aux couleurs du bandeau. L'app lui envoie les données à
+  chaque changement ; le compte à rebours se recalcule seul chaque nuit. Lecteur d'écran : une
+  phrase complète (« Prochaine course : …, dans 12 jours. 1 211 km en 2026. »). Ajout : appui long
+  sur l'écran d'accueil > Widgets > ÉLAN.
+
+## 19. Import de plusieurs GPX d'un coup ✅
+
+- Choisir plusieurs fichiers GPX (export Garmin, Strava…) : une course par fichier (date, distance,
+  durée, dénivelé), les doublons déjà présents sont ignorés, résumé à la fin.
+- Fait : bouton « Importer des fichiers GPX » en haut de l'écran Courses. Doublon = même jour et
+  distance à 3 % près (déjà dans l'app ou deux fois dans le lot). Traces sans heure et fichiers
+  illisibles comptés dans le résumé. Sans nom dans le GPX : « Course du 1 mai 2026 ».
+
+## 20. Avertissement « nouvelle version disponible » ✅
+
+- Au lancement (une fois par jour au plus), l'app regarde la dernière version publiée sur GitHub
+  (dépôt public) et propose de la télécharger si elle est plus récente.
+- Fait : bandeau en haut de l'écran, « Télécharger » ouvre le bon fichier (APK sur Android,
+  installateur sur Windows), « Plus tard » ne repropose plus cette version d'elle-même.
+  Réglages > À propos : version installée et « Rechercher une mise à jour ».
+
+## 21. Serveur personnel refait : un seul conteneur, zéro réglage ✅
+
+> Retour des premières personnes à qui le serveur a été remis : trop de fichiers, trop de pièces,
+> incompréhensible sans connaître Docker.
+
+- **Un seul conteneur** (PocketBase réglé pour ÉLAN, image `ghcr.io/drekstord/elan-serveur`) à la
+  place des 8 de Supabase : moins de 100 Mo de mémoire, NAS modestes et Raspberry Pi compris.
+- **Un seul fichier à déposer** (`docker-compose.yml`, une dizaine de lignes) : plus de dossier de
+  réglages, plus de script de préparation, plus de clés.
+- **Dans l'app, une adresse suffit.** Sur un serveur tout neuf, l'app propose de créer le premier
+  compte, propriétaire du serveur ; il ajoute ensuite ses proches dans Réglages > Gérer les comptes
+  (ajout, nouveau mot de passe, suppression). Chacun ne voit que ses courses.
+- **Page d'accueil du serveur** (`http://nas:8000`) : « le serveur fonctionne », l'adresse à saisir
+  dans l'app et les étapes suivantes.
+- **Données dans un seul dossier** (`donnees`), copie complète chaque nuit (7 gardées).
+- **Guide réécrit pour débutants** : vocabulaire, chaque écran de Synology, ce qu'on doit voir à
+  chaque étape, tableau de dépannage, questions fréquentes. Fourni en page web dans le paquet.
+- Le serveur ÉLAN en ligne (Supabase) est inchangé ; l'app parle aux deux par une couche commune
+  (`lib/core/backend`). Les courses sont stockées telles que l'app les envoie : un champ ajouté dans
+  l'app ne demande pas de mise à jour des serveurs personnels.
+- Testé de bout en bout sur GitHub à chaque modification, avec le vrai code de l'app : premier
+  compte, comptes des proches, cloisonnement, synchro (la plus récente gagne, envois groupés),
+  fichiers, mots de passe, redémarrage, sauvegarde, suppression d'un compte.
+
+## 22. Dépôt public sous licence libre (GPL-3.0) ✅
+
+- Le code est public sur github.com/Drekstord/elan, sous licence GNU GPL version 3 : chacun peut
+  l'utiliser, le modifier et le redistribuer, à condition que sa version reste libre.
+- Téléchargements sans compte (APK, installateur Windows, paquet du serveur) ; l'image Docker du
+  serveur est publique ; l'avertissement « nouvelle version » de l'app (point 20) fonctionne.
+- Vie privée : le dépôt public ne reçoit qu'un commit par version, jamais l'historique de travail
+  (gardé dans un dépôt privé). `scripts/publier.sh` fait la publication et refuse de partir si le
+  code contient une adresse de serveur, une clé ou un fichier personnel.

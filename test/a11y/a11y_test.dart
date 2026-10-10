@@ -7,6 +7,7 @@
 //   - textes agrandis à 200 % sans débordement ni erreur de mise en page.
 import 'package:app_course/app/theme/app_theme.dart';
 import 'package:app_course/app/widgets/count_up.dart';
+import 'package:app_course/features/auth/data/auth_repository.dart';
 import 'package:app_course/features/auth/presentation/server_screen.dart';
 import 'package:app_course/features/auth/presentation/sign_in_screen.dart';
 import 'package:app_course/features/courses/domain/course.dart';
@@ -20,6 +21,7 @@ import 'package:app_course/features/impact/presentation/impact_screen.dart';
 import 'package:app_course/features/records/presentation/gallery_screen.dart';
 import 'package:app_course/features/records/presentation/records_screen.dart';
 import 'package:app_course/features/report/presentation/report_screen.dart';
+import 'package:app_course/features/settings/presentation/server_accounts_screen.dart';
 import 'package:app_course/features/settings/presentation/settings_screen.dart';
 import 'package:app_course/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +30,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/sync_engine_test.dart' show FakeServer;
 import '../helpers.dart';
 
 final _courses = [
@@ -79,7 +82,13 @@ final _courses = [
     impactMetric: ImpactMetric.trees,
     impactQuantity: 4,
   ),
-  Course(id: 'lyon', title: 'Marathon de Mont-Fictif', isPlanned: true, raceDate: calendarDate(2026, 10, 5), distanceM: 42195),
+  Course(
+    id: 'lyon',
+    title: 'Marathon de Mont-Fictif',
+    isPlanned: true,
+    raceDate: calendarDate(2026, 10, 5),
+    distanceM: 42195,
+  ),
 ];
 
 final _screens = <String, String>{
@@ -95,7 +104,9 @@ final _screens = <String, String>{
   'Galerie': '/records/galerie',
   'Réglages': '/reglages',
   'Connexion': '/connexion',
+  'Premier compte': '/premier-compte',
   'Serveur': '/serveur',
+  'Comptes du serveur': '/comptes',
 };
 
 GoRouter _router(String location) => GoRouter(
@@ -132,6 +143,17 @@ GoRouter _router(String location) => GoRouter(
     ),
     GoRoute(path: '/reglages', builder: (_, _) => const SettingsScreen()),
     GoRoute(path: '/connexion', builder: (_, _) => const SignInScreen()),
+    // Serveur personnel tout neuf : création du premier compte, propriétaire.
+    GoRoute(
+      path: '/premier-compte',
+      builder: (_, _) => ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(AuthRepository(FakeBackend(FakeServer(), firstAccount: true))),
+        ],
+        child: const SignInScreen(),
+      ),
+    ),
+    GoRoute(path: '/comptes', builder: (_, _) => const ServerAccountsScreen()),
     GoRoute(
       path: '/serveur',
       builder: (_, _) => ServerScreen(

@@ -5,8 +5,7 @@ import 'package:app_course/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const _builtIn = ServerConfig(url: 'https://exemple.supabase.co', key: 'cle-integree-de-test-assez-longue', builtIn: true);
-const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.cle.publique';
+const _builtIn = ServerConfig.onlineForTest('https://exemple.supabase.co');
 
 void main() {
   late List<ServerConfig?> saved;
@@ -34,46 +33,54 @@ void main() {
     );
   }
 
-  Future<void> fillAndSave(WidgetTester tester, String address, String key) async {
+  Future<void> fillAndSave(WidgetTester tester, String address) async {
     await tester.tap(find.text('Mon serveur'));
     await tester.pump();
     await tester.enterText(find.widgetWithText(TextField, 'Adresse du serveur'), address);
-    await tester.enterText(find.widgetWithText(TextField, 'Clé publique'), key);
     await tester.ensureVisible(find.text('Vérifier et enregistrer'));
     await tester.tap(find.text('Vérifier et enregistrer'));
     await tester.pump();
   }
 
-  testWidgets('serveur ÉLAN par défaut, champs cachés', (tester) async {
+  testWidgets("serveur ÉLAN par défaut, champ d'adresse caché", (tester) async {
     await show(tester);
     expect(find.text('Serveur ÉLAN'), findsOneWidget);
     expect(find.widgetWithText(TextField, 'Adresse du serveur'), findsNothing);
   });
 
-  testWidgets('serveur personnel vérifié puis enregistré, adresse nettoyée', (tester) async {
+  testWidgets('serveur personnel : une adresse suffit, vérifiée puis enregistrée, nettoyée', (tester) async {
     await show(tester);
-    await fillAndSave(tester, ' 192.168.1.20:8000/ ', '$_key\n');
-    expect(checked, [const ServerConfig(url: 'http://192.168.1.20:8000', key: _key)]);
-    expect(saved, [const ServerConfig(url: 'http://192.168.1.20:8000', key: _key)]);
+    await fillAndSave(tester, ' 192.168.1.20:8000/ ');
+    // Un seul champ : plus de clé à recopier.
+    expect(find.byType(TextField), findsOneWidget);
+    expect(checked, [const ServerConfig.personal('http://192.168.1.20:8000')]);
+    expect(saved, [const ServerConfig.personal('http://192.168.1.20:8000')]);
   });
 
   testWidgets('http sur Internet refusé avant tout contact', (tester) async {
     await show(tester);
-    await fillAndSave(tester, 'http://elan.exemple.fr', _key);
+    await fillAndSave(tester, 'http://elan.exemple.fr');
     expect(find.textContaining('https://'), findsOneWidget);
     expect(checked, isEmpty);
     expect(saved, isEmpty);
   });
 
-  testWidgets('clé refusée par le serveur : rien enregistré, message clair', (tester) async {
-    await show(tester, result: ServerCheck.wrongKey);
-    await fillAndSave(tester, 'http://nas.local:8000', _key);
-    expect(find.text('Le serveur refuse cette clé. Vérifie la clé publique.'), findsOneWidget);
+  testWidgets("l'adresse ne mène pas à un serveur ÉLAN : rien enregistré, message clair", (tester) async {
+    await show(tester, result: ServerCheck.notElan);
+    await fillAndSave(tester, 'http://nas.local:5000');
+    expect(find.textContaining("ce n'est pas un serveur ÉLAN"), findsOneWidget);
+    expect(saved, isEmpty);
+  });
+
+  testWidgets('serveur injoignable : rien enregistré, pistes données', (tester) async {
+    await show(tester, result: ServerCheck.unreachable);
+    await fillAndSave(tester, 'http://nas.local:8000');
+    expect(find.textContaining('Serveur injoignable'), findsOneWidget);
     expect(saved, isEmpty);
   });
 
   testWidgets('retour au serveur ÉLAN depuis un serveur personnel', (tester) async {
-    await show(tester, current: const ServerConfig(url: 'http://nas.local:8000', key: _key));
+    await show(tester, current: const ServerConfig.personal('http://nas.local:8000'));
     expect(find.widgetWithText(TextField, 'Adresse du serveur'), findsOneWidget);
     await tester.tap(find.text('Serveur ÉLAN'));
     await tester.pump();

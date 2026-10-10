@@ -20,6 +20,28 @@ class FileImport {
     return GpxParser.parse(content, fallbackName: picked.name.replaceAll(RegExp(r'\.gpx$', caseSensitive: false), ''));
   }
 
+  /// Plusieurs traces GPX d'un coup : les lisibles, et le nombre de fichiers illisibles.
+  static Future<({List<GpxSummary> tracks, int unreadable})?> pickGpxFiles({required String dialogTitle}) async {
+    final picked = await FilePicker.pickFiles(
+      dialogTitle: dialogTitle,
+      type: FileType.custom,
+      allowedExtensions: const ['gpx'],
+    );
+    if (picked.isEmpty) return null;
+    final tracks = <GpxSummary>[];
+    var unreadable = 0;
+    for (final file in picked) {
+      try {
+        final path = file.path;
+        final content = path != null ? await File(path).readAsString() : await file.xFile.readAsString();
+        tracks.add(GpxParser.parse(content, fallbackName: file.name.replaceAll(RegExp(r'\.gpx$', caseSensitive: false), '')));
+      } catch (_) {
+        unreadable++;
+      }
+    }
+    return (tracks: tracks, unreadable: unreadable);
+  }
+
   /// Justificatif choisi par l'utilisateur (PDF ou image) ; null s'il annule.
   static Future<({File file, String name})?> pickDocument({required String dialogTitle}) async {
     final picked = await FilePicker.pickFile(

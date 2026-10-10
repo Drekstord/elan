@@ -1,7 +1,8 @@
 # Fichiers d'une version, construits à chaque étiquette (v2.8.0…) et joints à la release :
 #   ELAN-vX.apk                    app Android
 #   ELAN-Installation-vX.exe       installateur Windows (un seul fichier)
-#   ELAN-serveur-vX.zip            serveur auto-hébergé (dossier serveur/)
+#   ELAN-serveur-vX.zip            serveur personnel : le guide et le dossier « elan » à déposer sur le NAS
+# et l'image Docker du serveur, publiée sur ghcr.io/drekstord/elan-serveur (NAS Intel/AMD et ARM).
 # Aussi à la main, sans release : onglet Actions > Version > Run workflow (fichiers dans l'onglet Actions).
 #
 # Secrets du dépôt requis (Settings > Secrets and variables > Actions), voir docs/INSTALLATION.md :
@@ -9,6 +10,8 @@
 #   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
 #                                              clé de signature : la même que celle de l'app déjà installée,
 #                                              sinon Android refuse la mise à jour.
+# Ne tourne que dans le dépôt public Drekstord/elan (voir scripts/publier.sh) : dans le dépôt de
+# travail privé, les tâches sont ignorées.
 name: Version
 
 on:
@@ -24,6 +27,7 @@ env:
 
 jobs:
   android:
+    if: github.repository == 'Drekstord/elan'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -88,6 +92,7 @@ jobs:
           retention-days: 30
 
   windows:
+    if: github.repository == 'Drekstord/elan'
     runs-on: windows-latest
     timeout-minutes: 40
     defaults:
@@ -158,18 +163,70 @@ jobs:
           path: ELAN-Installation-${{ github.ref_name }}.exe
           retention-days: 30
 
+  # Image Docker du serveur personnel. Étiquettes : « 1 » (celle du docker-compose.yml fourni :
+  # version du protocole entre l'app et le serveur), le numéro de version et « latest ».
+  # Le test complet du serveur est fait par le workflow « Serveur ÉLAN ».
+  image-serveur:
+    if: github.repository == 'Drekstord/elan'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-qemu-action@v4
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Numéro de version
+        id: version
+        run: |
+          numero=$(sed -nE 's/^version: *([0-9.]+).*/\1/p' pubspec.yaml)
+          echo "numero=$numero" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: serveur/image
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: ${{ startsWith(github.ref, 'refs/tags/') }}
+          tags: |
+            ghcr.io/drekstord/elan-serveur:1
+            ghcr.io/drekstord/elan-serveur:${{ steps.version.outputs.numero }}
+            ghcr.io/drekstord/elan-serveur:latest
+
   publication:
-    needs: [android, windows]
+    needs: [android, windows, image-serveur]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - name: Paquet du serveur auto-hébergé (NAS)
+      # Ce que reçoit la personne qui installe le serveur : le guide (une page à ouvrir dans le
+      # navigateur) et le dossier « elan » à déposer tel quel sur le NAS.
+      - name: Paquet du serveur personnel (NAS)
         run: |
-          mkdir paquet
-          cp -r serveur paquet/elan-serveur
-          rm paquet/elan-serveur/systeme/import_v1_cloud.sql  # propre au serveur en ligne d'origine
-          (cd paquet && zip -qr "../ELAN-serveur-${GITHUB_REF_NAME}.zip" elan-serveur)
+          paquet="paquet/ELAN-serveur-${GITHUB_REF_NAME}"
+          mkdir -p "$paquet/elan/donnees"
+          cp serveur/docker-compose.yml "$paquet/elan/"
+          printf '%s\r\n' \
+            "Ce dossier contient les données de ton serveur ÉLAN : comptes, courses, photos, justificatifs." \
+            "Ne supprime et ne modifie rien ici. Pense à inclure ce dossier dans la sauvegarde de ton NAS." \
+            > "$paquet/elan/donnees/A LIRE.txt"
+          docker run --rm -v "$PWD:/data" pandoc/core:latest serveur/LISEZMOI.md \
+            --standalone --embed-resources --from gfm --to html5 \
+            --metadata lang=fr --metadata pagetitle="Guide du serveur ÉLAN" \
+            --include-in-header .github/scripts/guide-style.html \
+            --output "$paquet/Guide du serveur ELAN.html"
+          (cd paquet && zip -qr "../ELAN-serveur-${GITHUB_REF_NAME}.zip" .)
+          unzip -l "ELAN-serveur-${GITHUB_REF_NAME}.zip"
 
       - uses: actions/download-artifact@v8
         with:

@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -12,8 +13,12 @@ import '../../../l10n/app_localizations.dart';
 import '../../../app/widgets/image_export.dart';
 import '../../courses/domain/course.dart';
 import '../backup.dart';
+import '../auto_backup.dart';
+import '../../updates/update_banner.dart';
+import '../../updates/update_check.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/server_screen.dart';
+import 'server_accounts_screen.dart';
 import '../../reminders/reminder_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -31,6 +36,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: Space.md),
           const _BackupCard(),
           const SizedBox(height: Space.md),
+          if (supportsAutoBackup) ...[const _AutoBackupCard(), const SizedBox(height: Space.md)],
           const _AccountCard(),
           const SizedBox(height: Space.md),
           Card(
@@ -77,6 +83,8 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
+          const SizedBox(height: Space.md),
+          const _AboutCard(),
         ],
       ),
     );
@@ -139,6 +147,8 @@ class _AccountCard extends ConsumerWidget {
 
   Future<void> _changePassword(BuildContext context, WidgetRef ref) async {
     final t = AppLocalizations.of(context);
+    final auth = ref.read(authRepositoryProvider);
+    final current = TextEditingController();
     final controller = TextEditingController();
     String? error;
     final changed = await showDialog<bool>(
@@ -146,11 +156,28 @@ class _AccountCard extends ConsumerWidget {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
           title: Text(t.settingsChangePassword),
-          content: TextField(
-            controller: controller,
-            obscureText: true,
-            autofocus: true,
-            decoration: InputDecoration(labelText: t.settingsNewPassword, errorText: error),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Un serveur personnel demande le mot de passe actuel.
+                if (auth.needsCurrentPassword) ...[
+                  TextField(
+                    controller: current,
+                    obscureText: true,
+                    autofocus: true,
+                    decoration: InputDecoration(labelText: t.settingsCurrentPassword),
+                  ),
+                  const SizedBox(height: Space.md),
+                ],
+                TextField(
+                  controller: controller,
+                  obscureText: true,
+                  autofocus: !auth.needsCurrentPassword,
+                  decoration: InputDecoration(labelText: t.settingsNewPassword, errorText: error, errorMaxLines: 3),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
@@ -158,10 +185,17 @@ class _AccountCard extends ConsumerWidget {
               onPressed: () async {
                 if (controller.text.length < 8) return setState(() => error = t.settingsPasswordTooShort);
                 try {
-                  await ref.read(authRepositoryProvider).changePassword(controller.text);
+                  await auth.changePassword(controller.text, current: current.text);
                   if (ctx.mounted) Navigator.pop(ctx, true);
                 } on AuthError catch (e) {
-                  setState(() => error = e.detail ?? t.signInOffline);
+                  setState(
+                    () => error = switch (e.reason) {
+                      AuthFailure.wrongCredentials => t.settingsWrongCurrentPassword,
+                      AuthFailure.weakPassword => t.settingsPasswordTooShort,
+                      AuthFailure.rateLimited => t.signInRateLimited,
+                      _ => e.detail ?? t.signInOffline,
+                    },
+                  );
                 }
               },
               child: Text(t.save),
@@ -170,6 +204,7 @@ class _AccountCard extends ConsumerWidget {
         ),
       ),
     );
+    current.dispose();
     controller.dispose();
     if (changed == true && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.settingsPasswordChanged)));
@@ -221,6 +256,15 @@ class _AccountCard extends ConsumerWidget {
                   icon: const Icon(Icons.key_outlined),
                   label: Text(t.settingsChangePassword),
                 ),
+                // Propriétaire d'un serveur personnel : comptes de ses proches.
+                if (ref.watch(serverAccountsProvider) != null)
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const ServerAccountsScreen()),
+                    ),
+                    icon: const Icon(Icons.group_outlined),
+                    label: Text(t.accountsManage),
+                  ),
                 OutlinedButton.icon(
                   onPressed: () => _signOut(context, ref),
                   icon: const Icon(Icons.logout),
@@ -323,6 +367,110 @@ class _BackupCard extends ConsumerWidget {
                   label: Text(t.backupCsv),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Sauvegarde automatique (ordinateur) : activation, dossier, dernière copie, copie immédiate.
+class _AutoBackupCard extends ConsumerWidget {
+  const _AutoBackupCard();
+
+  Future<void> _chooseFolder(WidgetRef ref, String title) async {
+    final folder = await FilePicker.getDirectoryPath(dialogTitle: title);
+    if (folder != null) await ref.read(autoBackupProvider.notifier).setFolder(folder);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final state = ref.watch(autoBackupProvider);
+    final controller = ref.read(autoBackupProvider.notifier);
+    final result = state.result;
+    final last = state.last;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(Space.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.autoBackupTitle, style: theme.textTheme.titleMedium),
+            const SizedBox(height: Space.xs),
+            Text(t.autoBackupHint, style: theme.textTheme.bodySmall),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(t.autoBackupEnable),
+              value: state.enabled,
+              onChanged: controller.setEnabled,
+            ),
+            Text(state.folder == null ? t.autoBackupNoFolder : t.autoBackupFolder(state.folder!)),
+            const SizedBox(height: Space.xs),
+            Text(
+              state.running
+                  ? t.autoBackupRunning
+                  : last == null
+                  ? t.autoBackupNever
+                  : t.autoBackupLast(DateFormat('d MMM y, HH:mm', 'fr').format(last)),
+              style: theme.textTheme.bodySmall,
+            ),
+            if (result != null && !state.running) ...[
+              Text(t.autoBackupCopied(result.copied), style: theme.textTheme.bodySmall),
+              if (result.missing > 0) Text(t.autoBackupMissing(result.missing), style: theme.textTheme.bodySmall),
+            ],
+            if (state.error case final error?)
+              Text(
+                t.autoBackupError(error),
+                style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600),
+              ),
+            const SizedBox(height: Space.md),
+            Wrap(
+              spacing: Space.sm,
+              runSpacing: Space.sm,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => _chooseFolder(ref, t.autoBackupChoose),
+                  icon: const Icon(Icons.folder_open_outlined),
+                  label: Text(t.autoBackupChoose),
+                ),
+                FilledButton.icon(
+                  onPressed: state.folder == null || state.running ? null : controller.runNow,
+                  icon: const Icon(Icons.backup_outlined),
+                  label: Text(t.autoBackupNow),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Version installée et recherche d'une mise à jour.
+class _AboutCard extends ConsumerWidget {
+  const _AboutCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
+    final version = ref.watch(appVersionProvider).value;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(Space.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.settingsAbout, style: Theme.of(context).textTheme.titleMedium),
+            if (version != null) ...[const SizedBox(height: Space.xs), Text(t.settingsVersion(version))],
+            const SizedBox(height: Space.md),
+            OutlinedButton.icon(
+              onPressed: () => checkForUpdate(context, ref, manual: true),
+              icon: const Icon(Icons.system_update_outlined),
+              label: Text(t.updateCheck),
             ),
           ],
         ),

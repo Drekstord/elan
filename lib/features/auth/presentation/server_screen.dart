@@ -5,7 +5,7 @@ import '../../../app/theme/tokens.dart';
 import '../../../core/server/server_config.dart';
 import '../../../l10n/app_localizations.dart';
 
-/// Choix du serveur : celui d'ÉLAN (intégré) ou un serveur personnel (adresse + clé publique).
+/// Choix du serveur : celui d'ÉLAN (intégré) ou un serveur personnel, désigné par son adresse.
 /// Le serveur personnel est vérifié avant d'être enregistré.
 class ServerScreen extends StatefulWidget {
   /// Serveur en cours (null au tout premier lancement sans serveur intégré).
@@ -35,20 +35,18 @@ class ServerScreen extends StatefulWidget {
 class _ServerScreenState extends State<ServerScreen> {
   late bool _custom = widget.builtIn == null || !(widget.current?.builtIn ?? true);
   late final _address = TextEditingController(text: _custom ? widget.current?.url : null);
-  late final _key = TextEditingController(text: _custom ? widget.current?.key : null);
   bool _busy = false;
   String? _error;
 
   @override
   void dispose() {
     _address.dispose();
-    _key.dispose();
     super.dispose();
   }
 
-  Future<void> _paste(TextEditingController controller) async {
+  Future<void> _paste() async {
     final text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
-    if (text != null) controller.text = text.trim();
+    if (text != null) _address.text = text.trim();
   }
 
   Future<void> _save() async {
@@ -60,16 +58,14 @@ class _ServerScreenState extends State<ServerScreen> {
     }
 
     final url = normalizeServerAddress(_address.text);
-    final key = normalizeServerKey(_key.text);
-    final addressError = validateServerAddress(url);
-    final String? error = switch (addressError) {
+    final String? error = switch (validateServerAddress(url)) {
       ServerAddressError.invalid => t.serverErrorAddress,
       ServerAddressError.httpOnInternet => t.serverErrorHttp,
-      null => isPlausibleServerKey(key) ? null : t.serverErrorKey,
+      null => null,
     };
     if (error != null) return setState(() => _error = error);
 
-    final server = ServerConfig(url: url, key: key);
+    final server = ServerConfig.personal(url);
     if (server == widget.current) return Navigator.of(context).pop();
     setState(() {
       _busy = true;
@@ -81,9 +77,8 @@ class _ServerScreenState extends State<ServerScreen> {
       return setState(() {
         _busy = false;
         _error = switch (result) {
-          ServerCheck.wrongKey => t.serverWrongKey,
-          ServerCheck.notReady => t.serverNotReady,
-          ServerCheck.notSupabase => t.serverNotSupabase,
+          ServerCheck.tooRecent => t.serverTooRecent,
+          ServerCheck.notElan => t.serverNotElan,
           _ => t.serverUnreachable,
         };
       });
@@ -140,7 +135,7 @@ class _ServerScreenState extends State<ServerScreen> {
                       enabled: !_busy,
                       keyboardType: TextInputType.url,
                       autocorrect: false,
-                      textInputAction: TextInputAction.next,
+                      onSubmitted: (_) => _save(),
                       decoration: InputDecoration(
                         labelText: t.serverAddress,
                         hintText: t.serverAddressHint,
@@ -148,31 +143,12 @@ class _ServerScreenState extends State<ServerScreen> {
                         suffixIcon: IconButton(
                           tooltip: t.serverPaste,
                           icon: const Icon(Icons.content_paste),
-                          onPressed: _busy ? null : () => _paste(_address),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: Space.md),
-                    TextField(
-                      controller: _key,
-                      enabled: !_busy,
-                      autocorrect: false,
-                      enableSuggestions: false,
-                      minLines: 1,
-                      maxLines: 4,
-                      style: theme.textTheme.bodySmall,
-                      decoration: InputDecoration(
-                        labelText: t.serverKey,
-                        prefixIcon: const Icon(Icons.key_outlined),
-                        suffixIcon: IconButton(
-                          tooltip: t.serverPaste,
-                          icon: const Icon(Icons.content_paste),
-                          onPressed: _busy ? null : () => _paste(_key),
+                          onPressed: _busy ? null : _paste,
                         ),
                       ),
                     ),
                     const SizedBox(height: Space.sm),
-                    Text(t.serverFieldsHelp, style: theme.textTheme.bodySmall),
+                    Text(t.serverAddressHelp, style: theme.textTheme.bodySmall),
                   ],
                   if (_error != null) ...[
                     const SizedBox(height: Space.md),

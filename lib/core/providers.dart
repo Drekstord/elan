@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../features/courses/data/course_repository.dart';
 import '../features/courses/domain/course.dart';
+import 'backend/backend.dart';
 import 'database/database.dart';
 import 'legacy/legacy_import.dart';
 import 'media/media_store.dart';
@@ -20,14 +20,13 @@ import 'sync/sync_engine.dart';
 /// Dossier de données de l'application, résolu dans `main` avant le démarrage.
 final appDirectoryProvider = Provider<Directory>((ref) => throw UnimplementedError('appDirectoryProvider non fourni'));
 
-final supabaseProvider = Provider<SupabaseClient>((ref) => Supabase.instance.client);
+/// Serveur auquel l'app est reliée, ouvert par la racine de l'app (app/server_root.dart).
+final backendProvider = Provider<Backend>((ref) => throw UnimplementedError('backendProvider non fourni'));
 
-final currentUserProvider = StreamProvider<User?>((ref) async* {
-  final auth = ref.watch(supabaseProvider).auth;
-  yield auth.currentUser;
-  await for (final event in auth.onAuthStateChange) {
-    yield event.session?.user;
-  }
+final currentUserProvider = StreamProvider<BackendUser?>((ref) async* {
+  final backend = ref.watch(backendProvider);
+  yield backend.currentUser;
+  yield* backend.userChanges;
 });
 
 final userIdProvider = Provider<String?>((ref) => ref.watch(currentUserProvider).value?.id);
@@ -48,7 +47,7 @@ final mediaStoreProvider = Provider<MediaStore>(
   (ref) => MediaStore(Directory(p.join(ref.watch(appDirectoryProvider).path, 'media')), _requireUserId(ref)),
 );
 
-final remoteGatewayProvider = Provider<RemoteGateway>((ref) => SupabaseGateway(ref.watch(supabaseProvider)));
+final remoteGatewayProvider = Provider<RemoteGateway>((ref) => ref.watch(backendProvider).gateway);
 
 final syncEngineProvider = Provider<SyncEngine>(
   (ref) =>

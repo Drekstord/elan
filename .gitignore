@@ -59,7 +59,5 @@ app.*.map.json
 # Copies de conflit créées par la synchronisation Proton Drive
 *Edit conflict*
 
-# Serveur auto-hébergé : secrets et données (créés sur la machine qui l'héberge)
-/serveur/.env
-/serveur/connexion-app.txt
+# Serveur ÉLAN : données créées par un essai local
 /serveur/donnees/

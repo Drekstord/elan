@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:app_course/app/theme/app_theme.dart';
+import 'package:app_course/core/backend/backend.dart';
 import 'package:app_course/core/database/database.dart';
 import 'package:app_course/core/media/media_store.dart';
 import 'package:app_course/core/providers.dart';
 import 'package:app_course/core/server/server_config.dart';
+import 'package:app_course/core/sync/remote_gateway.dart';
 import 'package:app_course/features/courses/courses_providers.dart';
 import 'package:app_course/features/courses/domain/course.dart';
 import 'package:app_course/features/courses/presentation/course_detail_screen.dart';
@@ -22,10 +24,73 @@ import 'core/sync_engine_test.dart' show FakeServer;
 
 /// Serveur personnel en cours (serveur intégré disponible), pour les écrans qui l'affichent.
 final testServerChoice = ServerChoice(
-  current: const ServerConfig(url: 'http://192.168.1.20:8000', key: 'cle-publique-de-test-assez-longue'),
-  builtIn: const ServerConfig(url: 'https://exemple.supabase.co', key: 'cle-integree-de-test-assez-longue', builtIn: true),
+  current: const ServerConfig.personal('http://192.168.1.20:8000'),
+  builtIn: const ServerConfig.onlineForTest('https://exemple.supabase.co'),
   switchTo: (_) async {},
 );
+
+/// Faux serveur personnel : le compte de test en est le propriétaire, avec un proche.
+class FakeBackend implements Backend, ServerAccounts {
+  final RemoteGateway _gateway;
+
+  /// Serveur tout neuf : l'écran de connexion propose de créer le premier compte.
+  final bool firstAccount;
+
+  final List<ServerAccount> people = [
+    const ServerAccount(id: 'user-1', email: 'coureuse@exemple.fr', isOwner: true),
+    const ServerAccount(id: 'user-2', email: 'proche@exemple.fr', isOwner: false),
+  ];
+
+  FakeBackend(this._gateway, {this.firstAccount = false});
+
+  @override
+  BackendUser? get currentUser => const BackendUser(id: 'user-1', email: 'coureuse@exemple.fr', isOwner: true);
+
+  @override
+  Stream<BackendUser?> get userChanges => const Stream.empty();
+
+  @override
+  RemoteGateway get gateway => _gateway;
+
+  @override
+  Future<void> signIn(String email, String password) async {}
+
+  @override
+  Future<void> signOut() async {}
+
+  @override
+  bool get needsCurrentPassword => true;
+
+  @override
+  Future<void> changePassword(String newPassword, {String? current}) async {}
+
+  @override
+  Future<bool> needsFirstAccount() async => firstAccount;
+
+  @override
+  Future<void> createFirstAccount(String email, String password) async {}
+
+  @override
+  ServerAccounts? get accounts => this;
+
+  @override
+  Future<void> dispose() async {}
+
+  @override
+  Future<List<ServerAccount>> list() async => List.of(people);
+
+  @override
+  Future<void> create(String email, String password) async {
+    if (people.any((a) => a.email == email)) throw const AuthError(AuthFailure.emailTaken);
+    people.add(ServerAccount(id: 'user-${people.length + 1}', email: email, isOwner: false));
+  }
+
+  @override
+  Future<void> resetPassword(String accountId, String newPassword) async {}
+
+  @override
+  Future<void> delete(String accountId) async => people.removeWhere((a) => a.id == accountId);
+}
 
 /// Date du jour figée pour les tests d'écran.
 final testToday = calendarDate(2026, 10, 8);
@@ -34,8 +99,10 @@ final testToday = calendarDate(2026, 10, 8);
 class TestEnv {
   final AppDatabase db = AppDatabase.inMemory();
   final FakeServer server = FakeServer();
+  late final FakeBackend backend = FakeBackend(server);
   late final ProviderContainer container = ProviderContainer(
     overrides: [
+      backendProvider.overrideWithValue(backend),
       userIdProvider.overrideWithValue('user-1'),
       databaseProvider.overrideWithValue(db),
       mediaStoreProvider.overrideWithValue(MediaStore(Directory.systemTemp.createTempSync('elan_ui'), 'user-1')),

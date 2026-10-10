@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget ÉLAN : couleurs du bandeau de l'app (vert forêt, texte clair, accent vert mousse).
+     Textes d'exemple : aperçu dans la liste des widgets ; remplacés à l'affichage (ElanWidget.kt). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/elan_widget_background"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/widget_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:letterSpacing="0.08"
+        android:text="PROCHAINE COURSE"
+        android:textColor="#C9D2C3"
+        android:textSize="11sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text="Ta prochaine course"
+        android:textColor="#F2EEE4"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:text="J-12"
+        android:textColor="#A8D45E"
+        android:textSize="34sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_km"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="212 km en 2026"
+        android:textColor="#F2EEE4"
+        android:textSize="13sp" />
+</LinearLayout>

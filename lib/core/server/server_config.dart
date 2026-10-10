@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,19 +8,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config.dart';
 
-/// Serveur Supabase utilisé par l'app : celui intégré à la compilation (par défaut)
-/// ou un serveur personnel, par exemple auto-hébergé sur un NAS (dossier serveur du dépôt).
+/// Nature du serveur : elle décide de la façon de lui parler (voir core/backend).
+enum ServerKind {
+  /// Serveur ÉLAN en ligne (Supabase), intégré à la compilation.
+  supabase,
+
+  /// Serveur personnel : le « serveur ÉLAN » du dossier serveur, par exemple sur un NAS.
+  elan,
+}
+
+/// Serveur utilisé par l'app : celui intégré à la compilation (par défaut, [key] requis)
+/// ou un serveur personnel, désigné par sa seule adresse.
 class ServerConfig {
   final String url;
-  final String key;
-  final bool builtIn;
 
-  const ServerConfig({required this.url, required this.key, this.builtIn = false});
+  /// Clé publique du serveur en ligne ; vide pour un serveur personnel.
+  final String key;
+  final ServerKind kind;
+
+  /// Serveur personnel.
+  const ServerConfig.personal(this.url) : key = '', kind = ServerKind.elan;
+
+  const ServerConfig._online({required this.url, required this.key}) : kind = ServerKind.supabase;
 
   /// Serveur fourni à la compilation (config/supabase.json), s'il y en a un.
   static ServerConfig? get compiled => AppConfig.isSupabaseConfigured
-      ? const ServerConfig(url: AppConfig.supabaseUrl, key: AppConfig.supabaseKey, builtIn: true)
+      ? const ServerConfig._online(url: AppConfig.supabaseUrl, key: AppConfig.supabaseKey)
       : null;
+
+  /// Serveur en ligne factice, pour les tests d'écrans.
+  const ServerConfig.onlineForTest(this.url) : key = 'cle-publique-de-test', kind = ServerKind.supabase;
+
+  bool get builtIn => kind == ServerKind.supabase;
 
   /// Adresse courte pour l'affichage : « 192.168.1.20:8000 ».
   String get displayAddress {
@@ -27,19 +47,17 @@ class ServerConfig {
     return uri.hasPort ? '${uri.host}:${uri.port}' : uri.host;
   }
 
-  /// Clé sous laquelle la session est gardée sur l'appareil : une par serveur personnel.
-  /// Null pour le serveur intégré, qui garde la clé par défaut (sessions existantes conservées).
-  String? get sessionStorageKey {
-    if (builtIn) return null;
+  /// Clé sous laquelle la session d'un serveur personnel est gardée sur l'appareil : une par serveur.
+  String get sessionStorageKey {
     final uri = Uri.parse(url);
-    return 'sb-elan-${uri.host}-${uri.port}-auth-token';
+    return 'elan-session-${uri.host}-${uri.port}';
   }
 
   @override
-  bool operator ==(Object other) => other is ServerConfig && other.url == url && other.key == key;
+  bool operator ==(Object other) => other is ServerConfig && other.url == url && other.key == key && other.kind == kind;
 
   @override
-  int get hashCode => Object.hash(url, key);
+  int get hashCode => Object.hash(url, key, kind);
 }
 
 // ---------------------------------------------------------------------
@@ -91,49 +109,71 @@ bool isPrivateHost(String host) {
   return ip.isLoopback || ip.isLinkLocal || (b[0] & 0xfe) == 0xfc; // fc00::/7 : adresses privées
 }
 
-/// Clé saisie, nettoyée (retours à la ligne et espaces d'un copier-coller retirés).
-String normalizeServerKey(String input) => input.replaceAll(RegExp(r'\s'), '');
-
-bool isPlausibleServerKey(String key) => key.length > 20;
-
 // ---------------------------------------------------------------------
 // Vérification avant d'enregistrer
 // ---------------------------------------------------------------------
 
+/// Ce qu'un serveur ÉLAN dit de lui (GET /api/elan/etat).
+class ElanStatus {
+  /// Version du protocole entre l'app et le serveur.
+  final int version;
+
+  /// Serveur tout neuf : le premier compte, propriétaire, se crée depuis l'app.
+  final bool needsFirstAccount;
+
+  const ElanStatus({required this.version, required this.needsFirstAccount});
+}
+
+/// Version du protocole que cette app sait parler.
+const elanProtocolVersion = 1;
+
+/// État du serveur ÉLAN à cette adresse ; null si ce qui répond n'en est pas un.
+/// Lève une exception réseau si rien ne répond.
+Future<ElanStatus?> fetchElanStatus(
+  String url, {
+  http.Client? client,
+  Duration timeout = const Duration(seconds: 8),
+}) async {
+  final c = client ?? http.Client();
+  try {
+    final response = await c.get(Uri.parse('$url/api/elan/etat')).timeout(timeout);
+    if (response.statusCode != 200) return null;
+    final Object? data = jsonDecode(utf8.decode(response.bodyBytes));
+    if (data is! Map || data['serveur'] != 'elan') return null;
+    return ElanStatus(
+      version: (data['version'] as num?)?.toInt() ?? 0,
+      needsFirstAccount: data['premierCompte'] == true,
+    );
+  } on FormatException {
+    return null;
+  } finally {
+    if (client == null) c.close();
+  }
+}
+
 enum ServerCheck {
   ok,
 
-  /// Le serveur répond mais refuse la clé.
-  wrongKey,
+  /// Serveur ÉLAN plus récent que cette app : il faut mettre l'app à jour.
+  tooRecent,
 
-  /// Serveur joint, mais la table des courses manque (migrations non appliquées).
-  notReady,
-
-  /// Quelque chose répond, mais ce n'est pas un serveur Supabase.
-  notSupabase,
+  /// Quelque chose répond, mais ce n'est pas un serveur ÉLAN.
+  notElan,
 
   /// Rien ne répond (adresse, VPN, serveur arrêté).
   unreachable,
 }
 
-/// Interroge le serveur comme le fera l'app : comptes (auth) puis table des courses.
+/// Vérifie qu'un serveur ÉLAN répond à cette adresse.
 Future<ServerCheck> checkServer(
   ServerConfig server, {
   http.Client? client,
   Duration timeout = const Duration(seconds: 8),
 }) async {
-  final c = client ?? http.Client();
-  // Clé seule, comme l'app avant connexion.
-  final headers = {'apikey': server.key};
   try {
-    final health = await c.get(Uri.parse('${server.url}/auth/v1/health'), headers: headers).timeout(timeout);
-    if (health.statusCode == 401 || health.statusCode == 403) return ServerCheck.wrongKey;
-    if (health.statusCode != 200) return ServerCheck.notSupabase;
-
-    final table = await c.get(Uri.parse('${server.url}/rest/v1/courses?select=id&limit=0'), headers: headers).timeout(timeout);
-    if (table.statusCode == 401 || table.statusCode == 403) return ServerCheck.wrongKey;
-    if (table.statusCode == 404) return ServerCheck.notReady;
-    return table.statusCode == 200 ? ServerCheck.ok : ServerCheck.notSupabase;
+    final status = await fetchElanStatus(server.url, client: client, timeout: timeout);
+    if (status == null) return ServerCheck.notElan;
+    return status.version > elanProtocolVersion ? ServerCheck.tooRecent : ServerCheck.ok;
   } on TimeoutException {
     return ServerCheck.unreachable;
   } on SocketException {
@@ -142,10 +182,6 @@ Future<ServerCheck> checkServer(
     return ServerCheck.unreachable;
   } on HandshakeException {
     return ServerCheck.unreachable;
-  } on FormatException {
-    return ServerCheck.notSupabase;
-  } finally {
-    if (client == null) c.close();
   }
 }
 
@@ -155,7 +191,6 @@ Future<ServerCheck> checkServer(
 
 class ServerStore {
   static const _url = 'server.url';
-  static const _key = 'server.key';
 
   final SharedPreferences prefs;
 
@@ -164,20 +199,19 @@ class ServerStore {
   /// Serveur personnel enregistré, ou null (serveur intégré).
   ServerConfig? get custom {
     final url = prefs.getString(_url);
-    final key = prefs.getString(_key);
-    return url == null || key == null ? null : ServerConfig(url: url, key: key);
+    return url == null ? null : ServerConfig.personal(url);
   }
 
   /// Serveur à utiliser : le personnel s'il y en a un, sinon l'intégré, sinon aucun.
   ServerConfig? get active => custom ?? ServerConfig.compiled;
 
   Future<void> save(ServerConfig? custom) async {
+    // Clé d'un ancien serveur personnel de type Supabase (versions 2.8) : plus utilisée.
+    await prefs.remove('server.key');
     if (custom == null) {
       await prefs.remove(_url);
-      await prefs.remove(_key);
     } else {
       await prefs.setString(_url, custom.url);
-      await prefs.setString(_key, custom.key);
     }
   }
 }

@@ -37,6 +37,12 @@
 
 **Partage** : une carte image de la course (1080 × 1350), prête pour les réseaux.
 
+**Pratique**
+- Import de plusieurs fichiers GPX d'un coup (Garmin, Strava…), doublons ignorés.
+- Widget Android : prochaine course avec son compte à rebours, kilomètres de l'année.
+- Sauvegarde automatique chaque semaine sur ordinateur (courses en Excel, photos et justificatifs).
+- L'app signale toute seule les nouvelles versions.
+
 **Partout**
 - Hors ligne d'abord : tout fonctionne sans réseau, la synchronisation se fait dès que possible.
 - Mode clair, sombre ou système ; sur Android, **Material You** (couleurs du fond d'écran) et icône à thème.
@@ -59,7 +65,7 @@ Chaque version publie ses fichiers dans les *Releases* du dépôt, prêts à ins
 |---|---|
 | **Windows** | `ELAN-Installation-v….exe` : double-clic, Installer. |
 | **Android** | `ELAN-v….apk` : à ouvrir sur le téléphone. |
-| **Serveur personnel** | `ELAN-serveur-v….zip` : voir plus bas. |
+| **Serveur personnel** | `ELAN-serveur-v….zip` : un dossier à déposer sur son NAS, voir plus bas. |
 
 Depuis le code : `Installer ELAN.cmd` (Windows) et `Construire APK Android.cmd` (Android).
 
@@ -68,9 +74,10 @@ Pas à pas complet (dont la première installation des outils Android) : **[docs
 Avant la première installation, l'app doit être reliée à son projet Supabase (base, comptes, photos) :
 **[docs/CLOUD.md](docs/CLOUD.md)**. L'accès se fait par e-mail et mot de passe, sur invitation uniquement.
 
-**Héberger son propre serveur** (NAS avec Docker) : l'app sait aussi se connecter à un serveur
-personnel, choisi sur l'écran de connexion. Paquet `ELAN-serveur-vX.zip` joint à chaque version,
-guide pas à pas : **[serveur/LISEZMOI.md](serveur/LISEZMOI.md)**.
+**Héberger son propre serveur** (NAS avec Docker) : un seul conteneur, un seul fichier à déposer,
+rien à configurer. Dans l'app, il suffit d'indiquer son adresse ; le premier compte se crée depuis
+l'app. Paquet `ELAN-serveur-vX.zip` joint à chaque version, guide pas à pas pour débutants :
+**[serveur/LISEZMOI.md](serveur/LISEZMOI.md)**.
 
 ## Développer
 
@@ -87,7 +94,7 @@ dart run build_runner build                                            # après 
 |---|---|
 | Interface | Flutter, Riverpod, go_router |
 | Données locales | Drift (SQLite), une base par compte |
-| Serveur | Supabase, en ligne ou auto-hébergé (Docker) : authentification, Postgres avec sécurité par ligne, stockage privé |
+| Serveur | En ligne : Supabase (authentification, Postgres avec sécurité par ligne, stockage privé). Personnel : PocketBase, un conteneur Docker |
 | Synchronisation | Hors ligne d'abord, la modification la plus récente gagne, suppressions propagées |
 
 Architecture, règles métier et charte graphique : **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
@@ -100,13 +107,21 @@ lib/
   core/       base locale, synchronisation, photos, choix du serveur
   features/   courses · evolution · impact · records · report · documents · settings · auth
   l10n/       textes (français)
-serveur/      structure de la base et serveur auto-hébergé (= le paquet zip)
+serveur/      serveur personnel : un conteneur Docker pour NAS, et son guide
+supabase/     structure de la base du serveur en ligne
 scripts/      installation Windows (script et installateur), construction de l'APK
 .github/      fichiers de chaque version (APK, installateur, serveur), test du serveur
 ```
 
 ## Versions
 
-Chaque version est marquée par une étiquette Git (`v2.3.1`…) ; la liste est dans l'onglet *Tags* du dépôt.
+Chaque version est marquée par une étiquette Git (`v2.9.0`…) ; ses fichiers sont dans les *Releases*
+du dépôt. Ce dépôt public reçoit un commit par version (`scripts/publier.sh`).
+
+## Licence
+
+ÉLAN est un logiciel libre, distribué sous licence **GNU GPL version 3** (fichier [LICENSE](LICENSE)) :
+tu peux l'utiliser, l'étudier, le modifier et le redistribuer, à condition que les versions
+redistribuées restent libres, sous la même licence. Il est fourni sans garantie.
 
 Polices : Barlow Condensed et Plus Jakarta Sans, sous licence SIL Open Font License (`assets/fonts`).

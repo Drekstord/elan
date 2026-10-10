@@ -6,6 +6,10 @@ library;
 
 import 'dart:io';
 
+import 'package:app_course/features/auth/data/auth_repository.dart';
+import 'package:app_course/features/auth/presentation/server_screen.dart';
+import 'package:app_course/features/auth/presentation/sign_in_screen.dart';
+import 'package:app_course/features/settings/presentation/server_accounts_screen.dart';
 import 'package:app_course/app/shell.dart';
 import 'package:app_course/app/theme/app_theme.dart';
 import 'package:app_course/features/courses/domain/course.dart';
@@ -27,6 +31,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/sync_engine_test.dart' show FakeServer;
 import '../helpers.dart';
 
 Future<void> loadTestFonts() async {
@@ -147,7 +152,13 @@ final _sample = [
     impactMetric: ImpactMetric.oceanBottles,
     impactQuantity: 40,
   ),
-  Course(id: 'lyon', title: 'Marathon de Mont-Fictif', isPlanned: true, raceDate: calendarDate(2026, 10, 5), distanceM: 42195),
+  Course(
+    id: 'lyon',
+    title: 'Marathon de Mont-Fictif',
+    isPlanned: true,
+    raceDate: calendarDate(2026, 10, 5),
+    distanceM: 42195,
+  ),
   Course(
     id: 'paris',
     title: 'Marathon de Port-Imaginaire',
@@ -233,6 +244,26 @@ void main() {
             ),
           ],
         ),
+        // Serveur personnel : connexion, premier compte, choix du serveur, comptes des proches.
+        GoRoute(path: '/connexion', builder: (_, _) => const SignInScreen()),
+        GoRoute(
+          path: '/premier-compte',
+          builder: (_, _) => ProviderScope(
+            overrides: [
+              authRepositoryProvider.overrideWithValue(AuthRepository(FakeBackend(FakeServer(), firstAccount: true))),
+            ],
+            child: const SignInScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/serveur',
+          builder: (_, _) => ServerScreen(
+            current: testServerChoice.current,
+            builtIn: testServerChoice.builtIn,
+            onSave: testServerChoice.switchTo,
+          ),
+        ),
+        GoRoute(path: '/comptes', builder: (_, _) => const ServerAccountsScreen()),
       ],
     );
     addTearDown(router.dispose);
@@ -273,6 +304,10 @@ void main() {
   testWidgets('impact', (t) => capture(t, 'impact', location: '/impact'));
   testWidgets('records', (t) => capture(t, 'records', location: '/records', dark: true));
   testWidgets('réglages', (t) => capture(t, 'reglages', location: '/reglages'));
+  testWidgets('connexion', (t) => capture(t, 'connexion', location: '/connexion'));
+  testWidgets('premier compte', (t) => capture(t, 'premier_compte', location: '/premier-compte'));
+  testWidgets('serveur', (t) => capture(t, 'serveur', location: '/serveur'));
+  testWidgets('comptes du serveur', (t) => capture(t, 'comptes_serveur', location: '/comptes', dark: true));
 
   testWidgets(
     'large accueil sombre',

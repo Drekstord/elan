@@ -2398,7 +2398,7 @@ abstract class AppLocalizations {
   /// No description provided for @serverCustomHint.
   ///
   /// In fr, this message translates to:
-  /// **'Auto-hébergé, par exemple sur un NAS'**
+  /// **'Installé chez toi, par exemple sur un NAS'**
   String get serverCustomHint;
 
   /// No description provided for @serverAddress.
@@ -2412,18 +2412,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'http://192.168.1.20:8000'**
   String get serverAddressHint;
-
-  /// No description provided for @serverKey.
-  ///
-  /// In fr, this message translates to:
-  /// **'Clé publique'**
-  String get serverKey;
-
-  /// No description provided for @serverFieldsHelp.
-  ///
-  /// In fr, this message translates to:
-  /// **'Les deux valeurs sont dans le fichier connexion-app.txt créé lors de l\'installation du serveur.'**
-  String get serverFieldsHelp;
 
   /// No description provided for @serverPaste.
   ///
@@ -2455,30 +2443,6 @@ abstract class AppLocalizations {
   /// **'Sur Internet, l\'adresse doit commencer par https:// (en http, le mot de passe circulerait en clair). http n\'est accepté que sur le réseau local ou le VPN.'**
   String get serverErrorHttp;
 
-  /// No description provided for @serverErrorKey.
-  ///
-  /// In fr, this message translates to:
-  /// **'Clé publique manquante ou incomplète.'**
-  String get serverErrorKey;
-
-  /// No description provided for @serverWrongKey.
-  ///
-  /// In fr, this message translates to:
-  /// **'Le serveur refuse cette clé. Vérifie la clé publique.'**
-  String get serverWrongKey;
-
-  /// No description provided for @serverNotReady.
-  ///
-  /// In fr, this message translates to:
-  /// **'Serveur joint, mais sa base n\'est pas prête : vérifie que le service « migrations » s\'est bien terminé.'**
-  String get serverNotReady;
-
-  /// No description provided for @serverNotSupabase.
-  ///
-  /// In fr, this message translates to:
-  /// **'Cette adresse répond, mais ce n\'est pas un serveur ÉLAN. Vérifie le port (8000 par défaut).'**
-  String get serverNotSupabase;
-
   /// No description provided for @serverUnreachable.
   ///
   /// In fr, this message translates to:
@@ -2490,6 +2454,174 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Serveur : {name}'**
   String serverLabel(String name);
+
+  /// No description provided for @autoBackupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde automatique'**
+  String get autoBackupTitle;
+
+  /// No description provided for @autoBackupHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque semaine, une copie des courses (Excel) et des photos et justificatifs dans un dossier de ton choix : Proton Drive, disque externe… Les 8 dernières copies Excel sont gardées.'**
+  String get autoBackupHint;
+
+  /// No description provided for @autoBackupEnable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarder chaque semaine'**
+  String get autoBackupEnable;
+
+  /// No description provided for @autoBackupFolder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dossier : {path}'**
+  String autoBackupFolder(String path);
+
+  /// No description provided for @autoBackupNoFolder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun dossier choisi'**
+  String get autoBackupNoFolder;
+
+  /// No description provided for @autoBackupChoose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir le dossier'**
+  String get autoBackupChoose;
+
+  /// No description provided for @autoBackupNow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarder maintenant'**
+  String get autoBackupNow;
+
+  /// No description provided for @autoBackupLast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière sauvegarde : {date}'**
+  String autoBackupLast(String date);
+
+  /// No description provided for @autoBackupNever.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de sauvegarde'**
+  String get autoBackupNever;
+
+  /// No description provided for @autoBackupRunning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde en cours…'**
+  String get autoBackupRunning;
+
+  /// No description provided for @autoBackupCopied.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun nouveau fichier} =1{1 nouveau fichier copié} other{{count} nouveaux fichiers copiés}}'**
+  String autoBackupCopied(int count);
+
+  /// No description provided for @autoBackupMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 fichier introuvable pour l\'instant, réessayé la prochaine fois} other{{count} fichiers introuvables pour l\'instant, réessayés la prochaine fois}}'**
+  String autoBackupMissing(int count);
+
+  /// No description provided for @autoBackupError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sauvegarde impossible : {error}'**
+  String autoBackupError(String error);
+
+  /// No description provided for @gpxBatchAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer des fichiers GPX'**
+  String get gpxBatchAction;
+
+  /// No description provided for @gpxBatchTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Import GPX'**
+  String get gpxBatchTitle;
+
+  /// No description provided for @gpxBatchDefaultTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course du {date}'**
+  String gpxBatchDefaultTitle(String date);
+
+  /// No description provided for @gpxBatchCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune course ajoutée.} =1{1 course ajoutée.} other{{count} courses ajoutées.}}'**
+  String gpxBatchCreated(int count);
+
+  /// No description provided for @gpxBatchDuplicates.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 trace déjà présente, ignorée.} other{{count} traces déjà présentes, ignorées.}}'**
+  String gpxBatchDuplicates(int count);
+
+  /// No description provided for @gpxBatchUndated.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 trace sans date, ignorée.} other{{count} traces sans date, ignorées.}}'**
+  String gpxBatchUndated(int count);
+
+  /// No description provided for @gpxBatchUnreadable.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 fichier illisible.} other{{count} fichiers illisibles.}}'**
+  String gpxBatchUnreadable(int count);
+
+  /// No description provided for @gpxBatchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Elles sont rangées en courses officielles : ouvre-les pour compléter le titre, l\'association…'**
+  String get gpxBatchHint;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'ÉLAN {version} est disponible.'**
+  String updateAvailable(String version);
+
+  /// No description provided for @updateDownload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get updateDownload;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus tard'**
+  String get updateLater;
+
+  /// No description provided for @updateUpToDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu as la dernière version.'**
+  String get updateUpToDate;
+
+  /// No description provided for @updateCheck.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une mise à jour'**
+  String get updateCheck;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In fr, this message translates to:
+  /// **'À propos'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'ÉLAN {version}'**
+  String settingsVersion(String version);
 
   /// No description provided for @signInShowPassword.
   ///
@@ -2506,8 +2638,176 @@ abstract class AppLocalizations {
   /// No description provided for @signInForgottenCustom.
   ///
   /// In fr, this message translates to:
-  /// **'Mot de passe oublié ? Il se réinitialise depuis le tableau de bord de ton serveur.'**
+  /// **'Mot de passe oublié ? Le propriétaire du serveur peut t\'en donner un nouveau, dans Réglages > Comptes du serveur.'**
   String get signInForgottenCustom;
+
+  /// No description provided for @serverAddressHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'C\'est l\'adresse affichée sur la page d\'accueil de ton serveur (bouton « Copier l\'adresse »).'**
+  String get serverAddressHelp;
+
+  /// No description provided for @serverNotElan.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette adresse répond, mais ce n\'est pas un serveur ÉLAN. Vérifie le port (8000 par défaut).'**
+  String get serverNotElan;
+
+  /// No description provided for @serverTooRecent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce serveur est plus récent que l\'app. Mets l\'app à jour, puis réessaie.'**
+  String get serverTooRecent;
+
+  /// No description provided for @signInIntroCustom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connecte-toi avec le compte créé pour toi sur ce serveur.'**
+  String get signInIntroCustom;
+
+  /// No description provided for @firstAccountTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Premier compte'**
+  String get firstAccountTitle;
+
+  /// No description provided for @firstAccountIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce serveur est tout neuf. Crée le premier compte : il sera le propriétaire du serveur et pourra ajouter les comptes de ses proches.'**
+  String get firstAccountIntro;
+
+  /// No description provided for @firstAccountButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer mon compte'**
+  String get firstAccountButton;
+
+  /// No description provided for @firstAccountTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce serveur a déjà un compte. Connecte-toi, ou demande un compte à son propriétaire.'**
+  String get firstAccountTaken;
+
+  /// No description provided for @passwordConfirmLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le mot de passe'**
+  String get passwordConfirmLabel;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les deux mots de passe sont différents.'**
+  String get passwordMismatch;
+
+  /// No description provided for @settingsCurrentPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe actuel'**
+  String get settingsCurrentPassword;
+
+  /// No description provided for @settingsWrongCurrentPassword.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe actuel incorrect.'**
+  String get settingsWrongCurrentPassword;
+
+  /// No description provided for @accountsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comptes du serveur'**
+  String get accountsTitle;
+
+  /// No description provided for @accountsIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque personne a son compte et ne voit que ses propres courses.'**
+  String get accountsIntro;
+
+  /// No description provided for @accountsManage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer les comptes'**
+  String get accountsManage;
+
+  /// No description provided for @accountsOwner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Propriétaire du serveur'**
+  String get accountsOwner;
+
+  /// No description provided for @accountsYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toi'**
+  String get accountsYou;
+
+  /// No description provided for @accountsAdd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un compte'**
+  String get accountsAdd;
+
+  /// No description provided for @accountsAddIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisis son e-mail et un mot de passe provisoire, puis transmets-les lui. La personne pourra changer son mot de passe dans Réglages.'**
+  String get accountsAddIntro;
+
+  /// No description provided for @accountsCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte créé.'**
+  String get accountsCreated;
+
+  /// No description provided for @accountsEmailTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un compte existe déjà avec cette adresse.'**
+  String get accountsEmailTaken;
+
+  /// No description provided for @accountsReset.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donner un nouveau mot de passe'**
+  String get accountsReset;
+
+  /// No description provided for @accountsResetDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe remplacé.'**
+  String get accountsResetDone;
+
+  /// No description provided for @accountsDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le compte'**
+  String get accountsDelete;
+
+  /// No description provided for @accountsDeleteConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer le compte {email} ? Ses courses, photos et justificatifs enregistrés sur le serveur seront effacés définitivement.'**
+  String accountsDeleteConfirm(String email);
+
+  /// No description provided for @accountsDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte supprimé.'**
+  String get accountsDeleted;
+
+  /// No description provided for @accountsError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Action impossible. Vérifie la connexion au serveur.'**
+  String get accountsError;
+
+  /// No description provided for @accountsActions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actions pour {email}'**
+  String accountsActions(String email);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

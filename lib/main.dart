@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/server_root.dart';
+import 'core/backend/backend.dart';
 import 'core/server/server_config.dart';
 
 Future<void> main() async {
@@ -11,10 +12,11 @@ Future<void> main() async {
   await initializeDateFormatting('fr');
 
   // Serveur personnel choisi dans l'app, sinon celui de la compilation (config/supabase.json).
-  final store = ServerStore(await SharedPreferences.getInstance());
+  final prefs = await SharedPreferences.getInstance();
+  final store = ServerStore(prefs);
   final server = store.active;
-  if (server != null) await connectTo(server);
+  final backend = server == null ? null : await Backend.connect(server, prefs);
   final dataDir = await getApplicationSupportDirectory();
 
-  runApp(ServerRoot(store: store, dataDir: dataDir, initial: server));
+  runApp(ServerRoot(store: store, dataDir: dataDir, initial: server, initialBackend: backend));
 }

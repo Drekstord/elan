@@ -1,0 +1,28 @@
+<!-- Mise en page du guide du serveur (serveur/LISEZMOI.md converti en page web pour le paquet). -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --fond: #f2ede3; --carte: #fdfbf6; --texte: #17301f; --doux: #55645a; --vert: #386d27; --trait: #d9d2c3; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fond: #101a13; --carte: #17241b; --texte: #f1eee6; --doux: #a9b5ac; --vert: #8fcf6f; --trait: #2c3b30; }
+  }
+  html { background: var(--fond); }
+  body { max-width: 760px; margin: 0 auto; padding: 24px 18px 80px; color: var(--texte);
+         font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  h1 { font-size: 34px; line-height: 1.2; margin: 12px 0 16px; }
+  h2 { font-size: 24px; margin: 48px 0 12px; padding-top: 16px; border-top: 3px solid var(--texte); }
+  h3 { font-size: 19px; margin: 28px 0 8px; }
+  a { color: var(--vert); }
+  code { font: 15px/1.4 ui-monospace, Consolas, monospace; background: var(--carte); border: 1px solid var(--trait);
+         border-radius: 5px; padding: 1px 5px; overflow-wrap: anywhere; }
+  pre { background: var(--carte); border: 1px solid var(--trait); border-radius: 10px; padding: 14px 16px; overflow-x: auto; }
+  pre code { border: 0; padding: 0; background: none; overflow-wrap: normal; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; display: block; overflow-x: auto; }
+  th, td { border: 1px solid var(--trait); padding: 9px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--carte); }
+  blockquote { margin: 18px 0; padding: 12px 16px; background: var(--carte); border-left: 5px solid var(--vert);
+               border-radius: 0 10px 10px 0; }
+  blockquote p { margin: 0; }
+  li { margin-bottom: 6px; }
+  hr { border: 0; border-top: 1px solid var(--trait); margin: 40px 0; }
+  @media print { html, body { background: #fff; color: #000; } h2 { break-after: avoid; } pre, table { break-inside: avoid; } }
+</style>

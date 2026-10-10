@@ -1,13 +1,14 @@
 # ÉLAN : Mise en place de Supabase (serveur en ligne)
 
-> Pour héberger le serveur chez soi (NAS avec Docker), voir [serveur/LISEZMOI.md](../serveur/LISEZMOI.md).
+> Pour héberger le serveur chez soi (NAS avec Docker), c'est un autre serveur, bien plus simple :
+> voir [serveur/LISEZMOI.md](../serveur/LISEZMOI.md).
 
 Quatre actions dans le tableau de bord, une fois. Aucune ne touche aux e-mails.
 
 ## 1. Créer la base
 
 1. Barre de gauche : **SQL Editor** (icône `>_`) > **New query**.
-2. Ouvrir `serveur/systeme/migrations/001_schema.sql` dans le Bloc-notes, tout copier (Ctrl+A, Ctrl+C), coller dans Supabase.
+2. Ouvrir `supabase/001_schema.sql` dans le Bloc-notes, tout copier (Ctrl+A, Ctrl+C), coller dans Supabase.
 3. **Run**. Résultat attendu : *Success. No rows returned*.
    Un avertissement « destructive operation » peut apparaître : le script met de côté les anciennes tables sans les effacer (il ne supprime qu'une table d'essai vide). Confirmer.
 
@@ -48,7 +49,7 @@ Même procédure pour chaque proche (ils pourront changer leur mot de passe dans
 
 Les justificatifs (factures d'inscription…) demandent une colonne de plus et l'accès aux PDF
 dans le stockage. **Une seule fois, avant d'installer la version 2.6 :**
-SQL Editor > New query > coller le contenu de [`serveur/systeme/migrations/002_justificatifs.sql`](../serveur/systeme/migrations/002_justificatifs.sql) > **Run**.
+SQL Editor > New query > coller le contenu de [`supabase/002_justificatifs.sql`](../supabase/002_justificatifs.sql) > **Run**.
 (Ce fichier s'appelait `003_justificatifs.sql` jusqu'à la version 2.7 : déjà passé, rien à refaire.)
 Le script ne touche à aucune donnée existante et peut être relancé sans risque.
 (Une installation neuve avec `001_schema.sql` l'inclut déjà.)
@@ -56,7 +57,7 @@ Le script ne touche à aucune donnée existante et peut être relancé sans risq
 ## Facultatif : courses de l'ancienne table cloud
 
 Si des courses avaient été enregistrées dans Supabase avec la v1 : remplacer l'e-mail (2 fois) dans
-`serveur/systeme/import_v1_cloud.sql`, l'exécuter dans le SQL Editor, puis **Synchroniser maintenant** dans l'app.
+`supabase/import_v1.sql`, l'exécuter dans le SQL Editor, puis **Synchroniser maintenant** dans l'app.
 
 ## Mot de passe oublié
 

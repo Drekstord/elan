@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../app/format.dart';
 import '../../../app/labels.dart';
@@ -15,6 +16,8 @@ import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../impact/impact_providers.dart';
 import '../courses_providers.dart';
+import '../data/file_import.dart';
+import '../data/gpx_batch.dart';
 import '../domain/course.dart';
 import '../domain/course_query.dart';
 import '../domain/course_stats.dart';
@@ -22,6 +25,45 @@ import 'course_card.dart';
 
 class CoursesScreen extends ConsumerWidget {
   const CoursesScreen({super.key});
+
+  /// Plusieurs GPX d'un coup : une course par trace, doublons ignorés, résumé à la fin.
+  Future<void> _importGpxFiles(BuildContext context, WidgetRef ref) async {
+    final t = AppLocalizations.of(context);
+    final picked = await FileImport.pickGpxFiles(dialogTitle: t.gpxBatchAction);
+    if (picked == null || !context.mounted) return;
+    final result = coursesFromGpx(
+      picked.tracks,
+      ref.read(coursesProvider).value ?? const [],
+      newId: const Uuid().v4,
+      defaultTitle: (day) => t.gpxBatchDefaultTitle(DateFormat('d MMMM y', 'fr').format(day)),
+    );
+    final repository = ref.read(courseRepositoryProvider);
+    for (final course in result.created) {
+      await repository.save(course);
+    }
+    if (!context.mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.gpxBatchTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.gpxBatchCreated(result.created.length)),
+            if (result.duplicates > 0) Text(t.gpxBatchDuplicates(result.duplicates)),
+            if (result.undated > 0) Text(t.gpxBatchUndated(result.undated)),
+            if (picked.unreadable > 0) Text(t.gpxBatchUnreadable(picked.unreadable)),
+            if (result.created.isNotEmpty) ...[
+              const SizedBox(height: Space.md),
+              Text(t.gpxBatchHint, style: Theme.of(ctx).textTheme.bodySmall),
+            ],
+          ],
+        ),
+        actions: [FilledButton(onPressed: () => Navigator.pop(ctx), child: Text(t.close))],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,9 +75,14 @@ class CoursesScreen extends ConsumerWidget {
       appBar: AppBar(
         toolbarHeight: 64,
         title: const Wordmark(size: 30),
-        actions: const [
-          SyncBadge(),
-          SizedBox(width: Space.sm),
+        actions: [
+          IconButton(
+            tooltip: t.gpxBatchAction,
+            icon: const Icon(Icons.upload_file_outlined),
+            onPressed: () => _importGpxFiles(context, ref),
+          ),
+          const SyncBadge(),
+          const SizedBox(width: Space.sm),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

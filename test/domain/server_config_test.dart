@@ -7,13 +7,12 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.cle.publique';
-const _server = ServerConfig(url: 'http://192.168.1.20:8000', key: _key);
+const _server = ServerConfig.personal('http://192.168.1.20:8000');
 
-/// Faux serveur : réponse de /auth/v1/health puis de /rest/v1/courses.
-MockClient _respond(int health, [int table = 200]) => MockClient((request) async {
-  expect(request.headers['apikey'], _key);
-  return request.url.path.startsWith('/auth/v1/health') ? http.Response('{}', health) : http.Response('[]', table);
+/// Faux serveur : réponse de GET /api/elan/etat.
+MockClient _respond(int status, String body) => MockClient((request) async {
+  expect(request.url.path, '/api/elan/etat');
+  return http.Response(body, status, headers: {'content-type': 'application/json; charset=utf-8'});
 });
 
 void main() {
@@ -37,7 +36,6 @@ void main() {
         'http://localhost:8000',
         'http://[fd12::1]:8000',
         'https://elan.exemple.fr',
-        'https://abcd.supabase.co',
       ]) {
         expect(validateServerAddress(ok), isNull, reason: ok);
       }
@@ -50,40 +48,45 @@ void main() {
     });
 
     test('adresses invalides', () {
-      for (final bad in ['', 'http://', 'ftp://nas.local', 'http://nas.local/rest/v1', 'http://nas.local?x=1']) {
+      for (final bad in ['', 'http://', 'ftp://nas.local', 'http://nas.local/api', 'http://nas.local?x=1']) {
         expect(validateServerAddress(bad), ServerAddressError.invalid, reason: bad);
       }
     });
 
-    test('clé : retours à la ligne et espaces du copier-coller retirés', () {
-      expect(normalizeServerKey(' eyJ.abc\n.def \r\n'), 'eyJ.abc.def');
-      expect(isPlausibleServerKey('court'), isFalse);
-      expect(isPlausibleServerKey(_key), isTrue);
-    });
-
-    test('affichage et session propres à chaque serveur personnel', () {
+    test('serveur personnel : adresse seule, session propre à chaque serveur', () {
+      expect(_server.kind, ServerKind.elan);
+      expect(_server.builtIn, isFalse);
+      expect(_server.key, isEmpty);
       expect(_server.displayAddress, '192.168.1.20:8000');
-      expect(const ServerConfig(url: 'https://elan.exemple.fr', key: _key).displayAddress, 'elan.exemple.fr');
-      expect(_server.sessionStorageKey, 'sb-elan-192.168.1.20-8000-auth-token');
-      expect(const ServerConfig(url: 'https://x.supabase.co', key: _key, builtIn: true).sessionStorageKey, isNull);
+      expect(const ServerConfig.personal('https://elan.exemple.fr').displayAddress, 'elan.exemple.fr');
+      expect(_server.sessionStorageKey, 'elan-session-192.168.1.20-8000');
+      expect(
+        const ServerConfig.personal('http://192.168.1.21:8000').sessionStorageKey,
+        isNot(_server.sessionStorageKey),
+      );
     });
   });
 
   group('vérification du serveur', () {
-    test('serveur ÉLAN prêt', () async {
-      expect(await checkServer(_server, client: _respond(200)), ServerCheck.ok);
+    test('serveur ÉLAN prêt, avec ou sans premier compte à créer', () async {
+      final neuf = _respond(200, '{"serveur":"elan","version":1,"premierCompte":true}');
+      expect(await checkServer(_server, client: neuf), ServerCheck.ok);
+      expect((await fetchElanStatus(_server.url, client: neuf))!.needsFirstAccount, isTrue);
+
+      final installe = _respond(200, '{"serveur":"elan","version":1,"premierCompte":false}');
+      expect((await fetchElanStatus(_server.url, client: installe))!.needsFirstAccount, isFalse);
     });
 
-    test('clé refusée', () async {
-      expect(await checkServer(_server, client: _respond(401)), ServerCheck.wrongKey);
+    test("serveur plus récent que l'app : mise à jour de l'app demandée", () async {
+      final futur = _respond(200, '{"serveur":"elan","version":${elanProtocolVersion + 1},"premierCompte":false}');
+      expect(await checkServer(_server, client: futur), ServerCheck.tooRecent);
     });
 
-    test('base pas encore créée (migrations)', () async {
-      expect(await checkServer(_server, client: _respond(200, 404)), ServerCheck.notReady);
-    });
-
-    test("autre chose qu'un serveur Supabase", () async {
-      expect(await checkServer(_server, client: _respond(404)), ServerCheck.notSupabase);
+    test("autre chose qu'un serveur ÉLAN : page web, autre service, mauvais port", () async {
+      expect(await checkServer(_server, client: _respond(404, 'Not found')), ServerCheck.notElan);
+      expect(await checkServer(_server, client: _respond(200, '<html>Mon NAS</html>')), ServerCheck.notElan);
+      expect(await checkServer(_server, client: _respond(200, '{"serveur":"autre"}')), ServerCheck.notElan);
+      expect(await checkServer(_server, client: _respond(200, '[1,2]')), ServerCheck.notElan);
     });
 
     test('injoignable : réseau, délai dépassé', () async {
@@ -99,13 +102,16 @@ void main() {
 
   group('choix enregistré', () {
     test('serveur personnel gardé, puis retour au serveur intégré', () async {
-      SharedPreferences.setMockInitialValues({});
-      final store = ServerStore(await SharedPreferences.getInstance());
+      // Une clé restée d'un ancien serveur personnel (versions 2.8) est effacée au passage.
+      SharedPreferences.setMockInitialValues({'server.key': 'ancienne-cle'});
+      final prefs = await SharedPreferences.getInstance();
+      final store = ServerStore(prefs);
       expect(store.custom, isNull);
 
       await store.save(_server);
       expect(store.custom, _server);
       expect(store.active, _server);
+      expect(prefs.getString('server.key'), isNull);
 
       await store.save(null);
       expect(store.custom, isNull);

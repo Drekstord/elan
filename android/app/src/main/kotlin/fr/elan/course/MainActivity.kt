@@ -54,6 +54,22 @@ class MainActivity : FlutterActivity() {
             result.success(null)
         }
 
+        // Widget de l'écran d'accueil : données envoyées par l'app (voir ElanWidget).
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "elan/widget").setMethodCallHandler { call, result ->
+            if (call.method != "update") {
+                result.notImplemented()
+                return@setMethodCallHandler
+            }
+            ElanWidget.save(
+                this,
+                call.argument<String>("nextTitle"),
+                call.argument<Number>("nextEpochDay")?.toLong(),
+                call.argument<Int>("year") ?: 0,
+                call.argument<String>("yearKm") ?: "0",
+            )
+            result.success(null)
+        }
+
         // Copie riche : HTML (tableaux, gras, listes) + texte brut pour les apps qui ignorent le HTML.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "elan/clipboard").setMethodCallHandler { call, result ->
             if (call.method != "setRich") {

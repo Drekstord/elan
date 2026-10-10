@@ -5,7 +5,7 @@
 | Sujet | Choix | Raison |
 |---|---|---|
 | Plateformes | Flutter natif : Windows, Android | Un seul code, design entièrement maîtrisé, logique métier Dart réutilisée. |
-| Backend | Supabase : Auth (e-mail + mot de passe), PostgreSQL + RLS, Storage | Gratuit, tout-en-un, rien à héberger. Voir [CLOUD.md](CLOUD.md). Auto-hébergeable (Docker) : [serveur/LISEZMOI.md](../serveur/LISEZMOI.md). |
+| Backend | Supabase : Auth (e-mail + mot de passe), PostgreSQL + RLS, Storage | Gratuit, tout-en-un, rien à héberger. Voir [CLOUD.md](CLOUD.md). Serveur personnel possible (un conteneur Docker) : [serveur/LISEZMOI.md](../serveur/LISEZMOI.md). |
 | État | Riverpod 3 | Testable (overrides), gère chargement/erreur, indépendant du `BuildContext`. |
 | Navigation | go_router | Redirection selon la session ; coque responsive (rail ≥ 840 px, barre du bas sinon). |
 | Base locale | Drift (SQLite), une base par utilisateur | Requêtes réactives, migrations versionnées, stats rapides pour les graphiques. |
@@ -29,6 +29,7 @@ lib/
 │   └── widgets/                  # Widgets transverses (badge de synchro…)
 ├── core/                         # Infrastructure, sans écran
 │   ├── config.dart               # URL / clé du serveur intégré, injectées au build
+│   ├── backend/                  # Backend : serveur en ligne (Supabase) ou personnel (serveur ÉLAN)
 │   ├── server/                   # Serveur personnel : adresse, vérification, choix enregistré
 │   ├── providers.dart            # Graphe Riverpod (session, base, synchro)
 │   ├── database/                 # Tables Drift + conversions ligne <-> modèle
@@ -45,15 +46,33 @@ lib/
 
 Règle de dépendance : `presentation → data → domain` ; `domain` ne dépend de rien (ni Flutter, ni Supabase).
 
-### Serveur (`serveur/`)
+### Serveurs
 
-Le même dossier sert au serveur en ligne et au serveur auto-hébergé ; il est aussi, tel quel, le
-paquet `ELAN-serveur-vX.zip` remis à qui héberge son propre serveur.
+L'app parle à son serveur à travers une seule interface, `Backend` (`lib/core/backend`) : comptes,
+synchronisation, fichiers. Deux réalisations :
 
-- `systeme/migrations/` : structure de la base, dans l'ordre (`001_…`, `002_…`), idempotents si possible.
-  En ligne : à exécuter dans le SQL Editor ([CLOUD.md](CLOUD.md)). Auto-hébergé : appliqués seuls au
-  démarrage, chacun une seule fois. Tout changement de structure passe par un nouveau fichier ici.
-- `docker-compose.yml` et le reste de `systeme/` : le serveur auto-hébergé ([LISEZMOI.md](../serveur/LISEZMOI.md)).
+| | Serveur ÉLAN en ligne | Serveur personnel |
+|---|---|---|
+| Classe | `SupabaseBackend` | `ElanBackend` |
+| Technique | Supabase (Auth, PostgreSQL + RLS, Storage) | PocketBase dans un conteneur (`serveur/image`) |
+| Désigné par | URL + clé publique, à la compilation (`config/supabase.json`) | Son adresse, saisie dans l'app |
+| Comptes | Créés par l'administrateur dans le tableau de bord | Premier compte créé dans l'app, puis par le propriétaire |
+| Structure | `supabase/*.sql`, à exécuter dans le SQL Editor ([CLOUD.md](CLOUD.md)) | `serveur/image/pb_migrations`, appliquée au démarrage |
+
+Dossier `serveur/` :
+
+- `docker-compose.yml` et `LISEZMOI.md` : ce que reçoit la personne qui installe son serveur
+  (le guide est converti en page web dans le paquet `ELAN-serveur-vX.zip`).
+- `image/` : ce qui construit l'image Docker, jamais remis tel quel.
+  - `pb_migrations/` : comptes, courses, fichiers, réglages. Une évolution = un nouveau fichier.
+  - `pb_hooks/elan.pb.js` : les quatre routes propres à l'app (état, premier compte, envoi et
+    réception des courses). Le reste passe par les routes standard de PocketBase et leurs règles d'accès.
+  - `pb_public/` : la page d'accueil du serveur.
+
+Le serveur personnel stocke chaque course telle que l'app l'envoie (un bloc JSON) : ajouter un champ
+à `Course` ne demande aucune mise à jour des serveurs déjà installés. Le protocole entre l'app et le
+serveur a un numéro de version (`elanProtocolVersion`, `/api/elan/etat`) ; l'étiquette de l'image
+(`:1`) le suit.
 
 ## Flux de données
 

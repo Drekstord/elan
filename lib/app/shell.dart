@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/providers.dart';
+import '../features/settings/auto_backup.dart';
+import '../features/updates/update_banner.dart';
+import '../features/widget/home_screen_widget.dart';
+import '../features/courses/domain/course.dart';
 import '../features/reminders/domain/race_reminders.dart';
 import '../features/reminders/reminder_service.dart';
 import '../l10n/app_localizations.dart';
@@ -22,6 +28,7 @@ class AppShell extends ConsumerStatefulWidget {
 
 class _AppShellState extends ConsumerState<AppShell> {
   late final AppLifecycleListener _lifecycle;
+  Timer? _backupTimer;
 
   @override
   void initState() {
@@ -30,8 +37,12 @@ class _AppShellState extends ConsumerState<AppShell> {
       onResume: () {
         if (ref.read(userIdProvider) != null) ref.read(syncControllerProvider.notifier).sync();
         _reschedule();
+        _backupIfDue();
+        _updateWidget();
       },
     );
+    // Application de bureau souvent laissée ouverte : la sauvegarde hebdomadaire est vérifiée régulièrement.
+    if (supportsAutoBackup) _backupTimer = Timer.periodic(const Duration(hours: 6), (_) => _backupIfDue());
     _initReminders();
   }
 
@@ -71,8 +82,24 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
+  /// Widget de l'écran d'accueil Android : prochaine course et km de l'année.
+  void _updateWidget() {
+    if (!supportsHomeWidget || !mounted) return;
+    final courses = ref.read(coursesProvider).value;
+    if (courses == null) return;
+    final now = DateTime.now();
+    updateHomeWidget(homeWidgetData(courses, calendarDate(now.year, now.month, now.day)));
+  }
+
+  void _backupIfDue() {
+    if (supportsAutoBackup && mounted && ref.read(userIdProvider) != null) {
+      ref.read(autoBackupProvider.notifier).runIfDue();
+    }
+  }
+
   @override
   void dispose() {
+    _backupTimer?.cancel();
     _lifecycle.dispose();
     super.dispose();
   }
@@ -85,10 +112,17 @@ class _AppShellState extends ConsumerState<AppShell> {
     }
 
     // Les rappels suivent les courses (ajout, date, résultat saisi…) et le réglage.
-    ref.listen(coursesProvider, (_, _) => _reschedule());
+    ref.listen(coursesProvider, (_, _) {
+      _reschedule();
+      _updateWidget();
+    });
     ref.listen(reminderSettingsProvider, (_, _) => _reschedule());
 
     ref.listen(sessionBootstrapProvider, (_, next) {
+      if (next.hasValue) {
+        _backupIfDue();
+        checkForUpdate(context, ref);
+      }
       final imported = next.value ?? 0;
       if (imported > 0) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(t.syncImported(imported))));

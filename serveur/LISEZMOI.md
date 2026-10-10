@@ -1,209 +1,264 @@
-# ÉLAN : héberger ton propre serveur (NAS avec Docker)
+# Installer ton serveur ÉLAN
 
-ÉLAN enregistre les courses, les photos et les justificatifs sur un serveur. Ce paquet installe ce
-serveur **chez toi, sur ton NAS** : tes données ne quittent pas ta maison, et personne d'autre n'y a
-accès. L'app est la même que d'habitude ; il suffit de lui indiquer l'adresse de ton serveur.
+L'app ÉLAN enregistre tes courses, tes photos et tes justificatifs sur un **serveur** : c'est ce qui
+permet de les retrouver sur ton téléphone et sur ton ordinateur. Ce guide t'explique comment
+installer ce serveur **chez toi**, sur ton NAS. Tes données ne quittent alors pas ta maison.
 
-Compte une demi-heure la première fois.
+Aucune connaissance technique n'est nécessaire : suis les étapes dans l'ordre. Compte **un quart d'heure**.
 
-## Ce qu'il te faut
+## En bref
 
-- Un NAS (ou un ordinateur Linux) qui fait tourner **Docker** : Synology (Container Manager),
-  QNAP (Container Station), Unraid, TrueNAS… Processeur 64 bits (Intel, AMD ou ARM64).
-- Environ **2 Go de mémoire libre** et 3 Go d'espace disque, plus la place de tes photos.
-- Depuis le téléphone, un accès au NAS : même réseau Wi-Fi, ou **ton VPN** vers chez toi.
-- Les fichiers reçus : `ELAN-serveur-vX.zip` (ce paquet) et l'app : `ELAN-vX.apk` (Android),
-  `ELAN-Installation-vX.exe` (Windows).
+1. Tu déposes **un dossier** sur ton NAS et tu le démarres.
+2. Tu ouvres une page dans ton navigateur pour vérifier que ça marche.
+3. Dans l'app, tu indiques l'adresse de ton serveur et tu crées ton compte.
 
-## Ce qu'il y a dans le paquet
+C'est tout. Il n'y a rien à configurer, pas de mot de passe technique, pas de clé à recopier.
 
-```
-elan-serveur/
-  LISEZMOI.md                 ce guide
-  Préparer le serveur.cmd     à lancer une fois, au début
-  docker-compose.yml          le serveur, lu par Docker
-  systeme/                    fonctionnement interne : rien à ouvrir ni à modifier
-```
+## Avant de commencer
 
-Après installation s'ajoutent :
+### Ce qu'il te faut
 
-```
-  connexion-app.txt           ce qu'il faut saisir dans l'app (rien de secret)
-  donnees/                    tes données : base, photos et justificatifs, sauvegardes
-  .env                        tes réglages et clés secrètes (fichier caché) : ne jamais le partager
-```
+- Un **NAS** capable de faire tourner **Docker** : Synology (modèles « + » notamment), QNAP,
+  Unraid, TrueNAS… Un mini-PC ou un Raspberry Pi sous Linux conviennent aussi.
+- Très peu de ressources : moins de **100 Mo de mémoire**, et la place de tes photos sur le disque.
+- Le fichier **`ELAN-serveur-vX.zip`**. Il contient ce guide et un dossier **`elan`**.
+- L'app ÉLAN pour ton téléphone (`ELAN-vX.apk`) ou ton ordinateur (`ELAN-Installation-vX.exe`).
+
+Ces fichiers se téléchargent librement, sans compte, sur la page des versions d'ÉLAN :
+**https://github.com/Drekstord/elan/releases** (rubrique **Assets** de la version la plus récente).
+
+### Quatre mots à connaître
+
+| Mot | Ce que c'est |
+|---|---|
+| **NAS** | Le boîtier de stockage branché sur ta box, allumé en permanence. |
+| **Docker** | Un logiciel du NAS qui fait tourner des programmes dans des boîtes fermées, sans rien salir. Sur Synology, il s'appelle **Container Manager**. |
+| **Conteneur** | Une de ces boîtes. Le serveur ÉLAN en est une seule. |
+| **Adresse du NAS** | Le numéro qui désigne ton NAS sur ton réseau, par exemple `192.168.1.20`. On la trouve à l'étape 3. |
 
 ---
 
-## 1. Préparer les réglages (sur ton PC, 5 minutes)
+## Étape 1 : déposer le dossier sur le NAS
 
-1. Dézippe le paquet.
-2. Trouve l'**adresse IP de ton NAS** sur ton réseau (dans l'interface du NAS ou de ta box), par
-   exemple `192.168.1.20`. L'adresse du serveur sera alors **`http://192.168.1.20:8000`**.
-3. Dans le dossier `elan-serveur`, double-clique sur **`Préparer le serveur.cmd`**, puis saisis cette adresse.
+1. Sur ton ordinateur, dézippe `ELAN-serveur-vX.zip` (clic droit > **Extraire tout**). Tu obtiens ce
+   guide et un dossier **`elan`**.
+2. Copie le dossier **`elan`** entier sur ton NAS, là où tu ranges ce genre de choses.
+   Sur Synology : ouvre **File Station**, va dans le dossier partagé **`docker`** (il existe dès que
+   Container Manager est installé) et glisse le dossier `elan` dedans.
 
-   *Sans Windows* : dans le dossier `elan-serveur`, lance `sh systeme/preparer.sh http://192.168.1.20:8000`.
+Tu obtiens ceci sur le NAS :
 
-4. La fenêtre affiche le **mot de passe du tableau de bord** : note-le (il reste aussi dans `.env`).
+```
+docker/
+  elan/
+    docker-compose.yml    le serveur : le NAS lit ce fichier pour savoir quoi lancer
+    donnees/              tes données s'enregistreront ici (vide pour l'instant)
+```
 
-Deux fichiers sont créés : `.env` et `connexion-app.txt`. Les secrets sont tirés au hasard, propres à
-ton serveur.
+Ne modifie pas `docker-compose.yml`, sauf cas particulier expliqué plus bas (port déjà utilisé).
 
-## 2. Installer sur le NAS
+## Étape 2 : démarrer le serveur
 
-Copie le dossier `elan-serveur` entier sur le NAS, par exemple dans `/docker/elan-serveur`.
-Vérifie que le fichier **`.env`** a bien été copié : son nom commence par un point, certains
-systèmes le cachent.
+Choisis la partie qui correspond à ton NAS.
 
-### Synology (Container Manager)
+### Sur un Synology
 
-1. **Container Manager** > **Projet** > **Créer**.
-2. Nom du projet : `elan`. Chemin : le dossier **`elan-serveur`**.
-   Source : *utiliser le docker-compose.yml existant*.
-3. **Suivant** jusqu'au bout (pas de portail web à configurer), puis **Terminé**.
+1. Si ce n'est pas déjà fait, installe **Container Manager** : ouvre le **Centre de paquets**,
+   cherche « Container Manager », clique sur **Installer**.
+2. Ouvre **Container Manager**, puis, dans le menu de gauche, **Projet**.
+3. Clique sur **Créer**. Une fenêtre s'ouvre :
+   - **Nom du projet** : `elan`
+   - **Chemin** : clique sur **Définir le chemin** et choisis le dossier `docker/elan` de l'étape 1.
+   - Le NAS détecte le fichier et propose de **l'utiliser** : accepte
+     (« Utiliser le fichier docker-compose.yml existant »).
+4. Clique sur **Suivant**. Si une page « Portail Web » apparaît, ne coche rien. **Suivant**, puis **Effectué**.
+5. Le NAS télécharge le serveur (quelques dizaines de Mo), puis le démarre. Une fenêtre affiche l'avancement ;
+   quand elle indique que c'est terminé, ferme-la.
 
-Le premier démarrage télécharge environ 2 Go : quelques minutes.
+Dans la liste **Projet**, `elan` apparaît avec une **pastille verte** : le serveur tourne.
+Il redémarrera tout seul après une coupure de courant ou un redémarrage du NAS.
 
-### Autres NAS, ou en SSH
+### Sur un QNAP
+
+1. Installe **Container Station** depuis l'**App Center**, puis ouvre-le.
+2. **Applications** > **Créer**. Nom : `elan`.
+3. Ouvre `docker-compose.yml` avec le Bloc-notes, copie tout son contenu et colle-le dans la zone de texte.
+4. Dans le texte collé, remplace `./donnees` par le chemin complet du dossier `donnees` copié à
+   l'étape 1, par exemple `/share/Container/elan/donnees`. **Créer**.
+   (Selon la version de ton NAS, les intitulés peuvent varier légèrement.)
+
+### Sur un autre système (ligne de commande)
+
+Dans le dossier qui contient `docker-compose.yml` :
 
 ```bash
-cd /docker/elan-serveur
 docker compose up -d
 ```
 
-### Vérifier que tout va bien
+## Étape 3 : vérifier que ça marche
 
-- Le conteneur **migrations** s'arrête tout seul après le démarrage : c'est normal. Son journal doit
-  finir par *Base à jour : 2 fichier(s) appliqué(s).*
-- Dans un navigateur, ouvre `http://192.168.1.20:8000` : identifiant **`elan`** et le mot de passe
-  du tableau de bord. Le tableau de bord Supabase s'affiche.
+1. Trouve l'**adresse de ton NAS**. C'est celle que tu tapes pour ouvrir son interface, sans ce qui
+   suit les deux-points. Si tu ouvres ton NAS avec `http://192.168.1.20:5000`, son adresse est
+   `192.168.1.20`. (Sur Synology : **Panneau de configuration** > **Réseau** > **Interface réseau**.)
+2. Dans ton navigateur, ouvre cette adresse suivie de **`:8000`** :
 
-## 3. Créer ton compte
+   ```
+   http://192.168.1.20:8000
+   ```
 
-Les inscriptions depuis l'app sont fermées : les comptes se créent dans le tableau de bord.
+3. Tu dois voir une page **ÉLAN · Serveur personnel**, avec la mention **« ✓ Le serveur fonctionne »**
+   et, en dessous, **l'adresse à saisir dans l'app**. Garde cette page ouverte.
 
-1. **Authentication** > **Users** > **Add user** > **Create new user**.
-2. Ton e-mail et **le mot de passe que tu utiliseras dans l'app**.
-3. Coche **Auto Confirm User**, puis **Create user**.
+Si la page ne s'affiche pas, va à la section [Si quelque chose ne va pas](#si-quelque-chose-ne-va-pas).
 
-Même chose pour chaque personne de ta famille qui utilisera ce serveur. Chacun ne voit que ses courses.
+## Étape 4 : relier l'app et créer ton compte
 
-## 4. Brancher l'app
-
-1. Installe l'app :
-   - **Android** : ouvre `ELAN-vX.apk` et accepte l'installation (application hors Play Store) ;
+1. Installe l'app ÉLAN.
+   - **Android** : ouvre `ELAN-vX.apk` et accepte l'installation (l'app ne vient pas du Play Store,
+     Android demande donc une autorisation : c'est normal).
    - **Windows** : double-clique sur `ELAN-Installation-vX.exe`. Windows affiche « Windows a protégé
-     votre ordinateur » (installateur non signé) : **Informations complémentaires** > **Exécuter
-     quand même**, puis **Installer**.
-2. Sur l'écran de connexion, touche **Serveur : Serveur ÉLAN** tout en bas.
-3. Choisis **Mon serveur**, puis remplis :
-   - **Adresse du serveur** : `http://192.168.1.20:8000`
-   - **Clé publique** : la longue clé de `connexion-app.txt`
+     votre ordinateur » : clique sur **Informations complémentaires**, puis **Exécuter quand même**.
+2. Ouvre l'app. Sur l'écran de connexion, touche **Serveur : Serveur ÉLAN**, tout en bas.
+3. Choisis **Mon serveur** et saisis l'adresse affichée par la page de l'étape 3,
+   par exemple `http://192.168.1.20:8000`. (Sur la page, le bouton **Copier l'adresse** évite de la retaper.)
+4. Touche **Vérifier et enregistrer**. L'app contacte ton serveur.
+5. L'app te propose de créer le **premier compte** : choisis ton e-mail et un mot de passe
+   (8 caractères au moins). Ce compte est le **propriétaire du serveur**.
 
-   Astuce : envoie-toi `connexion-app.txt` (rien de secret dedans) et utilise les boutons **Coller**.
-   À faire sur chaque appareil (téléphone et PC) ; ensuite, ils se synchronisent entre eux.
-4. **Vérifier et enregistrer** : l'app contacte le serveur avant d'accepter.
-5. Connecte-toi avec l'e-mail et le mot de passe de l'étape 3.
+Tu es connecté : tes courses s'enregistrent maintenant chez toi.
 
-Dans **Réglages**, la ligne *Serveur : 192.168.1.20:8000* confirme que tu es sur ton serveur.
-Pour changer de serveur : se déconnecter, puis **Serveur** sur l'écran de connexion.
+Sur un **second appareil** (ton ordinateur, par exemple), refais les points 1 à 4, puis connecte-toi
+avec le même e-mail et le même mot de passe : tes courses s'y affichent.
 
-| Message de l'app | Que faire |
-|---|---|
-| Serveur injoignable | VPN actif ? Adresse et port exacts ? Serveur démarré ? |
-| Le serveur refuse cette clé | Recopie la clé publique en entier, depuis `connexion-app.txt` |
-| La base n'est pas prête | Regarde le journal du conteneur **migrations** |
-| Ce n'est pas un serveur ÉLAN | Mauvais port (8000 par défaut) |
-| L'adresse doit commencer par https:// | En http, seules les adresses du réseau local ou du VPN sont acceptées |
+> L'e-mail ne sert que d'identifiant. Le serveur n'envoie jamais d'e-mail et ne vérifie pas l'adresse.
 
-## Hors de chez toi
+## Étape 5 (facultative) : ajouter tes proches
 
-- **VPN connecté** : l'app fonctionne comme à la maison.
-- **Sans VPN** : l'app marche hors ligne ; tes ajouts partent dès que le serveur est de nouveau joignable.
-- **N'ouvre pas le port 8000 sur Internet** (pas de redirection de port sur la box). Pour un accès
-  sans VPN, il faut une adresse **https** derrière le proxy inverse du NAS ; l'app refuse le http
-  sur Internet, car le mot de passe y circulerait en clair.
+Chaque personne a son propre compte et ne voit **que ses propres courses**.
 
-Changer l'adresse plus tard : modifie seulement la ligne `ADRESSE_SERVEUR` de `.env`, redémarre le
-projet, puis mets à jour l'adresse dans l'app. Ne touche pas aux autres lignes de `.env` : changer
-une clé couperait l'accès aux données.
+1. Dans l'app, connecté avec le compte propriétaire : **Réglages** > **Gérer les comptes**.
+2. **Ajouter un compte** : saisis l'e-mail de la personne et un mot de passe provisoire.
+3. Transmets-lui l'adresse du serveur, son e-mail et ce mot de passe. Elle suit l'étape 4
+   (sans le point 5), puis change son mot de passe dans **Réglages**.
 
-## Sauvegardes
-
-Le serveur ne remplace pas une sauvegarde : si le disque du NAS lâche, tout ce qui n'est que sur
-lui est perdu.
-
-- **Chaque nuit à 3 h**, une copie de la base (comptes et courses) est rangée dans
-  `donnees/sauvegardes`. Les 14 plus récentes sont gardées. Heure et nombre : lignes
-  `HEURE_SAUVEGARDE` et `SAUVEGARDES_A_GARDER` de `.env`.
-- **À inclure dans la sauvegarde du NAS** (Hyper Backup sur Synology, par exemple, vers un disque
-  externe ou un autre lieu) : `donnees/sauvegardes`, `donnees/fichiers` et le fichier `.env`.
-- **Copie immédiate** (avant une mise à jour par exemple) :
-  `docker compose exec sauvegarde sh /sauvegarder.sh maintenant`
-- **En plus**, l'app exporte toutes tes courses en Excel ou CSV : Réglages > Sauvegarde.
-
-### Restaurer
-
-Sur le NAS, en SSH, dans le dossier `elan-serveur`, serveur démarré :
-
-```bash
-sh systeme/restaurer.sh donnees/sauvegardes/elan-2026-10-09-0300.sql.gz
-```
-
-Les comptes et courses reviennent à l'état de la sauvegarde. Remets aussi `donnees/fichiers` depuis
-la sauvegarde du NAS si les photos ont été perdues. Dans l'app : reconnecte-toi, puis
-**Synchroniser maintenant**.
-
-## Mettre à jour
-
-À la réception d'un nouveau `ELAN-serveur-vX.zip` :
-
-1. Copie immédiate de la base (voir plus haut), par prudence.
-2. Copie le contenu du nouveau `elan-serveur` **par-dessus** l'ancien. Le paquet ne contient ni `.env`
-   ni `donnees` : tes réglages et tes données restent en place.
-3. Redémarre : Container Manager > **Projet** > `elan` > **Action** > **Construire**, ou en SSH
-   `docker compose pull && docker compose up -d`.
-
-Les changements de structure de la base s'appliquent tout seuls au démarrage (conteneur **migrations**).
-
-## Mot de passe oublié
-
-Tableau de bord > **SQL Editor**, puis (en remplaçant le mot de passe et l'e-mail) :
-
-```sql
-update auth.users
-set encrypted_password = extensions.crypt('NouveauMotDePasse', extensions.gen_salt('bf'))
-where email = 'personne@exemple.fr';
-```
-
-## Commandes utiles (SSH, dans le dossier `elan-serveur`)
-
-| | |
-|---|---|
-| `docker compose ps` | état des services |
-| `docker compose logs -f` | journaux en direct (Ctrl+C pour quitter) |
-| `docker compose logs migrations` | résultat de la mise à jour de la base |
-| `docker compose restart` | redémarrer |
-| `docker compose down` | arrêter (les données restent) |
-
-## Ce qui tourne
-
-Une version réduite de **Supabase**, le logiciel libre qui fait aussi tourner le serveur ÉLAN en
-ligne : seulement ce dont l'app a besoin, sans e-mails ni service externe.
-
-| Service | Rôle |
-|---|---|
-| `api` | porte d'entrée unique, port 8000 : l'app et le tableau de bord |
-| `db` | base de données PostgreSQL |
-| `auth` | comptes et connexion |
-| `rest` | lecture et écriture des courses, chacun les siennes |
-| `storage` | photos et justificatifs, rangés par compte |
-| `studio`, `meta` | tableau de bord d'administration |
-| `migrations` | met la base à jour au démarrage, puis s'arrête |
-| `sauvegarde` | copie de la base chaque nuit |
+Depuis le même écran, le propriétaire peut **redonner un mot de passe** à quelqu'un qui a oublié le
+sien, ou **supprimer un compte** (ses courses et ses fichiers sont alors effacés du serveur).
 
 ---
 
-*Pour qui maintient ÉLAN* : le paquet est construit à chaque version par GitHub (workflow
-« Version ») à partir du dossier `serveur` du dépôt, et joint à la
-release. Il est testé de bout en bout par le workflow « Serveur auto-hébergé ».
+## Utiliser ÉLAN hors de chez toi
+
+L'adresse `192.168.…` ne fonctionne que **chez toi**, sur ton réseau.
+
+- **Sans rien faire** : dehors, l'app fonctionne quand même. Elle garde tes ajouts et les envoie au
+  serveur dès que tu rentres. C'est suffisant pour la plupart des usages.
+- **Avec un VPN vers chez toi** (WireGuard, Tailscale, le VPN de ta box ou de ton NAS) : l'app
+  synchronise partout, comme à la maison, tant que le VPN est actif.
+
+> **N'ouvre pas le port 8000 sur Internet** (pas de « redirection de port » sur ta box). Ton mot de
+> passe y circulerait en clair. L'app refuse d'ailleurs une adresse `http://` qui n'est pas celle
+> d'un réseau privé.
+
+## Tes données et leur sauvegarde
+
+Tout est dans **un seul dossier**, nommé **`donnees`**, à côté de `docker-compose.yml` :
+
+```
+docker/
+  elan/
+    docker-compose.yml
+    donnees/            <- comptes, courses, photos, justificatifs
+      backups/          <- une copie complète par nuit, les 7 dernières
+```
+
+- **Chaque nuit à 3 h**, le serveur range tout seul une copie complète dans `donnees/backups`
+  (un fichier `.zip` par nuit, les 7 plus récents sont gardés).
+- **Mais** ces copies sont sur le même disque que le reste : si le disque du NAS lâche, tout est perdu.
+  Inclus donc le dossier **`elan`** dans la sauvegarde habituelle de ton NAS vers un autre endroit
+  (sur Synology : **Hyper Backup**, vers un disque externe ou un service en ligne).
+- En plus, l'app sait exporter toutes tes courses en Excel : **Réglages** > **Sauvegarde**.
+
+### Retrouver ses données après un problème
+
+1. Arrête le serveur (Synology : **Container Manager** > **Projet** > `elan` > **Action** > **Arrêter**).
+2. Remets le dossier `donnees` tel qu'il était dans ta sauvegarde, à côté de `docker-compose.yml`.
+   (À partir d'un fichier de `backups` : vide `donnees`, puis dézippe ce fichier à l'intérieur.)
+3. Redémarre (**Action** > **Démarrer**). Dans l'app : **Réglages** > **Synchroniser maintenant**.
+
+### Changer de NAS
+
+Copie le dossier `elan` entier (avec `donnees`) sur le nouveau NAS et refais l'étape 2. Dans l'app,
+indique la nouvelle adresse (se déconnecter, puis **Serveur** sur l'écran de connexion).
+
+## Mettre à jour le serveur
+
+Les mises à jour sont rares. Tes données ne bougent pas : elles sont dans `donnees`.
+
+- **Synology** : **Container Manager** > **Projet** > `elan` > **Action** > **Arrêter**. Puis onglet
+  **Image** : sélectionne `ghcr.io/drekstord/elan-serveur`, **Action** > **Mettre à jour**. Reviens à
+  **Projet** > `elan` > **Action** > **Construire**.
+  (Selon la version de ton NAS, les intitulés peuvent varier légèrement.)
+- **Ligne de commande** : `docker compose pull`, puis `docker compose up -d`.
+
+Si l'app affiche « Ce serveur est plus récent que l'app », mets l'app à jour.
+Si elle affiche « Serveur pas à jour », mets le serveur à jour.
+
+---
+
+## Si quelque chose ne va pas
+
+| Ce que tu vois | Ce qu'il faut vérifier |
+|---|---|
+| La page `http://…:8000` ne s'ouvre pas | Le projet `elan` a-t-il sa pastille verte ? L'adresse est-elle bien celle du NAS ? As-tu bien mis `:8000` à la fin, et `http://` (pas `https://`) au début ? Ton ordinateur est-il sur le même réseau que le NAS ? |
+| Le projet ne démarre pas : « port déjà utilisé » (*port is already allocated*) | Un autre programme du NAS occupe le port 8000. Ouvre `docker-compose.yml` avec le Bloc-notes, remplace `"8000:8000"` par `"8010:8000"`, enregistre, puis relance le projet. Ton adresse se termine alors par `:8010`. |
+| L'app dit « Serveur injoignable » | Le téléphone est-il sur le Wi-Fi de la maison (ou le VPN est-il actif) ? Ouvre l'adresse dans le navigateur **du téléphone** : si la page ÉLAN ne s'affiche pas, le problème vient du réseau, pas de l'app. |
+| L'app dit « Ce n'est pas un serveur ÉLAN » | L'adresse mène à autre chose (souvent l'interface du NAS). Vérifie le `:8000` à la fin. |
+| L'app dit « L'adresse doit commencer par https:// » | Tu as saisi un nom de domaine Internet. Utilise l'adresse locale du NAS (`http://192.168.…:8000`). |
+| L'app ne propose pas de créer un compte | Le premier compte existe déjà. Connecte-toi, ou demande un compte au propriétaire (étape 5). |
+| Un proche a oublié son mot de passe | Le propriétaire lui en redonne un : **Réglages** > **Gérer les comptes**. |
+| Le **propriétaire** a oublié son mot de passe | Voir « Mot de passe du propriétaire perdu », ci-dessous. |
+
+### Mot de passe du propriétaire perdu
+
+C'est le seul cas qui demande une commande. Sur Synology : **Container Manager** > **Conteneur** >
+`elan` > **Action** > **Ouvrir le terminal** > **Créer**, puis tape (en choisissant ton propre mot de passe) :
+
+```bash
+/pb/pocketbase superuser upsert secours@exemple.fr UnMotDePasseDeSecours --dir=/donnees
+```
+
+Ouvre ensuite `http://192.168.1.20:8000/_/` dans ton navigateur, connecte-toi avec
+`secours@exemple.fr` et ce mot de passe. Dans **users**, clique sur ton compte, saisis un nouveau
+mot de passe dans **Password** et **Password confirm**, puis **Save changes**.
+
+## Questions fréquentes
+
+**Combien de place faut-il ?** Le serveur lui-même : quelques dizaines de Mo. Une course avec ses deux
+photos : environ 0,5 Mo. Compte quelques Go pour mille courses, les 7 sauvegardes comprises.
+
+**Le serveur consomme-t-il beaucoup ?** Non : moins de 100 Mo de mémoire et presque pas de processeur.
+
+**Qui peut voir mes courses ?** Dans l'app, seulement toi : chaque compte ne voit que ses propres
+courses et ses propres fichiers. Le propriétaire gère les comptes, il ne lit pas les courses des
+autres. En revanche, la personne qui administre le NAS a accès aux fichiers de son disque, comme
+pour tout ce qui y est rangé.
+
+**Et si mon NAS est éteint ?** L'app continue de fonctionner sur chaque appareil. La synchronisation
+entre tes appareils reprend quand le NAS est rallumé.
+
+**Comment tout désinstaller ?** Synology : **Projet** > `elan` > **Action** > **Supprimer**. Tes données
+restent dans le dossier `donnees` tant que tu ne le supprimes pas toi-même.
+
+**Puis-je revenir au serveur ÉLAN en ligne ?** Dans l'app : se déconnecter, **Serveur**, puis
+**Serveur ÉLAN**. Les deux serveurs sont indépendants : les courses ne passent pas de l'un à l'autre.
+
+## Pour les curieux
+
+Le serveur est un seul conteneur, construit sur **PocketBase**, un logiciel libre qui réunit en un
+petit programme la gestion des comptes, des données, des fichiers et des sauvegardes. Les données
+sont dans une base SQLite, un simple fichier du dossier `donnees`. Le serveur n'envoie aucun e-mail,
+ne contacte aucun service extérieur et n'a besoin d'Internet que pour être téléchargé.
+
+Le code de ce serveur est dans le dossier `serveur/image` du projet ÉLAN. Il est testé de bout en
+bout à chaque modification : démarrage, comptes, cloisonnement entre comptes, synchronisation avec
+l'app, fichiers, redémarrage, sauvegarde.
