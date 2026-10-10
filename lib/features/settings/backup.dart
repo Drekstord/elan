@@ -28,7 +28,7 @@ List<_Column> _columns(AppLocalizations t, DateTime today) {
   return [
     _Column(t.backupDate, 12, (c) => XCell.date(c.raceDate)),
     _Column(t.backupCourse, 32, (c) => txt(c.title)),
-    _Column(t.backupType, 20, (c) => txt(c.type.label(t))),
+    _Column(t.backupType, 20, (c) => txt(c.typeLabel(t))),
     _Column(t.backupStatus, 16, (c) => txt(c.statusOn(today).label(t))),
     _Column(t.backupDistance, 13, (c) => XCell.number(c.distanceM / 1000, XFormat.km)),
     _Column(
@@ -39,7 +39,7 @@ List<_Column> _columns(AppLocalizations t, DateTime today) {
     _Column(
       t.backupPace,
       12,
-      (c) => c.hasTime
+      (c) => c.paceSecondsPerKm != null
           ? XCell.text(formatPace(c.paceSecondsPerKm).replaceAll(' /km', ''), center: true)
           : const XCell.empty(XFormat.center),
     ),
@@ -67,6 +67,8 @@ List<_Column> _columns(AppLocalizations t, DateTime today) {
     _Column(t.backupNotes, 40, (c) => txt(c.notes)),
     _Column(t.backupCreated, 12, (c) => XCell.date(c.createdAt)),
     _Column(t.backupUpdated, 12, (c) => XCell.date(c.updatedAt)),
+    // En dernier : les colonnes existantes gardent leur place dans les classeurs déjà faits.
+    _Column(t.backupDisciplines, 44, (c) => txt(c.multisport == null ? '' : multisportSummary(c.multisport!, t))),
   ];
 }
 

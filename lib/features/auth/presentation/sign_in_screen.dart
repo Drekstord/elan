@@ -107,19 +107,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Réduit au besoin (téléphone étroit, textes agrandis) au lieu de déborder.
-                    const FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Wordmark(size: 72),
-                    ),
+                    const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Wordmark(size: 72)),
                     const SizedBox(height: Space.md),
                     Kicker(t.appTagline, color: theme.colorScheme.onSurface, size: 18),
                     const SizedBox(height: Space.xl),
                     if (_firstAccount) ...[
-                      Semantics(
-                        header: true,
-                        child: Text(t.firstAccountTitle, style: theme.textTheme.titleLarge),
-                      ),
+                      Semantics(header: true, child: Text(t.firstAccountTitle, style: theme.textTheme.titleLarge)),
                       const SizedBox(height: Space.sm),
                       Text(t.firstAccountIntro),
                     ] else

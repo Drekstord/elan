@@ -3,7 +3,12 @@ import 'course.dart';
 /// Totaux sportifs. Seules les courses terminées comptent.
 class CourseStats {
   final int count;
+
+  /// Kilomètres courus (course à pied seulement pour une épreuve enchaînée).
   final int distanceM;
+
+  /// Distance parcourue toutes disciplines confondues (bilans, engagement solidaire).
+  final int totalDistanceM;
 
   /// Durée cumulée des courses chronométrées.
   final int durationS;
@@ -12,38 +17,58 @@ class CourseStats {
   /// Distance des seules courses chronométrées, pour une allure moyenne juste.
   final int timedDistanceM;
 
+  /// Durée des courses à pied chronométrées (base de l'allure moyenne).
+  final int pacedDurationS;
+
   const CourseStats({
     required this.count,
     required this.distanceM,
+    required this.totalDistanceM,
     required this.durationS,
     required this.elevationGainM,
     required this.timedDistanceM,
+    required this.pacedDurationS,
   });
 
-  static const empty = CourseStats(count: 0, distanceM: 0, durationS: 0, elevationGainM: 0, timedDistanceM: 0);
+  static const empty = CourseStats(
+    count: 0,
+    distanceM: 0,
+    totalDistanceM: 0,
+    durationS: 0,
+    elevationGainM: 0,
+    timedDistanceM: 0,
+    pacedDurationS: 0,
+  );
 
   factory CourseStats.of(Iterable<Course> courses) {
-    var count = 0, distance = 0, duration = 0, elevation = 0, timedDistance = 0;
+    var count = 0, distance = 0, totalDistance = 0, duration = 0, elevation = 0, timedDistance = 0, pacedDuration = 0;
     for (final c in courses.where((c) => c.isCompleted)) {
       count++;
-      distance += c.distanceM;
+      distance += c.runDistanceM;
+      totalDistance += c.distanceM;
       elevation += c.elevationGainM ?? 0;
       if (c.hasTime) {
         duration += c.durationS;
-        timedDistance += c.distanceM;
+        // Une épreuve enchaînée n'a pas d'allure de course à pied : hors de la moyenne.
+        if (!c.isMultisport) {
+          timedDistance += c.distanceM;
+          pacedDuration += c.durationS;
+        }
       }
     }
     return CourseStats(
       count: count,
       distanceM: distance,
+      totalDistanceM: totalDistance,
       durationS: duration,
       elevationGainM: elevation,
       timedDistanceM: timedDistance,
+      pacedDurationS: pacedDuration,
     );
   }
 
   /// Allure moyenne pondérée par la distance, en secondes par km.
-  double? get averagePaceSecondsPerKm => timedDistanceM > 0 ? durationS / (timedDistanceM / 1000) : null;
+  double? get averagePaceSecondsPerKm => timedDistanceM > 0 ? pacedDurationS / (timedDistanceM / 1000) : null;
 }
 
 /// Un point de série temporelle (mois ou année) et les courses terminées qui le composent.
@@ -55,7 +80,7 @@ class PeriodTotal {
   const PeriodTotal(this.start, [this.courses = const []]);
 
   int get count => courses.length;
-  int get distanceM => courses.fold(0, (sum, c) => sum + c.distanceM);
+  int get distanceM => courses.fold(0, (sum, c) => sum + c.runDistanceM);
   int get donationCents => courses.fold(0, (sum, c) => sum + c.donationCents);
   CourseStats get stats => CourseStats.of(courses);
 }
@@ -107,7 +132,10 @@ List<(int day, int meters)> cumulativeDistance(Iterable<Course> courses, int yea
   final ofYear = courses.where((c) => c.isCompleted && c.raceDate.year == year).toList()
     ..sort((a, b) => a.raceDate.compareTo(b.raceDate));
   var total = 0;
-  return [(0, 0), for (final c in ofYear) (c.raceDate.difference(DateTime.utc(year)).inDays + 1, total += c.distanceM)];
+  return [
+    (0, 0),
+    for (final c in ofYear) (c.raceDate.difference(DateTime.utc(year)).inDays + 1, total += c.runDistanceM),
+  ];
 }
 
 /// Allure des courses officielles terminées et chronométrées, dans l'ordre chronologique.

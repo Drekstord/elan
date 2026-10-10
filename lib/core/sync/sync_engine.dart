@@ -160,6 +160,9 @@ String describeSyncError(Object error) {
       return 'Table « courses » introuvable : base du serveur pas à jour (supabase/001_schema.sql).';
     }
     if (error.code == '42501') return 'Accès refusé par le serveur (règles RLS).';
+    if (error.code == 'PGRST204' && error.message.contains('multisport')) {
+      return 'Triathlons non enregistrés sur le serveur : base pas à jour (supabase/003_multisport.sql).';
+    }
     if (error.code == 'PGRST204' && error.message.contains('documents')) {
       return 'Colonne « documents » absente : base du serveur pas à jour (supabase/002_justificatifs.sql).';
     }

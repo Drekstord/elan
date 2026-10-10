@@ -1,7 +1,6 @@
 import '../domain/course.dart';
 import 'gpx_parser.dart';
 
-
 /// Import de plusieurs traces GPX d'un coup (export Garmin, Strava…) : une course par trace.
 class GpxBatchResult {
   /// Courses à enregistrer.
@@ -31,9 +30,7 @@ GpxBatchResult coursesFromGpx(
   required String Function() newId,
   required String Function(DateTime day) defaultTitle,
 }) {
-  final known = [
-    for (final c in existing.where((c) => !c.isDeleted)) (c.raceDate, c.distanceM),
-  ];
+  final known = [for (final c in existing.where((c) => !c.isDeleted)) (c.raceDate, c.distanceM)];
   final created = <Course>[];
   var duplicates = 0;
   var undated = 0;

@@ -50,9 +50,16 @@ Même procédure pour chaque proche (ils pourront changer leur mot de passe dans
 Les justificatifs (factures d'inscription…) demandent une colonne de plus et l'accès aux PDF
 dans le stockage. **Une seule fois, avant d'installer la version 2.6 :**
 SQL Editor > New query > coller le contenu de [`supabase/002_justificatifs.sql`](../supabase/002_justificatifs.sql) > **Run**.
-(Ce fichier s'appelait `003_justificatifs.sql` jusqu'à la version 2.7 : déjà passé, rien à refaire.)
 Le script ne touche à aucune donnée existante et peut être relancé sans risque.
 (Une installation neuve avec `001_schema.sql` l'inclut déjà.)
+
+## Mise à jour : triathlons, duathlons, aquathlons (version 2.10)
+
+Les épreuves enchaînées demandent une colonne de plus. **Une seule fois :**
+SQL Editor > New query > coller le contenu de [`supabase/003_multisport.sql`](../supabase/003_multisport.sql) > **Run**.
+Tant que ce n'est pas fait, tout le reste de l'app se synchronise normalement ; seuls les triathlons
+restent sur l'appareil, avec un message qui le signale dans Réglages.
+(Une installation neuve avec `001_schema.sql` l'inclut déjà. Les serveurs personnels n'ont rien à faire.)
 
 ## Facultatif : courses de l'ancienne table cloud
 

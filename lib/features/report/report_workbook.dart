@@ -23,10 +23,10 @@ Uint8List reportWorkbook(EngagementReport r, AppLocalizations t) {
         [
           XCell.date(c.raceDate),
           XCell.text(c.title),
-          XCell.text(c.type.label(t)),
+          XCell.text(c.typeLabel(t)),
           XCell.number(c.distanceM / 1000, XFormat.km),
           c.hasTime ? XCell.text(formatDuration(c.durationS), center: true) : const XCell.empty(XFormat.center),
-          c.hasTime
+          c.paceSecondsPerKm != null
               ? XCell.text(formatPace(c.paceSecondsPerKm).replaceAll(' /km', ''), center: true)
               : const XCell.empty(XFormat.center),
           c.elevationGainM == null
@@ -45,7 +45,7 @@ Uint8List reportWorkbook(EngagementReport r, AppLocalizations t) {
       XCell.text(t.reportTotal),
       XCell.text(t.periodCount(r.courses.length)),
       const XCell.empty(),
-      XCell.sum(s.distanceM / 1000, XFormat.km),
+      XCell.sum(s.totalDistanceM / 1000, XFormat.km),
       XCell.text(s.durationS > 0 ? formatLongDuration(s.durationS) : '', center: true),
       const XCell.empty(XFormat.center),
       XCell.sum(s.elevationGainM, XFormat.integer),

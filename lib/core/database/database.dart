@@ -19,6 +19,9 @@ class Courses extends Table {
   IntColumn get distanceM => integer()();
   IntColumn get durationS => integer()();
   IntColumn get elevationGainM => integer().nullable()();
+
+  /// Épreuve enchaînée, en JSON ([Multisport]) ; null pour les autres types.
+  TextColumn get multisport => text().nullable()();
   IntColumn get teamSize => integer().nullable()();
   IntColumn get challengeDistanceM => integer().nullable()();
   BoolColumn get isCharity => boolean()();
@@ -81,7 +84,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.inMemory() => AppDatabase(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -90,12 +93,19 @@ class AppDatabase extends _$AppDatabase {
         // v2 : course à venir, collecte ; suppression du taux d'impact par km.
         // La table est recréée au schéma actuel : toutes les colonnes postérieures à v1 sont nouvelles.
         await m.alterTable(
-          TableMigration(courses, newColumns: [courses.isPlanned, courses.fundraisingCents, courses.documents]),
+          TableMigration(
+            courses,
+            newColumns: [courses.isPlanned, courses.fundraisingCents, courses.documents, courses.multisport],
+          ),
         );
       }
       if (from >= 2 && from < 3) {
         // v3 : justificatifs.
         await m.addColumn(courses, courses.documents);
+      }
+      if (from >= 2 && from < 4) {
+        // v4 : épreuves enchaînées (triathlon, duathlon, aquathlon).
+        await m.addColumn(courses, courses.multisport);
       }
     },
   );
@@ -123,6 +133,7 @@ class AppDatabase extends _$AppDatabase {
     distanceM: r.distanceM,
     durationS: r.durationS,
     elevationGainM: r.elevationGainM,
+    multisport: r.multisport == null ? null : Multisport.tryFromJson(jsonDecode(r.multisport!)),
     teamSize: r.teamSize,
     challengeDistanceM: r.challengeDistanceM,
     isCharity: r.isCharity,
@@ -153,6 +164,7 @@ class AppDatabase extends _$AppDatabase {
     distanceM: c.distanceM,
     durationS: c.durationS,
     elevationGainM: Value(c.elevationGainM),
+    multisport: Value(c.multisport == null ? null : jsonEncode(c.multisport!.toJson())),
     teamSize: Value(c.teamSize),
     challengeDistanceM: Value(c.challengeDistanceM),
     isCharity: c.isCharity,

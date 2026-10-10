@@ -33,7 +33,7 @@ String reportProse(EngagementReport r, AppLocalizations t) {
   final challenges = r.courses.where((c) => c.type == CourseType.theConqueror).toList();
   paragraphs.add(
     [
-      t.reportProseIntro(s.count, from, to, formatKm(s.distanceM, decimals: 1)),
+      t.reportProseIntro(s.count, from, to, formatKm(s.totalDistanceM, decimals: 1)),
       if (impact.charityCount == 0)
         t.reportProseNoCharity
       else if (impact.charityCount == s.count)
@@ -133,7 +133,7 @@ String reportText(EngagementReport r, AppLocalizations t) {
   lines
     ..add('')
     ..add(t.reportSectionSport)
-    ..add('• ${t.reportSportLine(s.count, formatKm(s.distanceM, decimals: 1))}');
+    ..add('• ${t.reportSportLine(s.count, formatKm(s.totalDistanceM, decimals: 1))}');
   if (s.durationS > 0) lines.add('• ${t.reportTimeLine(formatLongDuration(s.durationS))}');
   if (s.elevationGainM > 0) lines.add('• ${t.reportElevationLine(formatMeters(s.elevationGainM))}');
   if (s.averagePaceSecondsPerKm != null) lines.add('• ${t.reportPaceLine(formatPace(s.averagePaceSecondsPerKm))}');
@@ -150,10 +150,10 @@ String reportTable(EngagementReport r, AppLocalizations t) {
       [
         DateFormat('dd/MM/yyyy').format(c.raceDate),
         c.title,
-        c.type.label(t),
+        c.typeLabel(t),
         num(c.distanceM / 1000),
         c.hasTime ? formatDuration(c.durationS) : '',
-        c.hasTime ? formatPace(c.paceSecondsPerKm).replaceAll(' /km', '') : '',
+        c.paceSecondsPerKm != null ? formatPace(c.paceSecondsPerKm).replaceAll(' /km', '') : '',
         c.elevationGainM == null ? '' : '${c.elevationGainM}',
         c.isCharity ? (c.associationName ?? '') : '',
         c.isCharity ? (c.associationCause?.label(t) ?? '') : '',

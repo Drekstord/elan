@@ -27,6 +27,7 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 | 20 | Avertissement « nouvelle version disponible » | ✅ terminé |
 | 21 | Serveur personnel refait : un seul conteneur, zéro réglage | ✅ terminé |
 | 22 | Dépôt public sous licence libre (GPL-3.0) | ✅ terminé |
+| 23 | Triathlon, duathlon, aquathlon | ✅ terminé |
 
 Écartés : objectifs annuels (non souhaités).
 
@@ -62,7 +63,7 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 
 ## 4. Export de sauvegarde (CSV + Excel) ✅
 
-- Toutes les courses (à venir comprises), 23 colonnes, en **CSV** (format français : « ; », virgule
+- Toutes les courses (à venir comprises), 24 colonnes, en **CSV** (format français : « ; », virgule
   décimale, UTF-8 avec BOM) et en **Excel** mis en forme.
 - Accès depuis Réglages. Indépendant du cloud : une copie que l'on garde soi-même.
 
@@ -217,3 +218,23 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 - Vie privée : le dépôt public ne reçoit qu'un commit par version, jamais l'historique de travail
   (gardé dans un dépôt privé). `scripts/publier.sh` fait la publication et refuse de partir si le
   code contient une adresse de serveur, une clé ou un fichier personnel.
+
+## 23. Triathlon, duathlon, aquathlon ✅
+
+- Un troisième type de course, à côté de « Course » et « Défi » : triathlon, duathlon (course, vélo,
+  course) ou aquathlon (natation, course).
+- **Saisie** : un format (XXS à XL, ou libre) préremplit les distances, toutes modifiables ; un temps
+  par discipline et par transition, ou seulement le temps total.
+- **Transitions comptées dans les disciplines** : pour les chronos qui n'isolent pas les transitions
+  (T1 dans la natation, T2 dans le vélo). Les deux temps concernés portent la mention « transition
+  comprise », car leur rythme est alors un peu sous-estimé.
+- **Fiche** : temps total, puis chaque discipline dans son unité (allure aux 100 m en natation, km/h
+  à vélo, allure au km à pied), les transitions et la répartition du temps.
+- **Kilomètres courus** (accueil, Évolution, widget) : seule la course à pied compte. **Engagement
+  solidaire** (parrainage au kilomètre, bilans) : les trois disciplines comptent.
+- **Records** : meilleur temps par épreuve et format (« Triathlon S »…), à part des records de course
+  à pied. Filtre « Triathlons » dans la liste, affiché seulement si une épreuve enchaînée existe.
+- Carte de partage, bilans et sauvegarde Excel/CSV (une colonne « Disciplines » en plus, en dernier).
+- Serveur en ligne : exécuter une fois `supabase/003_multisport.sql` (voir [CLOUD.md](CLOUD.md)) ;
+  en attendant, le reste de l'app se synchronise normalement. Serveurs personnels : rien à faire.
+- **Corrigé au passage** : modifier une course lui faisait perdre ses justificatifs (depuis la 2.6).

@@ -99,9 +99,7 @@ void main() {
     expect(await gateway.pullSince(cursor), isEmpty);
 
     // Un autre appareil envoie une version plus ancienne : ignorée.
-    await gateway.upsertCourses([
-      course.copyWith(title: 'Version périmée', updatedAt: DateTime.utc(2026, 9, 21, 9)),
-    ]);
+    await gateway.upsertCourses([course.copyWith(title: 'Version périmée', updatedAt: DateTime.utc(2026, 9, 21, 9))]);
     expect(await gateway.pullSince(cursor), isEmpty);
 
     // Une version plus récente : acceptée, et seule renvoyée depuis le repère.
@@ -131,6 +129,33 @@ void main() {
     for (var i = 1; i < all.length; i++) {
       expect(all[i].serverUpdatedAt.isAfter(all[i - 1].serverUpdatedAt), isTrue, reason: 'ordre strict ($i)');
     }
+  });
+
+  test('triathlon : disciplines et transitions conservées telles quelles par le serveur', () async {
+    final triathlon = Course(
+      id: 'app-triathlon',
+      title: 'Triathlon de Démoville',
+      raceDate: calendarDate(2026, 6, 14),
+      type: CourseType.multisport,
+      distanceM: 6700,
+      durationS: 1680,
+      multisport: Multisport(
+        kind: MultisportKind.triathlon,
+        format: 'XXS',
+        legs: const [
+          Leg(sport: Sport.swim, distanceM: 200, durationS: 420),
+          Leg(sport: Sport.bike, distanceM: 5000, durationS: 780),
+          Leg(sport: Sport.run, distanceM: 1500, durationS: 480),
+        ],
+        transitionsIncluded: true,
+      ),
+    );
+    await owner.gateway.upsertCourses([triathlon]);
+    final back = (await owner.gateway.pullSince(null)).singleWhere((r) => r.course.id == 'app-triathlon').course;
+    expect(back.type, CourseType.multisport);
+    expect(back.multisport, triathlon.multisport);
+    expect(back.runDistanceM, 1500);
+    expect(back.durationS, 1680);
   });
 
   test('fichiers : envoi, lecture, remplacement, suppression', () async {
@@ -178,7 +203,12 @@ void main() {
 
     // Ses propres données.
     await proche.gateway.upsertCourses([
-      Course(id: 'proche-1', title: 'Trail des Monts Imaginaires', raceDate: calendarDate(2026, 6, 14), distanceM: 22500),
+      Course(
+        id: 'proche-1',
+        title: 'Trail des Monts Imaginaires',
+        raceDate: calendarDate(2026, 6, 14),
+        distanceM: 22500,
+      ),
     ]);
     expect((await proche.gateway.pullSince(null)).single.course.title, 'Trail des Monts Imaginaires');
     expect((await owner.gateway.pullSince(null)).any((r) => r.course.id == 'proche-1'), isFalse);

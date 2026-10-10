@@ -37,10 +37,10 @@ String reportTableHtml(EngagementReport r, AppLocalizations t) {
     final cells = [
       formatDay(c.raceDate),
       c.title,
-      c.type.label(t),
+      c.typeLabel(t),
       formatKm(c.distanceM, decimals: 2).replaceAll(' km', ''),
       c.hasTime ? formatDuration(c.durationS) : '',
-      c.hasTime ? formatPace(c.paceSecondsPerKm).replaceAll(' /km', '') : '',
+      c.paceSecondsPerKm != null ? formatPace(c.paceSecondsPerKm).replaceAll(' /km', '') : '',
       c.elevationGainM == null ? '' : '${c.elevationGainM}',
       c.isCharity ? (c.associationName ?? '') : '',
       c.isCharity ? (c.associationCause?.label(t) ?? '') : '',
@@ -61,7 +61,7 @@ String reportTableHtml(EngagementReport r, AppLocalizations t) {
       t.reportTotal,
       t.periodCount(r.courses.length),
       '',
-      formatKm(s.distanceM, decimals: 2).replaceAll(' km', ''),
+      formatKm(s.totalDistanceM, decimals: 2).replaceAll(' km', ''),
       s.durationS > 0 ? formatLongDuration(s.durationS) : '',
       '',
       s.elevationGainM > 0 ? '${s.elevationGainM}' : '',
@@ -148,13 +148,13 @@ String reportTableHtmlWord(EngagementReport r, AppLocalizations t) {
     final declared = c.isCharity && quantity != null && quantity > 0 && c.impactMetric != ImpactMetric.euroDirect;
     final perf = [
       if (c.hasTime) formatDuration(c.durationS),
-      if (c.hasTime) formatPace(c.paceSecondsPerKm),
+      if (c.paceSecondsPerKm != null) formatPace(c.paceSecondsPerKm),
       if ((c.elevationGainM ?? 0) > 0) 'D+ ${formatMeters(c.elevationGainM!)}',
     ].join(' · ');
     rows
       ..write('<tr>')
       ..write(cell(0, '<span style="white-space:nowrap">${htmlEscape(formatDay(c.raceDate))}</span>', background: bg))
-      ..write(cell(1, line(c.title, c.type.label(t)), background: bg))
+      ..write(cell(1, line(c.title, c.typeLabel(t)), background: bg))
       ..write(cell(2, line(formatKm(c.distanceM, decimals: 2), perf), background: bg))
       ..write(cell(3, c.isCharity ? line(c.associationName ?? '', c.associationCause?.label(t)) : '', background: bg))
       ..write(
@@ -181,7 +181,9 @@ String reportTableHtmlWord(EngagementReport r, AppLocalizations t) {
       ..write('<tr>')
       ..write(tc(0, htmlEscape(t.reportTotal)))
       ..write(tc(1, htmlEscape(t.periodCount(r.courses.length))))
-      ..write(tc(2, line(formatKm(s.distanceM, decimals: 1), s.durationS > 0 ? formatLongDuration(s.durationS) : null)))
+      ..write(
+        tc(2, line(formatKm(s.totalDistanceM, decimals: 1), s.durationS > 0 ? formatLongDuration(s.durationS) : null)),
+      )
       ..write(tc(3, ''))
       ..write(
         tc(

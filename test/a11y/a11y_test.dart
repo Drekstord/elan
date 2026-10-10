@@ -83,6 +83,24 @@ final _courses = [
     impactQuantity: 4,
   ),
   Course(
+    id: 'tri',
+    title: 'Triathlon de Valfleuri',
+    raceDate: calendarDate(2026, 6, 14),
+    type: CourseType.multisport,
+    distanceM: 25750,
+    durationS: 5010,
+    multisport: Multisport(
+      kind: MultisportKind.triathlon,
+      format: 'S',
+      legs: const [
+        Leg(sport: Sport.swim, distanceM: 750, durationS: 900),
+        Leg(sport: Sport.bike, distanceM: 20000, durationS: 2400),
+        Leg(sport: Sport.run, distanceM: 5000, durationS: 1500),
+      ],
+      transitionsS: const [120, 90],
+    ),
+  ),
+  Course(
     id: 'lyon',
     title: 'Marathon de Mont-Fictif',
     isPlanned: true,
@@ -95,6 +113,8 @@ final _screens = <String, String>{
   'Courses': '/courses',
   'Fiche': '/courses/restos',
   'Formulaire': '/courses/nouvelle',
+  'Fiche triathlon': '/courses/tri',
+  'Formulaire triathlon': '/courses/tri/modifier',
   'Évolution': '/evolution',
   'Impact': '/impact',
   'Association': '/impact/association/${Uri.encodeComponent('Les Restos du Cœur')}',
@@ -120,6 +140,12 @@ GoRouter _router(String location) => GoRouter(
         GoRoute(
           path: ':id',
           builder: (_, s) => CourseDetailScreen(courseId: s.pathParameters['id']!),
+          routes: [
+            GoRoute(
+              path: 'modifier',
+              builder: (_, s) => CourseFormScreen(courseId: s.pathParameters['id']),
+            ),
+          ],
         ),
       ],
     ),

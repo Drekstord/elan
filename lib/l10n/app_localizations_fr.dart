@@ -1728,4 +1728,138 @@ class AppLocalizationsFr extends AppLocalizations {
   String accountsActions(String email) {
     return 'Actions pour $email';
   }
+
+  @override
+  String get typeMultisport => 'Triathlon, duathlon, aquathlon';
+
+  @override
+  String get typeShortOfficial => 'Course';
+
+  @override
+  String get typeShortConqueror => 'Défi';
+
+  @override
+  String get typeShortMultisport => 'Triathlon';
+
+  @override
+  String get kindMultisport => 'Triathlons';
+
+  @override
+  String get kindMultisportHint => 'Triathlons, duathlons et aquathlons';
+
+  @override
+  String get multisportTriathlon => 'Triathlon';
+
+  @override
+  String get multisportDuathlon => 'Duathlon';
+
+  @override
+  String get multisportAquathlon => 'Aquathlon';
+
+  @override
+  String get sportSwim => 'Natation';
+
+  @override
+  String get sportBike => 'Vélo';
+
+  @override
+  String get sportRun => 'Course à pied';
+
+  @override
+  String sportRunNumbered(int number) {
+    return 'Course à pied $number';
+  }
+
+  @override
+  String get multisportFormat => 'Format';
+
+  @override
+  String get multisportFormatFree => 'Libre';
+
+  @override
+  String get multisportFormatHint => 'Le format préremplit les distances. Corrige-les si ton épreuve était différente.';
+
+  @override
+  String get multisportLegDistance => 'Distance';
+
+  @override
+  String get multisportLegTime => 'Temps';
+
+  @override
+  String multisportTransition(int number) {
+    return 'Transition $number';
+  }
+
+  @override
+  String get multisportTransitionsIncluded => 'Transitions comptées dans les disciplines';
+
+  @override
+  String get multisportTransitionsIncludedHint =>
+      'À cocher si ton chrono n\'isole pas les transitions : chacune est alors comprise dans le temps de la discipline qui la précède.';
+
+  @override
+  String get multisportTotalTime => 'Temps total';
+
+  @override
+  String multisportTotalComputed(String time) {
+    return 'Laisse vide : calculé d\'après les temps ci-dessus ($time).';
+  }
+
+  @override
+  String get multisportTotalOnly => 'Tu peux saisir seulement le temps total si tu n\'as pas le détail.';
+
+  @override
+  String get multisportTransitionIncludedNote => 'transition comprise';
+
+  @override
+  String get multisportTransitions => 'Transitions';
+
+  @override
+  String get multisportBreakdown => 'Répartition du temps';
+
+  @override
+  String multisportRunShare(String run) {
+    return '$run de course à pied comptés dans tes kilomètres courus.';
+  }
+
+  @override
+  String get multisportEditResult => 'Saisir mes temps';
+
+  @override
+  String get issueLegDistance => 'Indique la distance de chaque discipline.';
+
+  @override
+  String get issueLegTimes => 'Renseigne le temps de chaque discipline, ou aucun (temps total seul).';
+
+  @override
+  String issueTotalBelowSplits(String time) {
+    return 'Le temps total est inférieur à la somme des disciplines ($time).';
+  }
+
+  @override
+  String get recordsMultisport => 'Triathlons, duathlons, aquathlons';
+
+  @override
+  String get recordsMultisportBest => 'Meilleur temps';
+
+  @override
+  String get swimPaceUnit => '/100 m';
+
+  @override
+  String get shareMultisportTotal => 'Temps total';
+
+  @override
+  String summaryMultisport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count épreuves enchaînées',
+      one: '1 épreuve enchaînée',
+      zero: 'Aucune épreuve enchaînée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupDisciplines => 'Disciplines (triathlon, duathlon, aquathlon)';
 }

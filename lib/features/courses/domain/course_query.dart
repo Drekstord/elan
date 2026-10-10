@@ -6,12 +6,14 @@ import 'course.dart';
 enum CourseKind {
   all,
   official,
-  challenge;
+  challenge,
+  multisport;
 
   bool matches(Course course) => switch (this) {
     CourseKind.all => true,
     CourseKind.official => course.type == CourseType.officialRace,
     CourseKind.challenge => course.type == CourseType.theConqueror,
+    CourseKind.multisport => course.type == CourseType.multisport,
   };
 }
 
@@ -107,7 +109,7 @@ class CourseSection {
   const CourseSection(this.kind, this.courses, {this.year});
 
   /// Distance des courses terminées du bloc.
-  int get distanceM => courses.fold(0, (sum, c) => sum + c.distanceM);
+  int get distanceM => courses.fold(0, (sum, c) => sum + c.runDistanceM);
 }
 
 /// Découpe une liste déjà triée par [CourseQuery.apply] :

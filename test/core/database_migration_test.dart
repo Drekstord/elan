@@ -48,9 +48,11 @@ void main() {
           raw.execute(_v2Courses);
           raw.execute('CREATE TABLE photo_ops (photo_key TEXT NOT NULL PRIMARY KEY, kind TEXT NOT NULL)');
           raw.execute('CREATE TABLE meta (name TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)');
-          raw.execute('''INSERT INTO courses VALUES ('b', 'Octobre Solidaire', '2026-10-05', 'officialRace', 0, 7300, 3013,
+          raw.execute(
+            '''INSERT INTO courses VALUES ('b', 'Octobre Solidaire', '2026-10-05', 'officialRace', 0, 7300, 3013,
         NULL, NULL, NULL, 1, NULL, 'AEH', 'handicap', NULL, 0, 1000, 0, 'euroDirect', NULL, NULL, NULL, NULL,
-        '2026-10-05T10:00:00.000Z', '2026-10-05T10:00:00.000Z', NULL, 0)''');
+        '2026-10-05T10:00:00.000Z', '2026-10-05T10:00:00.000Z', NULL, 0)''',
+          );
           raw.execute('PRAGMA user_version = 2');
         },
       ),
@@ -70,6 +72,56 @@ void main() {
     final reread = AppDatabase.toCourse(await db.select(db.courses).getSingle());
     expect(reread.documents.single.name, 'facture.pdf');
     expect(reread.fileKeys, ['u/docs/x.pdf']);
+  });
+
+  test('migration v3 -> v4 : données conservées, triathlons enregistrables', () async {
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(_v2Courses);
+          raw.execute("ALTER TABLE courses ADD COLUMN documents TEXT NOT NULL DEFAULT '[]'");
+          raw.execute('CREATE TABLE photo_ops (photo_key TEXT NOT NULL PRIMARY KEY, kind TEXT NOT NULL)');
+          raw.execute('CREATE TABLE meta (name TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)');
+          raw.execute(
+            '''INSERT INTO courses VALUES ('a', 'Semi de Démoville', '2026-03-08', 'officialRace', 0, 21100, 6100,
+        NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'euroDirect', NULL, NULL, NULL, NULL,
+        '2026-03-08T10:00:00.000Z', '2026-03-08T10:00:00.000Z', NULL, 0,
+        '[{"key":"u/docs/x.pdf","name":"facture.pdf","size":10,"added_at":"2026-03-01T00:00:00.000Z"}]')''',
+          );
+          raw.execute('PRAGMA user_version = 3');
+        },
+      ),
+    );
+    addTearDown(db.close);
+
+    final course = AppDatabase.toCourse(await db.select(db.courses).getSingle());
+    expect(course.title, 'Semi de Démoville');
+    expect(course.documents.single.name, 'facture.pdf');
+    expect(course.multisport, isNull);
+
+    final triathlon = Course(
+      id: 'tri',
+      title: 'Triathlon',
+      raceDate: calendarDate(2026, 6, 14),
+      type: CourseType.multisport,
+      distanceM: 6700,
+      durationS: 1680,
+      multisport: Multisport(
+        kind: MultisportKind.triathlon,
+        format: 'XXS',
+        legs: const [
+          Leg(sport: Sport.swim, distanceM: 200, durationS: 420),
+          Leg(sport: Sport.bike, distanceM: 5000, durationS: 780),
+          Leg(sport: Sport.run, distanceM: 1500, durationS: 480),
+        ],
+        transitionsIncluded: true,
+      ),
+    );
+    await db.into(db.courses).insert(AppDatabase.toRow(triathlon, pending: true));
+    final rows = await (db.select(db.courses)..where((c) => c.id.equals('tri'))).getSingle();
+    final reread = AppDatabase.toCourse(rows);
+    expect(reread.multisport!.transitionsIncluded, isTrue);
+    expect(reread.runDistanceM, 1500);
   });
 }
 

@@ -415,7 +415,7 @@ class _PeriodCourses extends StatelessWidget {
                     ),
                     const SizedBox(width: Space.sm),
                     Text(
-                      [formatKm(c.distanceM, decimals: 1), if (c.hasTime) formatDuration(c.durationS)].join('  ·  '),
+                      [formatKm(c.runDistanceM, decimals: 1), if (c.hasTime) formatDuration(c.durationS)].join('  ·  '),
                       style: TextStyles.figure(p.text, size: 15),
                     ),
                   ],

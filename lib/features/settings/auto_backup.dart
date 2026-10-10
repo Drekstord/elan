@@ -119,16 +119,10 @@ class AutoBackupState {
   final AutoBackupResult? result;
   final String? error;
 
-  const AutoBackupState({
-    this.enabled = false,
-    this.folder,
-    this.last,
-    this.running = false,
-    this.result,
-    this.error,
-  });
+  const AutoBackupState({this.enabled = false, this.folder, this.last, this.running = false, this.result, this.error});
 
-  bool get isDue => enabled && folder != null && (last == null || DateTime.now().difference(last!) >= autoBackupInterval);
+  bool get isDue =>
+      enabled && folder != null && (last == null || DateTime.now().difference(last!) >= autoBackupInterval);
 
   AutoBackupState copyWith({
     bool? enabled,

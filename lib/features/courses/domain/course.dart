@@ -1,7 +1,14 @@
+import 'multisport.dart';
+
+export 'multisport.dart';
+
 /// Type d'épreuve.
 enum CourseType {
   officialRace,
-  theConqueror;
+  theConqueror,
+
+  /// Épreuve enchaînée (triathlon, duathlon, aquathlon) : détail dans [Course.multisport].
+  multisport;
 
   static CourseType parse(String? value) =>
       CourseType.values.firstWhere((e) => e.name == value, orElse: () => CourseType.officialRace);
@@ -162,9 +169,15 @@ class Course {
   /// Course inscrite à l'avance (« course future ») : pas encore de résultat.
   final bool isPlanned;
 
+  /// Distance totale. Épreuve enchaînée : toutes disciplines confondues (voir [runDistanceM]).
   final int distanceM;
+
+  /// Temps total, transitions comprises.
   final int durationS;
   final int? elevationGainM;
+
+  /// Disciplines et transitions d'une épreuve enchaînée ; null pour les autres types.
+  final Multisport? multisport;
 
   /// Défi en équipe : taille de l'équipe (null = solo) et distance totale du défi.
   final int? teamSize;
@@ -213,6 +226,7 @@ class Course {
     required this.distanceM,
     this.durationS = 0,
     this.elevationGainM,
+    Multisport? multisport,
     this.teamSize,
     this.challengeDistanceM,
     this.isCharity = false,
@@ -232,7 +246,8 @@ class Course {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.deletedAt,
-  }) : associationId = isCharity ? associationId : null,
+  }) : multisport = type == CourseType.multisport ? multisport : null,
+       associationId = isCharity ? associationId : null,
        associationName = isCharity ? associationName : null,
        associationCause = isCharity ? associationCause : null,
        associationDescription = isCharity ? associationDescription : null,
@@ -248,6 +263,12 @@ class Course {
   bool get isTeam => (teamSize ?? 1) > 1;
   double get distanceKm => distanceM / 1000;
 
+  bool get isMultisport => multisport != null;
+
+  /// Kilomètres courus : pour une épreuve enchaînée, la seule partie course à pied.
+  /// C'est cette distance qui alimente les totaux, les graphiques et le widget.
+  int get runDistanceM => multisport?.runDistanceM ?? distanceM;
+
   /// Seules les courses terminées comptent dans les totaux, l'impact et les records.
   bool get isCompleted => !isPlanned;
 
@@ -259,11 +280,12 @@ class Course {
 
   bool get hasTime => durationS > 0 && distanceM > 0;
 
-  /// Allure en secondes par kilomètre, null sans chrono.
-  double? get paceSecondsPerKm => hasTime ? durationS / distanceKm : null;
+  /// Allure en secondes par kilomètre, null sans chrono. Sans objet pour une épreuve enchaînée
+  /// (natation, vélo et transitions mêlés) : chaque discipline a la sienne, voir [Leg].
+  double? get paceSecondsPerKm => hasTime && !isMultisport ? durationS / distanceKm : null;
 
-  /// Vitesse moyenne en km/h, null sans chrono.
-  double? get speedKmh => hasTime ? distanceKm / (durationS / 3600) : null;
+  /// Vitesse moyenne en km/h, null sans chrono ou pour une épreuve enchaînée.
+  double? get speedKmh => hasTime && !isMultisport ? distanceKm / (durationS / 3600) : null;
 
   /// Argent réellement engagé pour la cause : parrainage au km + inscription + collecte.
   int get donationCents {
@@ -284,6 +306,7 @@ class Course {
     int? distanceM,
     int? durationS,
     Object? elevationGainM = _unset,
+    Object? multisport = _unset,
     Object? teamSize = _unset,
     Object? challengeDistanceM = _unset,
     bool? isCharity,
@@ -313,6 +336,7 @@ class Course {
       distanceM: distanceM ?? this.distanceM,
       durationS: durationS ?? this.durationS,
       elevationGainM: pick(elevationGainM, this.elevationGainM),
+      multisport: pick(multisport, this.multisport),
       teamSize: pick(teamSize, this.teamSize),
       challengeDistanceM: pick(challengeDistanceM, this.challengeDistanceM),
       isCharity: isCharity ?? this.isCharity,
@@ -345,6 +369,7 @@ class Course {
     'distance_m': distanceM,
     'duration_s': durationS,
     'elevation_gain_m': elevationGainM,
+    'multisport': multisport?.toJson(),
     'team_size': teamSize,
     'challenge_distance_m': challengeDistanceM,
     'is_charity': isCharity,
@@ -378,6 +403,7 @@ class Course {
       distanceM: integer('distance_m') ?? 0,
       durationS: integer('duration_s') ?? 0,
       elevationGainM: integer('elevation_gain_m'),
+      multisport: Multisport.tryFromJson(json['multisport']),
       teamSize: integer('team_size'),
       challengeDistanceM: integer('challenge_distance_m'),
       isCharity: json['is_charity'] as bool? ?? false,

@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 
+import '../features/courses/domain/multisport.dart';
+
 /// Formats d'affichage communs (français, chiffres lisibles).
 
 /// Distance sans zéros superflus : « 42,2 km », « 10 km », « 21,18 km ».
@@ -28,6 +30,23 @@ String formatPace(double? secondsPerKm) {
   final total = secondsPerKm.round();
   return '${total ~/ 60}\'${(total % 60).toString().padLeft(2, '0')}" /km';
 }
+
+/// Allure de natation : « 2'05" /100 m ».
+String formatSwimPace(double? secondsPer100m) {
+  if (secondsPer100m == null || secondsPer100m <= 0) return '--';
+  final total = secondsPer100m.round();
+  return '${total ~/ 60}\'${(total % 60).toString().padLeft(2, '0')}" /100 m';
+}
+
+/// Distance d'une discipline : en mètres pour la natation (« 750 m »), en kilomètres sinon.
+String formatLegDistance(Leg leg) => leg.sport == Sport.swim ? formatMeters(leg.distanceM) : formatKm(leg.distanceM);
+
+/// Rythme d'une discipline dans son unité habituelle : /100 m en natation, km/h à vélo, /km à pied.
+String formatLegPace(Leg leg) => switch (leg.sport) {
+  Sport.swim => formatSwimPace(leg.secondsPer100m),
+  Sport.bike => formatSpeed(leg.speedKmh),
+  Sport.run => formatPace(leg.secondsPerKm),
+};
 
 String formatSpeed(double? kmh) => kmh == null ? '--' : '${NumberFormat('0.0', 'fr').format(kmh)} km/h';
 

@@ -45,7 +45,7 @@ class ReportCard extends StatelessWidget {
     final figures = [
       (t.statRaces, '${stats.count - challenges}'),
       if (challenges > 0) (t.kindChallenge, '$challenges'),
-      (t.statDistance, formatKm(stats.distanceM, decimals: 0)),
+      (t.statDistance, formatKm(stats.totalDistanceM, decimals: 0)),
       if (impact.charityCount > 0) (t.filterCharity, '${impact.charityCount}'),
     ];
 
@@ -103,7 +103,7 @@ class ReportCard extends StatelessWidget {
                                 Text(
                                   hasMoney
                                       ? formatEurosAmount(impact.donationCents)
-                                      : formatKm(stats.distanceM, decimals: 0).replaceAll(' km', ''),
+                                      : formatKm(stats.totalDistanceM, decimals: 0).replaceAll(' km', ''),
                                   style: TextStyles.hero(hasMoney ? p.bandWarm : onBand, size: 76),
                                 ),
                                 Text(

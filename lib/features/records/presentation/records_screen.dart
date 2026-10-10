@@ -32,7 +32,7 @@ class _RecordsScreenState extends ConsumerState<RecordsScreen> {
     final years = PersonalRecords.years(courses);
     final year = years.contains(_year) ? _year : null;
     final records = year == null ? ref.watch(personalRecordsProvider) : PersonalRecords.forYear(courses, year);
-    final hasAny = records.byDistance.isNotEmpty || records.longest.isNotEmpty;
+    final hasAny = !records.isEmpty;
 
     // Tous les temps, puis chaque année ayant des courses comparables.
     final yearChips = years.length < 2
@@ -84,6 +84,24 @@ class _RecordsScreenState extends ConsumerState<RecordsScreen> {
                               value: (c) => formatDuration(c.durationS),
                               detail: (c) => formatPace(c.paceSecondsPerKm),
                             ),
+                      ],
+                    ),
+                  ],
+                  if (records.multisport.isNotEmpty) ...[
+                    if (records.byDistance.isNotEmpty) const SizedBox(height: Space.md),
+                    SectionHeader(t.recordsMultisport),
+                    const SizedBox(height: Space.md),
+                    _PodiumGrid(
+                      children: [
+                        // Dans l'ordre des épreuves, puis des formats du plus court au plus long.
+                        for (final kind in MultisportKind.values)
+                          for (final format in MultisportFormat.of(kind))
+                            if (records.multisport[(kind: kind, format: format.name)] case final list?)
+                              _Podium(
+                                title: '${kind.label(t)} ${format.name}',
+                                courses: list,
+                                value: (c) => formatDuration(c.durationS),
+                              ),
                       ],
                     ),
                   ],

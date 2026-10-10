@@ -14,6 +14,7 @@ import '../../records/domain/personal_records.dart';
 import '../../records/records_providers.dart';
 import '../courses_providers.dart';
 import '../domain/course.dart';
+import 'multisport_view.dart';
 import '../domain/course_rules.dart';
 import '../../documents/presentation/document_widgets.dart';
 import 'share_card.dart';
@@ -109,7 +110,7 @@ class _Detail extends ConsumerWidget {
               const SizedBox(width: Space.xs),
               Flexible(
                 child: Kicker(
-                  course.isCharity && course.type == CourseType.officialRace ? t.formCharity : course.type.label(t),
+                  course.isCharity && course.type == CourseType.officialRace ? t.formCharity : course.typeLabel(t),
                   color: course.isCharity ? p.solidarity : p.accent,
                 ),
               ),
@@ -139,6 +140,7 @@ class _Detail extends ConsumerWidget {
           gap,
           if (status != CourseStatus.completed) ...[_PlannedNotice(course: course, status: status), gap],
           _PerformanceBand(course: course),
+          if (course.isMultisport) ...[gap, MultisportCard(course: course)],
           const SizedBox(height: Space.md),
         ],
         right: [
@@ -195,6 +197,7 @@ class _Detail extends ConsumerWidget {
 
   static String _recordLabel(RecordKind r, AppLocalizations t) => switch (r) {
     DistanceRecord(:final distance) => '${t.recordBadge} ${distance.label(t)}',
+    MultisportRecord(:final event) => '${t.recordBadge} ${event.kind.label(t)} ${event.format}',
     LongestRecord() => t.recordsLongest,
     ElevationRecord() => t.recordsElevation,
   };
@@ -214,8 +217,13 @@ class _PerformanceBand extends StatelessWidget {
     final km = formatKm(course.distanceM).replaceAll(' km', '');
     StatTile tile(String label, String value) =>
         StatTile(label: label, value: value, color: p.onBand, labelColor: muted);
+    final multisport = course.multisport;
     final tiles = [
-      if (course.hasTime) ...[
+      // Épreuve enchaînée : la distance de chaque discipline (allures détaillées dans la carte dessous).
+      if (multisport != null)
+        for (var i = 0; i < multisport.legs.length; i++)
+          tile(multisport.legLabel(i, t), formatLegDistance(multisport.legs[i]))
+      else if (course.hasTime) ...[
         tile(t.statDistance, formatKm(course.distanceM)),
         tile(t.detailPace, formatPace(course.paceSecondsPerKm)),
         tile(t.detailSpeed, formatSpeed(course.speedKmh)),
@@ -276,12 +284,15 @@ class _PlannedNotice extends ConsumerWidget {
             const SizedBox(height: Space.md),
             FilledButton.icon(
               style: FilledButton.styleFrom(backgroundColor: color),
-              onPressed: () => showDialog<void>(
-                context: context,
-                builder: (_) => ResultDialog(course: course),
-              ),
+              // Épreuve enchaînée : plusieurs temps à saisir, donc le formulaire complet.
+              onPressed: () => course.isMultisport
+                  ? context.push(Routes.editCourse(course.id))
+                  : showDialog<void>(
+                      context: context,
+                      builder: (_) => ResultDialog(course: course),
+                    ),
               icon: const Icon(Icons.timer_outlined),
-              label: Text(t.detailEnterResult),
+              label: Text(course.isMultisport ? t.multisportEditResult : t.detailEnterResult),
             ),
           ],
         ],

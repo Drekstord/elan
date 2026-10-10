@@ -73,6 +73,7 @@ create table if not exists public.courses (
   distance_m integer not null check (distance_m >= 0),
   duration_s integer not null default 0 check (duration_s >= 0),
   elevation_gain_m integer,
+  multisport jsonb,
   team_size integer check (team_size is null or team_size >= 1),
   challenge_distance_m integer,
 
@@ -103,6 +104,7 @@ create table if not exists public.courses (
 alter table public.courses add column if not exists is_planned boolean not null default false;
 alter table public.courses add column if not exists fundraising_cents integer not null default 0;
 alter table public.courses add column if not exists documents jsonb not null default '[]'::jsonb;  -- justificatifs
+alter table public.courses add column if not exists multisport jsonb;  -- triathlon, duathlon, aquathlon
 alter table public.courses drop column if exists impact_rate_per_km;  -- équivalences au km abandonnées
 
 create index if not exists courses_user_server_updated_idx

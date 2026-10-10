@@ -169,6 +169,24 @@ final _sample = [
     associationName: 'AFM-Téléthon',
     associationCause: CauseType.sante,
   ),
+  Course(
+    id: 'tri',
+    title: 'Triathlon de Bois-Joli',
+    raceDate: calendarDate(2026, 6, 14),
+    type: CourseType.multisport,
+    distanceM: 25750,
+    durationS: 5010,
+    multisport: Multisport(
+      kind: MultisportKind.triathlon,
+      format: 'S',
+      legs: const [
+        Leg(sport: Sport.swim, distanceM: 750, durationS: 900),
+        Leg(sport: Sport.bike, distanceM: 20000, durationS: 2400),
+        Leg(sport: Sport.run, distanceM: 5000, durationS: 1500),
+      ],
+      transitionsS: const [120, 90],
+    ),
+  ),
 ];
 
 const _phone = Size(390, 844);
@@ -212,6 +230,12 @@ void main() {
                     GoRoute(
                       path: ':id',
                       builder: (_, s) => CourseDetailScreen(courseId: s.pathParameters['id']!),
+                      routes: [
+                        GoRoute(
+                          path: 'modifier',
+                          builder: (_, s) => CourseFormScreen(courseId: s.pathParameters['id']),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -304,6 +328,11 @@ void main() {
   testWidgets('impact', (t) => capture(t, 'impact', location: '/impact'));
   testWidgets('records', (t) => capture(t, 'records', location: '/records', dark: true));
   testWidgets('réglages', (t) => capture(t, 'reglages', location: '/reglages'));
+  testWidgets('fiche triathlon', (t) => capture(t, 'fiche_triathlon', location: '/courses/tri'));
+  testWidgets(
+    'formulaire triathlon',
+    (t) => capture(t, 'formulaire_triathlon', location: '/courses/tri/modifier', size: const Size(390, 1500)),
+  );
   testWidgets('connexion', (t) => capture(t, 'connexion', location: '/connexion'));
   testWidgets('premier compte', (t) => capture(t, 'premier_compte', location: '/premier-compte'));
   testWidgets('serveur', (t) => capture(t, 'serveur', location: '/serveur'));

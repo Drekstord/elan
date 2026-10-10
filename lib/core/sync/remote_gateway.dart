@@ -40,9 +40,18 @@ class SupabaseGateway implements RemoteGateway {
   Future<void> upsertCourses(List<Course> courses) async {
     if (courses.isEmpty) return;
     final uid = _userId;
-    await client.from('courses').upsert([
-      for (final c in courses) {...c.toRemoteJson(), 'user_id': uid},
-    ], onConflict: 'user_id,id');
+    // La colonne « multisport » date de la version 2.10 (supabase/003_multisport.sql). Les courses
+    // ordinaires sont envoyées sans elle : leur synchro ne dépend pas de cette mise à jour de la base.
+    final plain = [
+      for (final c in courses)
+        if (!c.isMultisport) {...c.toRemoteJson()..remove('multisport'), 'user_id': uid},
+    ];
+    final multisport = [
+      for (final c in courses)
+        if (c.isMultisport) {...c.toRemoteJson(), 'user_id': uid},
+    ];
+    if (plain.isNotEmpty) await client.from('courses').upsert(plain, onConflict: 'user_id,id');
+    if (multisport.isNotEmpty) await client.from('courses').upsert(multisport, onConflict: 'user_id,id');
   }
 
   @override

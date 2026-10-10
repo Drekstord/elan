@@ -82,6 +82,15 @@ class $CoursesTable extends Courses with TableInfo<$CoursesTable, CourseRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _multisportMeta = const VerificationMeta('multisport');
+  @override
+  late final GeneratedColumn<String> multisport = GeneratedColumn<String>(
+    'multisport',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _teamSizeMeta = const VerificationMeta('teamSize');
   @override
   late final GeneratedColumn<int> teamSize = GeneratedColumn<int>(
@@ -277,6 +286,7 @@ class $CoursesTable extends Courses with TableInfo<$CoursesTable, CourseRow> {
     distanceM,
     durationS,
     elevationGainM,
+    multisport,
     teamSize,
     challengeDistanceM,
     isCharity,
@@ -345,6 +355,9 @@ class $CoursesTable extends Courses with TableInfo<$CoursesTable, CourseRow> {
         _elevationGainMMeta,
         elevationGainM.isAcceptableOrUnknown(data['elevation_gain_m']!, _elevationGainMMeta),
       );
+    }
+    if (data.containsKey('multisport')) {
+      context.handle(_multisportMeta, multisport.isAcceptableOrUnknown(data['multisport']!, _multisportMeta));
     }
     if (data.containsKey('team_size')) {
       context.handle(_teamSizeMeta, teamSize.isAcceptableOrUnknown(data['team_size']!, _teamSizeMeta));
@@ -468,6 +481,7 @@ class $CoursesTable extends Courses with TableInfo<$CoursesTable, CourseRow> {
       distanceM: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}distance_m'])!,
       durationS: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}duration_s'])!,
       elevationGainM: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}elevation_gain_m']),
+      multisport: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}multisport']),
       teamSize: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}team_size']),
       challengeDistanceM: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -527,6 +541,9 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
   final int distanceM;
   final int durationS;
   final int? elevationGainM;
+
+  /// Épreuve enchaînée, en JSON ([Multisport]) ; null pour les autres types.
+  final String? multisport;
   final int? teamSize;
   final int? challengeDistanceM;
   final bool isCharity;
@@ -560,6 +577,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     required this.distanceM,
     required this.durationS,
     this.elevationGainM,
+    this.multisport,
     this.teamSize,
     this.challengeDistanceM,
     required this.isCharity,
@@ -593,6 +611,9 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     map['duration_s'] = Variable<int>(durationS);
     if (!nullToAbsent || elevationGainM != null) {
       map['elevation_gain_m'] = Variable<int>(elevationGainM);
+    }
+    if (!nullToAbsent || multisport != null) {
+      map['multisport'] = Variable<String>(multisport);
     }
     if (!nullToAbsent || teamSize != null) {
       map['team_size'] = Variable<int>(teamSize);
@@ -649,6 +670,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
       distanceM: Value(distanceM),
       durationS: Value(durationS),
       elevationGainM: elevationGainM == null && nullToAbsent ? const Value.absent() : Value(elevationGainM),
+      multisport: multisport == null && nullToAbsent ? const Value.absent() : Value(multisport),
       teamSize: teamSize == null && nullToAbsent ? const Value.absent() : Value(teamSize),
       challengeDistanceM: challengeDistanceM == null && nullToAbsent ? const Value.absent() : Value(challengeDistanceM),
       isCharity: Value(isCharity),
@@ -685,6 +707,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
       distanceM: serializer.fromJson<int>(json['distanceM']),
       durationS: serializer.fromJson<int>(json['durationS']),
       elevationGainM: serializer.fromJson<int?>(json['elevationGainM']),
+      multisport: serializer.fromJson<String?>(json['multisport']),
       teamSize: serializer.fromJson<int?>(json['teamSize']),
       challengeDistanceM: serializer.fromJson<int?>(json['challengeDistanceM']),
       isCharity: serializer.fromJson<bool>(json['isCharity']),
@@ -719,6 +742,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
       'distanceM': serializer.toJson<int>(distanceM),
       'durationS': serializer.toJson<int>(durationS),
       'elevationGainM': serializer.toJson<int?>(elevationGainM),
+      'multisport': serializer.toJson<String?>(multisport),
       'teamSize': serializer.toJson<int?>(teamSize),
       'challengeDistanceM': serializer.toJson<int?>(challengeDistanceM),
       'isCharity': serializer.toJson<bool>(isCharity),
@@ -751,6 +775,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     int? distanceM,
     int? durationS,
     Value<int?> elevationGainM = const Value.absent(),
+    Value<String?> multisport = const Value.absent(),
     Value<int?> teamSize = const Value.absent(),
     Value<int?> challengeDistanceM = const Value.absent(),
     bool? isCharity,
@@ -780,6 +805,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     distanceM: distanceM ?? this.distanceM,
     durationS: durationS ?? this.durationS,
     elevationGainM: elevationGainM.present ? elevationGainM.value : this.elevationGainM,
+    multisport: multisport.present ? multisport.value : this.multisport,
     teamSize: teamSize.present ? teamSize.value : this.teamSize,
     challengeDistanceM: challengeDistanceM.present ? challengeDistanceM.value : this.challengeDistanceM,
     isCharity: isCharity ?? this.isCharity,
@@ -811,6 +837,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
       distanceM: data.distanceM.present ? data.distanceM.value : this.distanceM,
       durationS: data.durationS.present ? data.durationS.value : this.durationS,
       elevationGainM: data.elevationGainM.present ? data.elevationGainM.value : this.elevationGainM,
+      multisport: data.multisport.present ? data.multisport.value : this.multisport,
       teamSize: data.teamSize.present ? data.teamSize.value : this.teamSize,
       challengeDistanceM: data.challengeDistanceM.present ? data.challengeDistanceM.value : this.challengeDistanceM,
       isCharity: data.isCharity.present ? data.isCharity.value : this.isCharity,
@@ -849,6 +876,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
           ..write('distanceM: $distanceM, ')
           ..write('durationS: $durationS, ')
           ..write('elevationGainM: $elevationGainM, ')
+          ..write('multisport: $multisport, ')
           ..write('teamSize: $teamSize, ')
           ..write('challengeDistanceM: $challengeDistanceM, ')
           ..write('isCharity: $isCharity, ')
@@ -883,6 +911,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     distanceM,
     durationS,
     elevationGainM,
+    multisport,
     teamSize,
     challengeDistanceM,
     isCharity,
@@ -916,6 +945,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
           other.distanceM == this.distanceM &&
           other.durationS == this.durationS &&
           other.elevationGainM == this.elevationGainM &&
+          other.multisport == this.multisport &&
           other.teamSize == this.teamSize &&
           other.challengeDistanceM == this.challengeDistanceM &&
           other.isCharity == this.isCharity &&
@@ -947,6 +977,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
   final Value<int> distanceM;
   final Value<int> durationS;
   final Value<int?> elevationGainM;
+  final Value<String?> multisport;
   final Value<int?> teamSize;
   final Value<int?> challengeDistanceM;
   final Value<bool> isCharity;
@@ -977,6 +1008,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     this.distanceM = const Value.absent(),
     this.durationS = const Value.absent(),
     this.elevationGainM = const Value.absent(),
+    this.multisport = const Value.absent(),
     this.teamSize = const Value.absent(),
     this.challengeDistanceM = const Value.absent(),
     this.isCharity = const Value.absent(),
@@ -1008,6 +1040,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     required int distanceM,
     required int durationS,
     this.elevationGainM = const Value.absent(),
+    this.multisport = const Value.absent(),
     this.teamSize = const Value.absent(),
     this.challengeDistanceM = const Value.absent(),
     required bool isCharity,
@@ -1050,6 +1083,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     Expression<int>? distanceM,
     Expression<int>? durationS,
     Expression<int>? elevationGainM,
+    Expression<String>? multisport,
     Expression<int>? teamSize,
     Expression<int>? challengeDistanceM,
     Expression<bool>? isCharity,
@@ -1081,6 +1115,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
       if (distanceM != null) 'distance_m': distanceM,
       if (durationS != null) 'duration_s': durationS,
       if (elevationGainM != null) 'elevation_gain_m': elevationGainM,
+      if (multisport != null) 'multisport': multisport,
       if (teamSize != null) 'team_size': teamSize,
       if (challengeDistanceM != null) 'challenge_distance_m': challengeDistanceM,
       if (isCharity != null) 'is_charity': isCharity,
@@ -1114,6 +1149,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     Value<int>? distanceM,
     Value<int>? durationS,
     Value<int?>? elevationGainM,
+    Value<String?>? multisport,
     Value<int?>? teamSize,
     Value<int?>? challengeDistanceM,
     Value<bool>? isCharity,
@@ -1145,6 +1181,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
       distanceM: distanceM ?? this.distanceM,
       durationS: durationS ?? this.durationS,
       elevationGainM: elevationGainM ?? this.elevationGainM,
+      multisport: multisport ?? this.multisport,
       teamSize: teamSize ?? this.teamSize,
       challengeDistanceM: challengeDistanceM ?? this.challengeDistanceM,
       isCharity: isCharity ?? this.isCharity,
@@ -1195,6 +1232,9 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     }
     if (elevationGainM.present) {
       map['elevation_gain_m'] = Variable<int>(elevationGainM.value);
+    }
+    if (multisport.present) {
+      map['multisport'] = Variable<String>(multisport.value);
     }
     if (teamSize.present) {
       map['team_size'] = Variable<int>(teamSize.value);
@@ -1273,6 +1313,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
           ..write('distanceM: $distanceM, ')
           ..write('durationS: $durationS, ')
           ..write('elevationGainM: $elevationGainM, ')
+          ..write('multisport: $multisport, ')
           ..write('teamSize: $teamSize, ')
           ..write('challengeDistanceM: $challengeDistanceM, ')
           ..write('isCharity: $isCharity, ')
@@ -1663,6 +1704,7 @@ typedef $$CoursesTableCreateCompanionBuilder = CoursesCompanion Function({
   required int distanceM,
   required int durationS,
   Value<int?> elevationGainM,
+  Value<String?> multisport,
   Value<int?> teamSize,
   Value<int?> challengeDistanceM,
   required bool isCharity,
@@ -1694,6 +1736,7 @@ typedef $$CoursesTableUpdateCompanionBuilder = CoursesCompanion Function({
   Value<int> distanceM,
   Value<int> durationS,
   Value<int?> elevationGainM,
+  Value<String?> multisport,
   Value<int?> teamSize,
   Value<int?> challengeDistanceM,
   Value<bool> isCharity,
@@ -1747,6 +1790,9 @@ class $$CoursesTableFilterComposer extends Composer<_$AppDatabase, $CoursesTable
 
   ColumnFilters<int> get elevationGainM =>
       $composableBuilder(column: $table.elevationGainM, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get multisport =>
+      $composableBuilder(column: $table.multisport, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get teamSize =>
       $composableBuilder(column: $table.teamSize, builder: (column) => ColumnFilters(column));
@@ -1840,6 +1886,9 @@ class $$CoursesTableOrderingComposer extends Composer<_$AppDatabase, $CoursesTab
   ColumnOrderings<int> get elevationGainM =>
       $composableBuilder(column: $table.elevationGainM, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get multisport =>
+      $composableBuilder(column: $table.multisport, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get teamSize =>
       $composableBuilder(column: $table.teamSize, builder: (column) => ColumnOrderings(column));
 
@@ -1925,6 +1974,8 @@ class $$CoursesTableAnnotationComposer extends Composer<_$AppDatabase, $CoursesT
 
   GeneratedColumn<int> get elevationGainM =>
       $composableBuilder(column: $table.elevationGainM, builder: (column) => column);
+
+  GeneratedColumn<String> get multisport => $composableBuilder(column: $table.multisport, builder: (column) => column);
 
   GeneratedColumn<int> get teamSize => $composableBuilder(column: $table.teamSize, builder: (column) => column);
 
@@ -2012,6 +2063,7 @@ class $$CoursesTableTableManager
                 Value<int> distanceM = const Value.absent(),
                 Value<int> durationS = const Value.absent(),
                 Value<int?> elevationGainM = const Value.absent(),
+                Value<String?> multisport = const Value.absent(),
                 Value<int?> teamSize = const Value.absent(),
                 Value<int?> challengeDistanceM = const Value.absent(),
                 Value<bool> isCharity = const Value.absent(),
@@ -2042,6 +2094,7 @@ class $$CoursesTableTableManager
                 distanceM: distanceM,
                 durationS: durationS,
                 elevationGainM: elevationGainM,
+                multisport: multisport,
                 teamSize: teamSize,
                 challengeDistanceM: challengeDistanceM,
                 isCharity: isCharity,
@@ -2074,6 +2127,7 @@ class $$CoursesTableTableManager
                 required int distanceM,
                 required int durationS,
                 Value<int?> elevationGainM = const Value.absent(),
+                Value<String?> multisport = const Value.absent(),
                 Value<int?> teamSize = const Value.absent(),
                 Value<int?> challengeDistanceM = const Value.absent(),
                 required bool isCharity,
@@ -2104,6 +2158,7 @@ class $$CoursesTableTableManager
                 distanceM: distanceM,
                 durationS: durationS,
                 elevationGainM: elevationGainM,
+                multisport: multisport,
                 teamSize: teamSize,
                 challengeDistanceM: challengeDistanceM,
                 isCharity: isCharity,

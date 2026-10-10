@@ -35,15 +35,19 @@ class CourseCard extends ConsumerWidget {
     // Valeur mise en avant à droite : chrono, compte à rebours, ou action attendue.
     final (String headline, Color headlineColor) = switch (status) {
       CourseStatus.completed when course.hasTime => (formatDuration(course.durationS), p.text),
-      CourseStatus.completed => (formatKm(course.distanceM, decimals: 1), p.text),
+      CourseStatus.completed => (formatKm(course.runDistanceM, decimals: 1), p.text),
       CourseStatus.upcoming => ('J-${course.raceDate.difference(today).inDays}', p.upcoming),
       CourseStatus.awaitingResult => (t.statusAwaitingShort, p.accent),
     };
 
     final details = [
-      course.type.label(t),
-      formatKm(course.distanceM),
-      if (status == CourseStatus.completed && course.hasTime) formatPace(course.paceSecondsPerKm),
+      course.typeLabel(t),
+      // Épreuve enchaînée : la distance de chaque discipline, dans l'ordre.
+      if (course.multisport case final m?)
+        for (final leg in m.legs) formatLegDistance(leg)
+      else
+        formatKm(course.distanceM),
+      if (status == CourseStatus.completed && course.paceSecondsPerKm != null) formatPace(course.paceSecondsPerKm),
       if ((course.elevationGainM ?? 0) > 0) 'D+ ${formatMeters(course.elevationGainM!)}',
     ];
 

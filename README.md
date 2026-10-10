@@ -19,6 +19,7 @@
 
 **Courses**
 - Toutes tes courses officielles et tes défis (The Conqueror…), avec temps, allure, dénivelé, photos du dossard et de la médaille.
+- **Triathlons, duathlons, aquathlons** : un temps par discipline et par transition, chaque discipline dans son unité.
 - **Courses à venir** : inscris-les à l'avance ; le jour J, elles passent en « résultat à saisir ».
 - Import d'un fichier **GPX** (distance, durée, dénivelé).
 - Liste en blocs (à saisir, à venir, puis par année), recherche et filtres : *Officielles / Défis* et *Solidaires / par cause*.

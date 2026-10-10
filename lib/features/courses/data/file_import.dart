@@ -34,7 +34,9 @@ class FileImport {
       try {
         final path = file.path;
         final content = path != null ? await File(path).readAsString() : await file.xFile.readAsString();
-        tracks.add(GpxParser.parse(content, fallbackName: file.name.replaceAll(RegExp(r'\.gpx$', caseSensitive: false), '')));
+        tracks.add(
+          GpxParser.parse(content, fallbackName: file.name.replaceAll(RegExp(r'\.gpx$', caseSensitive: false), '')),
+        );
       } catch (_) {
         unreadable++;
       }

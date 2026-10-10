@@ -56,11 +56,7 @@ class ElanBackend implements Backend {
 
   static BackendUser? _user(RecordModel? record) => record == null
       ? null
-      : BackendUser(
-          id: record.id,
-          email: record.getStringValue('email'),
-          isOwner: record.getBoolValue('proprietaire'),
-        );
+      : BackendUser(id: record.id, email: record.getStringValue('email'), isOwner: record.getBoolValue('proprietaire'));
 
   @override
   BackendUser? get currentUser => pb.authStore.isValid ? _user(pb.authStore.record) : null;
@@ -95,7 +91,8 @@ class ElanBackend implements Backend {
   }
 
   @override
-  Future<bool> needsFirstAccount() async => (await fetchElanStatus(pb.baseURL, client: _http))?.needsFirstAccount ?? false;
+  Future<bool> needsFirstAccount() async =>
+      (await fetchElanStatus(pb.baseURL, client: _http))?.needsFirstAccount ?? false;
 
   @override
   Future<void> createFirstAccount(String email, String password) async {
@@ -130,7 +127,9 @@ class ElanBackend implements Backend {
       if (e.statusCode == 429) throw AuthError(AuthFailure.rateLimited, message);
       if (code('oldPassword') != null) throw AuthError(AuthFailure.wrongCredentials, message);
       if (code('email') == 'validation_not_unique') throw AuthError(AuthFailure.emailTaken, message);
-      if (code('password') != null || code('passwordConfirm') != null) throw AuthError(AuthFailure.weakPassword, message);
+      if (code('password') != null || code('passwordConfirm') != null) {
+        throw AuthError(AuthFailure.weakPassword, message);
+      }
       throw AuthError(e.statusCode == 400 ? onRefused : AuthFailure.unknown, message);
     }
   }

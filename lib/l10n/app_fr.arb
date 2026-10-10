@@ -1144,5 +1144,85 @@
         "type": "String"
       }
     }
-  }
+  },
+  "typeMultisport": "Triathlon, duathlon, aquathlon",
+  "typeShortOfficial": "Course",
+  "typeShortConqueror": "Défi",
+  "typeShortMultisport": "Triathlon",
+  "kindMultisport": "Triathlons",
+  "kindMultisportHint": "Triathlons, duathlons et aquathlons",
+  "multisportTriathlon": "Triathlon",
+  "multisportDuathlon": "Duathlon",
+  "multisportAquathlon": "Aquathlon",
+  "sportSwim": "Natation",
+  "sportBike": "Vélo",
+  "sportRun": "Course à pied",
+  "sportRunNumbered": "Course à pied {number}",
+  "@sportRunNumbered": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "multisportFormat": "Format",
+  "multisportFormatFree": "Libre",
+  "multisportFormatHint": "Le format préremplit les distances. Corrige-les si ton épreuve était différente.",
+  "multisportLegDistance": "Distance",
+  "multisportLegTime": "Temps",
+  "multisportTransition": "Transition {number}",
+  "@multisportTransition": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "multisportTransitionsIncluded": "Transitions comptées dans les disciplines",
+  "multisportTransitionsIncludedHint": "À cocher si ton chrono n'isole pas les transitions : chacune est alors comprise dans le temps de la discipline qui la précède.",
+  "multisportTotalTime": "Temps total",
+  "multisportTotalComputed": "Laisse vide : calculé d'après les temps ci-dessus ({time}).",
+  "@multisportTotalComputed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "multisportTotalOnly": "Tu peux saisir seulement le temps total si tu n'as pas le détail.",
+  "multisportTransitionIncludedNote": "transition comprise",
+  "multisportTransitions": "Transitions",
+  "multisportBreakdown": "Répartition du temps",
+  "multisportRunShare": "{run} de course à pied comptés dans tes kilomètres courus.",
+  "@multisportRunShare": {
+    "placeholders": {
+      "run": {
+        "type": "String"
+      }
+    }
+  },
+  "multisportEditResult": "Saisir mes temps",
+  "issueLegDistance": "Indique la distance de chaque discipline.",
+  "issueLegTimes": "Renseigne le temps de chaque discipline, ou aucun (temps total seul).",
+  "issueTotalBelowSplits": "Le temps total est inférieur à la somme des disciplines ({time}).",
+  "@issueTotalBelowSplits": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "recordsMultisport": "Triathlons, duathlons, aquathlons",
+  "recordsMultisportBest": "Meilleur temps",
+  "swimPaceUnit": "/100 m",
+  "shareMultisportTotal": "Temps total",
+  "summaryMultisport": "{count, plural, =0{Aucune épreuve enchaînée} =1{1 épreuve enchaînée} other{{count} épreuves enchaînées}}",
+  "@summaryMultisport": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupDisciplines": "Disciplines (triathlon, duathlon, aquathlon)"
 }

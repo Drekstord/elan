@@ -353,7 +353,7 @@ class _NextRace extends ConsumerWidget {
                       const SizedBox(height: Space.xs),
                       Text(next.title.toUpperCase(), style: TextStyles.courseTitle(p.text, size: 22)),
                       Text(
-                        '${formatLongDay(next.raceDate)}  ·  ${formatKm(next.distanceM)}',
+                        '${formatLongDay(next.raceDate)}  ·  ${next.isMultisport ? next.typeLabel(t) : formatKm(next.distanceM)}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -480,6 +480,7 @@ String _filterSummary(AppLocalizations t, CourseQuery q, int count) {
     CourseKind.all => t.summaryCourses(count),
     CourseKind.official => t.summaryOfficial(count),
     CourseKind.challenge => t.summaryChallenges(count),
+    CourseKind.multisport => t.summaryMultisport(count),
   };
   return [
     if (q.charityOnly || q.cause != null) '$base ${t.summarySolidarity(count)}' else base,
@@ -545,6 +546,7 @@ class _Toolbar extends ConsumerWidget {
     final query = ref.watch(courseQueryProvider);
     final controller = ref.read(courseQueryProvider.notifier);
     final count = ref.watch(visibleCoursesProvider).value?.length ?? 0;
+    final hasMultisport = ref.watch(coursesProvider.select((list) => list.value?.any((c) => c.isMultisport) ?? false));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -609,6 +611,13 @@ class _Toolbar extends ConsumerWidget {
                 ButtonSegment(value: CourseKind.all, label: Text(t.kindAll)),
                 ButtonSegment(value: CourseKind.official, label: Text(t.kindOfficial)),
                 ButtonSegment(value: CourseKind.challenge, label: Text(t.kindChallenge)),
+                // Proposé seulement à qui a déjà saisi un triathlon, un duathlon ou un aquathlon.
+                if (hasMultisport || query.kind == CourseKind.multisport)
+                  ButtonSegment(
+                    value: CourseKind.multisport,
+                    label: Text(t.kindMultisport),
+                    tooltip: t.kindMultisportHint,
+                  ),
               ],
               selected: {query.kind},
               onSelectionChanged: (s) => controller.setKind(s.first),

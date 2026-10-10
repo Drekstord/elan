@@ -21,6 +21,7 @@ import '../data/file_import.dart';
 import '../data/gpx_parser.dart';
 import '../domain/course.dart';
 import '../domain/course_rules.dart';
+import 'multisport_editor.dart';
 
 /// Création ou modification d'une course.
 class CourseFormScreen extends ConsumerWidget {
@@ -93,6 +94,12 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
   );
   late final _notes = TextEditingController(text: widget.initial?.notes);
 
+  /// Épreuve enchaînée : disciplines, transitions, temps total.
+  late final _multi = MultisportEditorController(
+    initial: widget.initial?.multisport,
+    initialDurationS: widget.initial?.durationS ?? 0,
+  );
+
   late CourseType _type = widget.initial?.type ?? CourseType.officialRace;
   late bool _planned = widget.initial?.isPlanned ?? false;
   late bool _charity = widget.initial?.isCharity ?? false;
@@ -148,6 +155,7 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
     ]) {
       c.dispose();
     }
+    _multi.dispose();
     if (!_saved) {
       for (final key in _importedKeys) {
         _media.deleteLocal(key);
@@ -249,9 +257,15 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
 
     // Erreurs de saisie et de cohérence affichées ensemble.
     if (_title.text.trim().isEmpty) _errors[_Field.title] = t.issueMissingTitle;
-    final km = parseDecimal(_distance.text);
+    final isMultisport = _type == CourseType.multisport;
+    // Épreuve enchaînée : distance et temps viennent du détail des disciplines.
+    final multi = isMultisport ? _multi.read(t, planned: _planned) : null;
+    if (isMultisport && multi == null) _errors[_Field.distance] = _multi.error ?? t.issueLegDistance;
+    final km = isMultisport ? (multi?.multisport.distanceM ?? 0) / 1000 : parseDecimal(_distance.text);
     if (km == null) _errors[_Field.distance] = t.issueDistance;
-    final duration = _planned || _duration.text.trim().isEmpty ? 0 : parseDuration(_duration.text);
+    final duration = isMultisport
+        ? (multi?.durationS ?? 0)
+        : (_planned || _duration.text.trim().isEmpty ? 0 : parseDuration(_duration.text));
     if (duration == null) _errors[_Field.duration] = t.issueInvalidDuration;
     final elevation = _elevation.text.trim().isEmpty ? null : int.tryParse(_elevation.text.trim());
     if (_elevation.text.trim().isNotEmpty && elevation == null) _errors[_Field.elevation] = t.issueInvalidNumber;
@@ -283,6 +297,7 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
       distanceM: (km! * 1000).round(),
       durationS: duration!,
       elevationGainM: elevation,
+      multisport: multi?.multisport,
       teamSize: teamSize,
       challengeDistanceM: challengeKm == null ? null : (challengeKm * 1000).round(),
       isCharity: _charity,
@@ -298,6 +313,8 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
       bibPhotoKey: _bibKey,
       medalPhotoKey: _medalKey,
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+      // Les justificatifs se gèrent sur la fiche de la course : la modifier ne doit pas les retirer.
+      documents: initial?.documents ?? const [],
       createdAt: initial?.createdAt,
       updatedAt: initial?.updatedAt,
     );
@@ -354,7 +371,7 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
 
   int _previewDonation() {
     if (!_charity) return 0;
-    final km = parseDecimal(_distance.text) ?? 0;
+    final km = _type == CourseType.multisport ? _multi.previewDistanceM / 1000 : (parseDecimal(_distance.text) ?? 0);
     return ((parseEurosToCents(_sponsor.text) ?? 0) * km).round() +
         (parseEurosToCents(_registration.text) ?? 0) +
         (parseEurosToCents(_fundraising.text) ?? 0);
@@ -365,6 +382,7 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
     final t = AppLocalizations.of(context);
     final p = context.palette;
     final isConqueror = _type == CourseType.theConqueror;
+    final isMultisport = _type == CourseType.multisport;
     const gap = SizedBox(height: Space.md);
 
     TextField field(
@@ -396,9 +414,15 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
               SegmentedButton<CourseType>(
                 segments: [
                   for (final type in CourseType.values)
-                    ButtonSegment(value: type, label: Text(type.label(t)), icon: Icon(type.icon)),
+                    ButtonSegment(
+                      value: type,
+                      label: Text(type.shortLabel(t)),
+                      icon: Icon(type.icon),
+                      tooltip: type.label(t),
+                    ),
                 ],
                 selected: {_type},
+                showSelectedIcon: false,
                 onSelectionChanged: (s) => _setType(s.first),
               ),
               gap,
@@ -456,17 +480,29 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
                       gap,
                     ],
                   ],
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: field(_distance, t.formDistance, _Field.distance, keyboard: decimal)),
-                      const SizedBox(width: Space.md),
-                      Expanded(
-                        child: field(_elevation, t.formElevation, _Field.elevation, keyboard: TextInputType.number),
-                      ),
-                    ],
-                  ),
-                  if (!_planned) ...[
+                  if (isMultisport) ...[
+                    MultisportEditor(
+                      controller: _multi,
+                      planned: _planned,
+                      onChanged: () => setState(() {
+                        _errors.remove(_Field.distance);
+                        _multi.error = null;
+                      }),
+                    ),
+                    gap,
+                    field(_elevation, t.formElevation, _Field.elevation, keyboard: TextInputType.number),
+                  ] else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: field(_distance, t.formDistance, _Field.distance, keyboard: decimal)),
+                        const SizedBox(width: Space.md),
+                        Expanded(
+                          child: field(_elevation, t.formElevation, _Field.elevation, keyboard: TextInputType.number),
+                        ),
+                      ],
+                    ),
+                  if (!_planned && !isMultisport) ...[
                     gap,
                     field(_duration, t.formDuration, _Field.duration, hint: '1:05:30'),
                     const SizedBox(height: Space.sm),

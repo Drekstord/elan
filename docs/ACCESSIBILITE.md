@@ -16,9 +16,9 @@ Seul un tel audit permettrait d'annoncer un taux de conformité RGAA.
 | Images (1.1 à 1.3) | Photos de médaille et de dossard décrites (« Médaille : Semi-marathon de Démoville ») ; miniatures et emblème décoratifs ignorés | `test/a11y/a11y_test.dart` |
 | Graphiques (1.8, 1.9) | Barres lues mois par mois (« Mars 2026 : 21,2 km, 1 course ») ; courbe de cumul et allures décrites ; vue Tableau dans Évolution | `test/a11y/a11y_test.dart` |
 | Structure (9.1) | Titres de section et titre de chaque course déclarés comme titres | `test/a11y/a11y_test.dart` |
-| Liens et boutons (6.1, 11.9) | Chaque bouton et zone cliquable a un nom lisible (infobulles, libellés) | Contrôle automatique « nom » sur les 15 écrans |
-| Cibles tactiles | Au moins 48 × 48 | Contrôle automatique « cible 48 » sur les 15 écrans |
-| Agrandissement du texte (10.4) | Utilisable à 200 % : rien ne déborde, les lignes se resserrent ou passent à la ligne | Contrôle automatique à 200 % sur les 15 écrans |
+| Liens et boutons (6.1, 11.9) | Chaque bouton et zone cliquable a un nom lisible (infobulles, libellés) | Contrôle automatique « nom » sur les 17 écrans |
+| Cibles tactiles | Au moins 48 × 48 | Contrôle automatique « cible 48 » sur les 17 écrans |
+| Agrandissement du texte (10.4) | Utilisable à 200 % : rien ne déborde, les lignes se resserrent ou passent à la ligne | Contrôle automatique à 200 % sur les 17 écrans |
 | Lecture (8.3, 10.1) | Langue de l'app : français ; titres affichés en capitales lus en casse normale | Revue du code |
 | Formulaires (11.1, 11.10) | Chaque champ a une étiquette ; erreurs affichées sous le champ concerné, toutes à la fois | Tests du formulaire |
 | Animations (13.8) | Chiffres animés au lancement désactivés si le système demande de réduire les animations ; les lecteurs d'écran lisent la valeur finale | `test/features/count_up_test.dart` |

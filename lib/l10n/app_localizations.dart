@@ -2808,6 +2808,234 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Actions pour {email}'**
   String accountsActions(String email);
+
+  /// No description provided for @typeMultisport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Triathlon, duathlon, aquathlon'**
+  String get typeMultisport;
+
+  /// No description provided for @typeShortOfficial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course'**
+  String get typeShortOfficial;
+
+  /// No description provided for @typeShortConqueror.
+  ///
+  /// In fr, this message translates to:
+  /// **'Défi'**
+  String get typeShortConqueror;
+
+  /// No description provided for @typeShortMultisport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Triathlon'**
+  String get typeShortMultisport;
+
+  /// No description provided for @kindMultisport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Triathlons'**
+  String get kindMultisport;
+
+  /// No description provided for @kindMultisportHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Triathlons, duathlons et aquathlons'**
+  String get kindMultisportHint;
+
+  /// No description provided for @multisportTriathlon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Triathlon'**
+  String get multisportTriathlon;
+
+  /// No description provided for @multisportDuathlon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Duathlon'**
+  String get multisportDuathlon;
+
+  /// No description provided for @multisportAquathlon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aquathlon'**
+  String get multisportAquathlon;
+
+  /// No description provided for @sportSwim.
+  ///
+  /// In fr, this message translates to:
+  /// **'Natation'**
+  String get sportSwim;
+
+  /// No description provided for @sportBike.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vélo'**
+  String get sportBike;
+
+  /// No description provided for @sportRun.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course à pied'**
+  String get sportRun;
+
+  /// No description provided for @sportRunNumbered.
+  ///
+  /// In fr, this message translates to:
+  /// **'Course à pied {number}'**
+  String sportRunNumbered(int number);
+
+  /// No description provided for @multisportFormat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Format'**
+  String get multisportFormat;
+
+  /// No description provided for @multisportFormatFree.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libre'**
+  String get multisportFormatFree;
+
+  /// No description provided for @multisportFormatHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le format préremplit les distances. Corrige-les si ton épreuve était différente.'**
+  String get multisportFormatHint;
+
+  /// No description provided for @multisportLegDistance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Distance'**
+  String get multisportLegDistance;
+
+  /// No description provided for @multisportLegTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Temps'**
+  String get multisportLegTime;
+
+  /// No description provided for @multisportTransition.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transition {number}'**
+  String multisportTransition(int number);
+
+  /// No description provided for @multisportTransitionsIncluded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transitions comptées dans les disciplines'**
+  String get multisportTransitionsIncluded;
+
+  /// No description provided for @multisportTransitionsIncludedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'À cocher si ton chrono n\'isole pas les transitions : chacune est alors comprise dans le temps de la discipline qui la précède.'**
+  String get multisportTransitionsIncludedHint;
+
+  /// No description provided for @multisportTotalTime.
+  ///
+  /// In fr, this message translates to:
+  /// **'Temps total'**
+  String get multisportTotalTime;
+
+  /// No description provided for @multisportTotalComputed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Laisse vide : calculé d\'après les temps ci-dessus ({time}).'**
+  String multisportTotalComputed(String time);
+
+  /// No description provided for @multisportTotalOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tu peux saisir seulement le temps total si tu n\'as pas le détail.'**
+  String get multisportTotalOnly;
+
+  /// No description provided for @multisportTransitionIncludedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'transition comprise'**
+  String get multisportTransitionIncludedNote;
+
+  /// No description provided for @multisportTransitions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Transitions'**
+  String get multisportTransitions;
+
+  /// No description provided for @multisportBreakdown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Répartition du temps'**
+  String get multisportBreakdown;
+
+  /// No description provided for @multisportRunShare.
+  ///
+  /// In fr, this message translates to:
+  /// **'{run} de course à pied comptés dans tes kilomètres courus.'**
+  String multisportRunShare(String run);
+
+  /// No description provided for @multisportEditResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisir mes temps'**
+  String get multisportEditResult;
+
+  /// No description provided for @issueLegDistance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indique la distance de chaque discipline.'**
+  String get issueLegDistance;
+
+  /// No description provided for @issueLegTimes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseigne le temps de chaque discipline, ou aucun (temps total seul).'**
+  String get issueLegTimes;
+
+  /// No description provided for @issueTotalBelowSplits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le temps total est inférieur à la somme des disciplines ({time}).'**
+  String issueTotalBelowSplits(String time);
+
+  /// No description provided for @recordsMultisport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Triathlons, duathlons, aquathlons'**
+  String get recordsMultisport;
+
+  /// No description provided for @recordsMultisportBest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Meilleur temps'**
+  String get recordsMultisportBest;
+
+  /// No description provided for @swimPaceUnit.
+  ///
+  /// In fr, this message translates to:
+  /// **'/100 m'**
+  String get swimPaceUnit;
+
+  /// No description provided for @shareMultisportTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Temps total'**
+  String get shareMultisportTotal;
+
+  /// No description provided for @summaryMultisport.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucune épreuve enchaînée} =1{1 épreuve enchaînée} other{{count} épreuves enchaînées}}'**
+  String summaryMultisport(int count);
+
+  /// No description provided for @backupDisciplines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Disciplines (triathlon, duathlon, aquathlon)'**
+  String get backupDisciplines;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

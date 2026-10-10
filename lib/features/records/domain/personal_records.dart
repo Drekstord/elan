@@ -23,6 +23,9 @@ enum StandardDistance {
 
 /// Records personnels, calculés uniquement sur les courses terminées et
 /// chronométrées. Les défis virtuels (cumul sur plusieurs semaines) sont exclus.
+/// Une épreuve enchaînée comparable d'une fois sur l'autre : même épreuve, même format.
+typedef MultisportEvent = ({MultisportKind kind, String format});
+
 class PersonalRecords {
   /// Pour chaque distance de référence, les courses du meilleur au moins bon temps.
   final Map<StandardDistance, List<Course>> byDistance;
@@ -33,7 +36,18 @@ class PersonalRecords {
   /// Plus gros dénivelés positifs, du plus fort au plus faible.
   final List<Course> highestElevation;
 
-  const PersonalRecords({required this.byDistance, required this.longest, required this.highestElevation});
+  /// Épreuves enchaînées : classement par temps total pour chaque épreuve et format
+  /// (« Triathlon S », « Duathlon M »…). Les distances libres ne se comparent pas.
+  final Map<MultisportEvent, List<Course>> multisport;
+
+  const PersonalRecords({
+    required this.byDistance,
+    required this.longest,
+    required this.highestElevation,
+    this.multisport = const {},
+  });
+
+  bool get isEmpty => byDistance.isEmpty && longest.isEmpty && multisport.isEmpty;
 
   factory PersonalRecords.compute(Iterable<Course> courses) {
     final eligible = courses.where((c) => c.isCompleted && c.type == CourseType.officialRace).toList();
@@ -51,7 +65,25 @@ class PersonalRecords {
     final climbing = eligible.where((c) => (c.elevationGainM ?? 0) > 0).toList()
       ..sort(_byTimeThenDate((c) => -(c.elevationGainM ?? 0)));
 
-    return PersonalRecords(byDistance: byDistance, longest: longest, highestElevation: climbing);
+    // Un 10 km couru après 40 km de vélo n'est pas un 10 km : les épreuves enchaînées ont leurs
+    // propres classements, à part des records de course à pied.
+    final multisport = <MultisportEvent, List<Course>>{};
+    for (final c in courses.where((c) => c.isCompleted && c.hasTime)) {
+      final m = c.multisport;
+      if (m?.format case final format?) {
+        multisport.putIfAbsent((kind: m!.kind, format: format), () => []).add(c);
+      }
+    }
+    for (final list in multisport.values) {
+      list.sort(_byTimeThenDate((c) => c.durationS));
+    }
+
+    return PersonalRecords(
+      byDistance: byDistance,
+      longest: longest,
+      highestElevation: climbing,
+      multisport: multisport,
+    );
   }
 
   /// Records d'une seule année (meilleurs temps de 2026…).
@@ -61,7 +93,7 @@ class PersonalRecords {
   /// Années ayant au moins une course comptée dans les records, de la plus récente à la plus ancienne.
   static List<int> years(Iterable<Course> courses) => {
     for (final c in courses)
-      if (c.isCompleted && c.type == CourseType.officialRace && !c.isDeleted) c.raceDate.year,
+      if (c.isCompleted && c.type != CourseType.theConqueror && !c.isDeleted) c.raceDate.year,
   }.toList()..sort((a, b) => b.compareTo(a));
 
   /// En cas d'égalité, la plus ancienne garde le record.
@@ -73,6 +105,8 @@ class PersonalRecords {
   Set<RecordKind> heldBy(Course course) => {
     for (final MapEntry(:key, :value) in byDistance.entries)
       if (value.length >= 2 && value.first.id == course.id) DistanceRecord(key),
+    for (final MapEntry(:key, :value) in multisport.entries)
+      if (value.length >= 2 && value.first.id == course.id) MultisportRecord(key),
     if (longest.length >= 2 && longest.first.id == course.id) const LongestRecord(),
     if (highestElevation.length >= 2 && highestElevation.first.id == course.id) const ElevationRecord(),
   };
@@ -91,6 +125,17 @@ class DistanceRecord extends RecordKind {
 
   @override
   int get hashCode => distance.hashCode;
+}
+
+class MultisportRecord extends RecordKind {
+  final MultisportEvent event;
+  const MultisportRecord(this.event);
+
+  @override
+  bool operator ==(Object other) => other is MultisportRecord && other.event == event;
+
+  @override
+  int get hashCode => event.hashCode;
 }
 
 class LongestRecord extends RecordKind {

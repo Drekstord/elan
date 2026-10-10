@@ -259,9 +259,9 @@ class _AccountCard extends ConsumerWidget {
                 // Propriétaire d'un serveur personnel : comptes de ses proches.
                 if (ref.watch(serverAccountsProvider) != null)
                   OutlinedButton.icon(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(builder: (_) => const ServerAccountsScreen()),
-                    ),
+                    onPressed: () =>
+                        Navigator.of(context)
+                            .push(MaterialPageRoute<void>(builder: (_) => const ServerAccountsScreen())),
                     icon: const Icon(Icons.group_outlined),
                     label: Text(t.accountsManage),
                   ),

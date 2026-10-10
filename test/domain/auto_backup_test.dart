@@ -37,7 +37,14 @@ void main() {
       distanceM: 20000,
       medalPhotoKey: 'u/absente.jpg',
     ),
-    Course(id: 'c', title: 'Supprimée', raceDate: calendarDate(2025, 1, 1), distanceM: 1, deletedAt: DateTime.utc(2026), medalPhotoKey: 'u/x.jpg'),
+    Course(
+      id: 'c',
+      title: 'Supprimée',
+      raceDate: calendarDate(2025, 1, 1),
+      distanceM: 1,
+      deletedAt: DateTime.utc(2026),
+      medalPhotoKey: 'u/x.jpg',
+    ),
   ];
 
   test('noms lisibles, rangés par année, caractères interdits retirés, supprimées ignorées', () {

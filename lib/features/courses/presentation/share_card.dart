@@ -87,13 +87,25 @@ class ShareCard extends StatelessWidget {
     final onBand = p.onBand;
     final muted = p.onBandMuted;
     final hero = course.hasTime ? formatDuration(course.durationS) : formatKm(course.distanceM).replaceAll(' km', '');
+    final multisport = course.multisport;
     final stats = [
-      if (course.hasTime) (t.statDistance, formatKm(course.distanceM)),
-      if (course.hasTime) (t.detailPace, formatPace(course.paceSecondsPerKm)),
+      // Épreuve enchaînée : chaque discipline avec sa distance, et son temps s'il est connu.
+      if (multisport != null)
+        for (var i = 0; i < multisport.legs.length; i++)
+          multisport.legs[i].durationS > 0
+              ? (
+                  '${multisport.legLabel(i, t)} ${formatLegDistance(multisport.legs[i])}',
+                  formatDuration(multisport.legs[i].durationS),
+                )
+              : (multisport.legLabel(i, t), formatLegDistance(multisport.legs[i]))
+      else ...[
+        if (course.hasTime) (t.statDistance, formatKm(course.distanceM)),
+        if (course.hasTime) (t.detailPace, formatPace(course.paceSecondsPerKm)),
+      ],
       if ((course.elevationGainM ?? 0) > 0) (t.statElevation, formatMeters(course.elevationGainM!)),
     ];
 
-    final kind = course.isCharity && course.type == CourseType.officialRace ? t.formCharity : course.type.label(t);
+    final kind = course.isCharity && course.type == CourseType.officialRace ? t.formCharity : course.typeLabel(t);
 
     return SizedBox.fromSize(
       size: kShareCardSize,
@@ -155,13 +167,14 @@ class ShareCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             for (final (label, value) in stats)
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(label.toUpperCase(), style: TextStyles.kicker(muted, size: 10)),
+                                    Text(label.toUpperCase(), maxLines: 2, style: TextStyles.kicker(muted, size: 10)),
                                     Text(value, style: TextStyles.figure(onBand, size: 18)),
                                   ],
                                 ),
