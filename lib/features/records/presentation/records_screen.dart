@@ -105,6 +105,32 @@ class _RecordsScreenState extends ConsumerState<RecordsScreen> {
                       ],
                     ),
                   ],
+                  if (records.bySport.isNotEmpty) ...[
+                    if (records.byDistance.isNotEmpty || records.multisport.isNotEmpty)
+                      const SizedBox(height: Space.md),
+                    SectionHeader(t.recordsBySport),
+                    const SizedBox(height: Space.sm),
+                    Text(t.recordsBySportHint, style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(height: Space.md),
+                    _PodiumGrid(
+                      children: [
+                        for (final sport in Sport.values)
+                          if (records.bySport[sport] case final list?)
+                            _Podium(
+                              title: sport.label(t),
+                              courses: list,
+                              value: (c) => formatLegPace(c.multisport!.split(sport)!),
+                              detail: (c) => [
+                                c.typeLabel(t),
+                                formatLegDistance(c.multisport!.split(sport)!),
+                                // Rythme un peu sous-estimé : le temps contient aussi la transition.
+                                if (c.multisport!.splitIncludesTransition(sport)) t.multisportTransitionIncludedNote,
+                                // Chaque élément reste entier à la ligne (« 5 km » ne se coupe pas).
+                              ].map((part) => part.replaceAll(' ', ' ')).join('  ·  '),
+                            ),
+                      ],
+                    ),
+                  ],
                   _PodiumGrid(
                     children: [
                       if (records.longest.isNotEmpty)

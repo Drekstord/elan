@@ -198,7 +198,8 @@ void main() {
       expect(records.multisport.keys, [(kind: MultisportKind.triathlon, format: 'S')]);
       expect(records.multisport.values.single.map((c) => c.id), ['rapide', 'lent']);
       expect(records.heldBy(fast), {const MultisportRecord((kind: MultisportKind.triathlon, format: 'S'))});
-      expect(records.heldBy(slow), isEmpty);
+      // Mêmes temps intermédiaires dans les trois : à égalité, la plus ancienne garde le record.
+      expect(records.heldBy(slow), {for (final sport in Sport.values) SportRecord(sport)});
       expect(PersonalRecords.years(all), [2026, 2025]);
     });
   });
@@ -289,6 +290,108 @@ void main() {
       expect(c.transitions.map((d) => d.text), ['02:00', '01:30']);
       expect(c.total.text, isEmpty, reason: 'total calculé, rien à ressaisir');
       expect(c.read(t, planned: false)!.multisport, _triathlonS);
+    });
+  });
+
+  group('performances par discipline', () {
+    Course tri(String id, int day, List<Leg> legs, {String? format, bool included = false, MultisportKind? kind}) =>
+        Course(
+          id: id,
+          title: id,
+          raceDate: calendarDate(2026, 5, day),
+          type: CourseType.multisport,
+          distanceM: legs.fold(0, (sum, l) => sum + l.distanceM),
+          durationS: legs.fold(0, (sum, l) => sum + l.durationS),
+          multisport: Multisport(
+            kind: kind ?? MultisportKind.triathlon,
+            format: format,
+            legs: legs,
+            transitionsIncluded: included,
+          ),
+        );
+
+    final xxs = tri(
+      'xxs',
+      1,
+      const [
+        Leg(sport: Sport.swim, distanceM: 200, durationS: 420),
+        Leg(sport: Sport.bike, distanceM: 5000, durationS: 780),
+        Leg(sport: Sport.run, distanceM: 1500, durationS: 480),
+      ],
+      format: 'XXS',
+      included: true,
+    );
+    final s = tri('s', 20, const [
+      Leg(sport: Sport.swim, distanceM: 750, durationS: 900),
+      Leg(sport: Sport.bike, distanceM: 20000, durationS: 2400),
+      Leg(sport: Sport.run, distanceM: 5000, durationS: 1500),
+    ], format: 'S');
+    final duathlon = tri('duathlon', 10, const [
+      Leg(sport: Sport.run, distanceM: 5000, durationS: 1400),
+      Leg(sport: Sport.bike, distanceM: 20000, durationS: 2880),
+      Leg(sport: Sport.run, distanceM: 2500, durationS: 775),
+    ], kind: MultisportKind.duathlon);
+    final sansDetail = tri('sans-detail', 25, const [
+      Leg(sport: Sport.swim, distanceM: 750),
+      Leg(sport: Sport.bike, distanceM: 20000),
+      Leg(sport: Sport.run, distanceM: 5000),
+    ]);
+
+    test('une discipline sur toute l\'épreuve : les deux courses d\'un duathlon réunies', () {
+      final run = duathlon.multisport!.split(Sport.run)!;
+      expect(run.distanceM, 7500);
+      expect(run.durationS, 2175);
+      expect(run.secondsPerKm, 290);
+      expect(duathlon.multisport!.split(Sport.swim), isNull);
+      expect(sansDetail.multisport!.split(Sport.bike)!.hasTime, isFalse);
+    });
+
+    test('transition comprise : signalée sur la natation et le vélo, pas sur la course finale', () {
+      final m = xxs.multisport!;
+      expect(m.splitIncludesTransition(Sport.swim), isTrue);
+      expect(m.splitIncludesTransition(Sport.bike), isTrue);
+      expect(m.splitIncludesTransition(Sport.run), isFalse);
+      expect(s.multisport!.splitIncludesTransition(Sport.swim), isFalse);
+    });
+
+    test('cumuls par discipline : épreuves terminées seulement, courses ordinaires ignorées', () {
+      final totals = sportTotals([
+        xxs,
+        s,
+        duathlon,
+        Course(id: 'dix', title: '10 km', raceDate: calendarDate(2026, 5, 2), distanceM: 10000, durationS: 3000),
+        tri('a-venir', 28, const [Leg(sport: Sport.swim, distanceM: 1500)]).copyWith(isPlanned: true),
+      ]);
+      expect(totals[Sport.swim], (distanceM: 950, durationS: 1320));
+      expect(totals[Sport.bike], (distanceM: 45000, durationS: 6060));
+      expect(totals[Sport.run], (distanceM: 14000, durationS: 4155));
+      expect(sportTotals([duathlon]).containsKey(Sport.swim), isFalse);
+    });
+
+    test('progression : épreuves chronométrées de la discipline, dans l\'ordre des dates', () {
+      expect(splitRaces([s, sansDetail, duathlon, xxs], Sport.bike).map((c) => c.id), ['xxs', 'duathlon', 's']);
+      expect(splitRaces([s, sansDetail, duathlon, xxs], Sport.swim).map((c) => c.id), ['xxs', 's']);
+    });
+
+    test('records par discipline : meilleur rythme, tous formats confondus', () {
+      final records = PersonalRecords.compute([xxs, s, duathlon, sansDetail]);
+      // Natation : 2'00" /100 m (S) devant 3'30" (XXS). Vélo : 30 km/h (S), 25 (duathlon), 23,1 (XXS).
+      expect(records.bySport[Sport.swim]!.map((c) => c.id), ['s', 'xxs']);
+      expect(records.bySport[Sport.bike]!.map((c) => c.id), ['s', 'duathlon', 'xxs']);
+      // Course à pied : 4'50" /km (duathlon), 5'00" (S), 5'20" (XXS).
+      expect(records.bySport[Sport.run]!.map((c) => c.id), ['duathlon', 's', 'xxs']);
+      expect(records.heldBy(s), containsAll([const SportRecord(Sport.swim), const SportRecord(Sport.bike)]));
+      expect(records.heldBy(duathlon), {const SportRecord(Sport.run)});
+      expect(records.heldBy(xxs), isEmpty);
+      // Les records de course à pied ne bougent pas : aucun 5 km ici.
+      expect(records.byDistance, isEmpty);
+    });
+
+    test('une seule épreuve : un rythme affiché, mais pas de badge record', () {
+      final records = PersonalRecords.compute([xxs]);
+      expect(records.isEmpty, isFalse);
+      expect(records.bySport.keys, Sport.values);
+      expect(records.heldBy(xxs), isEmpty);
     });
   });
 }

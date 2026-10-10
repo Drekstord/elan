@@ -71,6 +71,29 @@ class CourseStats {
   double? get averagePaceSecondsPerKm => timedDistanceM > 0 ? pacedDurationS / (timedDistanceM / 1000) : null;
 }
 
+/// Cumul d'une discipline sur les épreuves enchaînées terminées.
+typedef SportTotal = ({int distanceM, int durationS});
+
+/// Distance et temps de chaque discipline, sur les épreuves enchaînées terminées.
+/// Une discipline absente de toutes les épreuves n'apparaît pas.
+Map<Sport, SportTotal> sportTotals(Iterable<Course> courses) {
+  final totals = <Sport, SportTotal>{};
+  for (final c in courses.where((c) => c.isCompleted)) {
+    final m = c.multisport;
+    if (m == null) continue;
+    for (final leg in m.legs) {
+      final t = totals[leg.sport] ?? (distanceM: 0, durationS: 0);
+      totals[leg.sport] = (distanceM: t.distanceM + leg.distanceM, durationS: t.durationS + leg.durationS);
+    }
+  }
+  return totals;
+}
+
+/// Épreuves enchaînées terminées dont [sport] est chronométré, dans l'ordre chronologique.
+List<Course> splitRaces(Iterable<Course> courses, Sport sport) =>
+    courses.where((c) => c.isCompleted && (c.multisport?.split(sport)?.hasTime ?? false)).toList()
+      ..sort((a, b) => a.raceDate.compareTo(b.raceDate));
+
 /// Un point de série temporelle (mois ou année) et les courses terminées qui le composent.
 class PeriodTotal {
   /// Premier jour de la période (UTC).

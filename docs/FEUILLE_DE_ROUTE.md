@@ -28,6 +28,7 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 | 21 | Serveur personnel refait : un seul conteneur, zéro réglage | ✅ terminé |
 | 22 | Dépôt public sous licence libre (GPL-3.0) | ✅ terminé |
 | 23 | Triathlon, duathlon, aquathlon | ✅ terminé |
+| 24 | Performances de triathlon dans Évolution et Records | ✅ terminé |
 
 Écartés : objectifs annuels (non souhaités).
 
@@ -238,3 +239,16 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 - Serveur en ligne : exécuter une fois `supabase/003_multisport.sql` (voir [CLOUD.md](CLOUD.md)) ;
   en attendant, le reste de l'app se synchronise normalement. Serveurs personnels : rien à faire.
 - **Corrigé au passage** : modifier une course lui faisait perdre ses justificatifs (depuis la 2.6).
+
+## 24. Performances de triathlon dans Évolution et Records ✅
+
+- **Évolution** : un filtre « Triathlons » (proposé dès qu'une épreuve enchaînée est terminée) ; une
+  carte « Triathlons : par discipline » avec le nombre d'épreuves, puis la distance et le temps cumulés
+  en natation, à vélo et à pied, comparés à la période précédente.
+- **Évolution** : un graphique « Rythme par discipline en triathlon », une discipline à la fois
+  (allure aux 100 m, km/h, allure au km), affiché à partir de deux épreuves chronométrées sur la période.
+- **Records** : « Meilleurs rythmes en triathlon », un podium par discipline, tous formats confondus.
+  Les deux courses d'un duathlon n'en font qu'une.
+- Un temps qui contient une transition est signalé (« transition comprise ») partout où il apparaît.
+- Badge « Record natation / vélo / course à pied » sur la fiche, à partir de deux épreuves comparables.
+- Les kilomètres courus et les records de course à pied restent inchangés.

@@ -58,6 +58,10 @@ class Leg {
 
   bool get hasTime => durationS > 0 && distanceM > 0;
 
+  /// Rythme comparable d'une épreuve à l'autre, où le plus petit est le meilleur :
+  /// secondes aux 100 m en natation, secondes au kilomètre à vélo comme à pied.
+  double? get effort => !hasTime ? null : durationS / (distanceM / (sport == Sport.swim ? 100 : 1000));
+
   /// Natation : secondes aux 100 m.
   double? get secondsPer100m => hasTime ? durationS / (distanceM / 100) : null;
 
@@ -138,6 +142,26 @@ class Multisport {
 
   /// La discipline n° [index] contient-elle le temps d'une transition ?
   bool legIncludesTransition(int index) => transitionsIncluded && index < legs.length - 1;
+
+  /// Une discipline sur toute l'épreuve : les deux courses d'un duathlon n'en font qu'une.
+  /// Null si l'épreuve ne la comporte pas ; sans temps s'il manque un temps intermédiaire.
+  Leg? split(Sport sport) {
+    final own = legs.where((l) => l.sport == sport).toList();
+    if (own.isEmpty) return null;
+    return Leg(
+      sport: sport,
+      distanceM: own.fold(0, (sum, l) => sum + l.distanceM),
+      durationS: own.every((l) => l.durationS > 0) ? own.fold(0, (sum, l) => sum + l.durationS) : 0,
+    );
+  }
+
+  /// Le temps de cette discipline contient-il une transition ? Son rythme est alors sous-estimé.
+  bool splitIncludesTransition(Sport sport) {
+    for (var i = 0; i < legs.length; i++) {
+      if (legs[i].sport == sport && legIncludesTransition(i)) return true;
+    }
+    return false;
+  }
 
   Map<String, dynamic> toJson() => {
     'kind': kind.name,

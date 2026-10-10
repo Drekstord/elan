@@ -1862,4 +1862,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get backupDisciplines => 'Disciplines (triathlon, duathlon, aquathlon)';
+
+  @override
+  String get evolutionSportsTitle => 'Triathlons : par discipline';
+
+  @override
+  String get evolutionSportsHint => 'Distance et temps cumulés de tes triathlons, duathlons et aquathlons.';
+
+  @override
+  String get evolutionSportsEvents => 'Épreuves';
+
+  @override
+  String get chartSportTitle => 'Rythme par discipline en triathlon';
+
+  @override
+  String get chartSportHintSwim => 'En minutes aux 100 m. Plus le point est haut, plus tu as nagé vite.';
+
+  @override
+  String get chartSportHintBike => 'En km/h. Plus le point est haut, plus tu as roulé vite.';
+
+  @override
+  String get chartSportHintRun => 'En minutes par kilomètre. Plus le point est haut, plus tu as couru vite.';
+
+  @override
+  String get chartSportNeedsTwo => 'Il faut deux épreuves chronométrées sur la période pour tracer cette discipline.';
+
+  @override
+  String get legendSport => 'Une épreuve chronométrée';
+
+  @override
+  String get recordsBySport => 'Meilleurs rythmes en triathlon';
+
+  @override
+  String get recordsBySportHint => 'Par discipline, tous formats confondus (triathlons, duathlons, aquathlons).';
 }

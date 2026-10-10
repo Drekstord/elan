@@ -40,14 +40,19 @@ class PersonalRecords {
   /// (« Triathlon S », « Duathlon M »…). Les distances libres ne se comparent pas.
   final Map<MultisportEvent, List<Course>> multisport;
 
+  /// Meilleur rythme de chaque discipline en épreuve enchaînée, tous formats confondus :
+  /// allure aux 100 m en natation, vitesse à vélo, allure au kilomètre à pied.
+  final Map<Sport, List<Course>> bySport;
+
   const PersonalRecords({
     required this.byDistance,
     required this.longest,
     required this.highestElevation,
     this.multisport = const {},
+    this.bySport = const {},
   });
 
-  bool get isEmpty => byDistance.isEmpty && longest.isEmpty && multisport.isEmpty;
+  bool get isEmpty => byDistance.isEmpty && longest.isEmpty && multisport.isEmpty && bySport.isEmpty;
 
   factory PersonalRecords.compute(Iterable<Course> courses) {
     final eligible = courses.where((c) => c.isCompleted && c.type == CourseType.officialRace).toList();
@@ -78,11 +83,20 @@ class PersonalRecords {
       list.sort(_byTimeThenDate((c) => c.durationS));
     }
 
+    final bySport = <Sport, List<Course>>{};
+    for (final sport in Sport.values) {
+      double effort(Course c) => c.multisport!.split(sport)!.effort!;
+      final list = courses.where((c) => c.isCompleted && c.multisport?.split(sport)?.effort != null).toList()
+        ..sort((a, b) => effort(a) != effort(b) ? effort(a).compareTo(effort(b)) : a.raceDate.compareTo(b.raceDate));
+      if (list.isNotEmpty) bySport[sport] = list;
+    }
+
     return PersonalRecords(
       byDistance: byDistance,
       longest: longest,
       highestElevation: climbing,
       multisport: multisport,
+      bySport: bySport,
     );
   }
 
@@ -107,6 +121,8 @@ class PersonalRecords {
       if (value.length >= 2 && value.first.id == course.id) DistanceRecord(key),
     for (final MapEntry(:key, :value) in multisport.entries)
       if (value.length >= 2 && value.first.id == course.id) MultisportRecord(key),
+    for (final MapEntry(:key, :value) in bySport.entries)
+      if (value.length >= 2 && value.first.id == course.id) SportRecord(key),
     if (longest.length >= 2 && longest.first.id == course.id) const LongestRecord(),
     if (highestElevation.length >= 2 && highestElevation.first.id == course.id) const ElevationRecord(),
   };
@@ -136,6 +152,17 @@ class MultisportRecord extends RecordKind {
 
   @override
   int get hashCode => event.hashCode;
+}
+
+class SportRecord extends RecordKind {
+  final Sport sport;
+  const SportRecord(this.sport);
+
+  @override
+  bool operator ==(Object other) => other is SportRecord && other.sport == sport;
+
+  @override
+  int get hashCode => Object.hash('sport', sport);
 }
 
 class LongestRecord extends RecordKind {

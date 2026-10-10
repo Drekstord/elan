@@ -3036,6 +3036,72 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Disciplines (triathlon, duathlon, aquathlon)'**
   String get backupDisciplines;
+
+  /// No description provided for @evolutionSportsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Triathlons : par discipline'**
+  String get evolutionSportsTitle;
+
+  /// No description provided for @evolutionSportsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Distance et temps cumulés de tes triathlons, duathlons et aquathlons.'**
+  String get evolutionSportsHint;
+
+  /// No description provided for @evolutionSportsEvents.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épreuves'**
+  String get evolutionSportsEvents;
+
+  /// No description provided for @chartSportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rythme par discipline en triathlon'**
+  String get chartSportTitle;
+
+  /// No description provided for @chartSportHintSwim.
+  ///
+  /// In fr, this message translates to:
+  /// **'En minutes aux 100 m. Plus le point est haut, plus tu as nagé vite.'**
+  String get chartSportHintSwim;
+
+  /// No description provided for @chartSportHintBike.
+  ///
+  /// In fr, this message translates to:
+  /// **'En km/h. Plus le point est haut, plus tu as roulé vite.'**
+  String get chartSportHintBike;
+
+  /// No description provided for @chartSportHintRun.
+  ///
+  /// In fr, this message translates to:
+  /// **'En minutes par kilomètre. Plus le point est haut, plus tu as couru vite.'**
+  String get chartSportHintRun;
+
+  /// No description provided for @chartSportNeedsTwo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il faut deux épreuves chronométrées sur la période pour tracer cette discipline.'**
+  String get chartSportNeedsTwo;
+
+  /// No description provided for @legendSport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une épreuve chronométrée'**
+  String get legendSport;
+
+  /// No description provided for @recordsBySport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Meilleurs rythmes en triathlon'**
+  String get recordsBySport;
+
+  /// No description provided for @recordsBySportHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par discipline, tous formats confondus (triathlons, duathlons, aquathlons).'**
+  String get recordsBySportHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

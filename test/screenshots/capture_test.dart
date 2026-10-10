@@ -170,6 +170,24 @@ final _sample = [
     associationCause: CauseType.sante,
   ),
   Course(
+    id: 'tri-xxs',
+    title: 'Triathlon de Démoville',
+    raceDate: calendarDate(2026, 4, 12),
+    type: CourseType.multisport,
+    distanceM: 6700,
+    durationS: 1680,
+    multisport: Multisport(
+      kind: MultisportKind.triathlon,
+      format: 'XXS',
+      legs: const [
+        Leg(sport: Sport.swim, distanceM: 200, durationS: 420),
+        Leg(sport: Sport.bike, distanceM: 5000, durationS: 780),
+        Leg(sport: Sport.run, distanceM: 1500, durationS: 480),
+      ],
+      transitionsIncluded: true,
+    ),
+  ),
+  Course(
     id: 'tri',
     title: 'Triathlon de Bois-Joli',
     raceDate: calendarDate(2026, 6, 14),
@@ -332,6 +350,14 @@ void main() {
   testWidgets(
     'formulaire triathlon',
     (t) => capture(t, 'formulaire_triathlon', location: '/courses/tri/modifier', size: const Size(390, 1500)),
+  );
+  testWidgets(
+    'évolution triathlon',
+    (t) => capture(t, 'evolution_triathlon', location: '/evolution', size: const Size(390, 3000)),
+  );
+  testWidgets(
+    'records triathlon',
+    (t) => capture(t, 'records_triathlon', location: '/records', size: const Size(390, 3000)),
   );
   testWidgets('connexion', (t) => capture(t, 'connexion', location: '/connexion'));
   testWidgets('premier compte', (t) => capture(t, 'premier_compte', location: '/premier-compte'));

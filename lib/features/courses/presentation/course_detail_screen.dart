@@ -198,6 +198,7 @@ class _Detail extends ConsumerWidget {
   static String _recordLabel(RecordKind r, AppLocalizations t) => switch (r) {
     DistanceRecord(:final distance) => '${t.recordBadge} ${distance.label(t)}',
     MultisportRecord(:final event) => '${t.recordBadge} ${event.kind.label(t)} ${event.format}',
+    SportRecord(:final sport) => '${t.recordBadge} ${sport.label(t).toLowerCase()}',
     LongestRecord() => t.recordsLongest,
     ElevationRecord() => t.recordsElevation,
   };

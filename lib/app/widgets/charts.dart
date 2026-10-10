@@ -550,6 +550,9 @@ class DotChart extends StatefulWidget {
   final double minX;
   final double maxX;
   final bool invertY;
+
+  /// Pas de l'échelle verticale, dans l'unité des valeurs (15 s pour une allure).
+  final double step;
   final double height;
 
   const DotChart({
@@ -561,6 +564,7 @@ class DotChart extends StatefulWidget {
     required this.minX,
     required this.maxX,
     this.invertY = false,
+    this.step = 15,
     this.height = 200,
   });
 
@@ -576,7 +580,7 @@ class _DotChartState extends State<DotChart> {
     final p = context.palette;
     final ys = widget.data.map((d) => d.y);
     // Échelle resserrée autour des données (une allure ne part pas de zéro).
-    final step = 15.0;
+    final step = widget.step;
     final lo = (ys.reduce(math.min) / step).floor() * step - step;
     final hi = (ys.reduce(math.max) / step).ceil() * step + step;
     final spanX = math.max(1.0, widget.maxX - widget.minX);

@@ -1,4 +1,6 @@
 import 'package:app_course/features/courses/domain/course.dart';
+import 'package:app_course/features/evolution/presentation/evolution_screen.dart';
+import 'package:app_course/features/records/presentation/records_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,6 +22,25 @@ final _triathlonS = Course(
       Leg(sport: Sport.run, distanceM: 5000, durationS: 1500),
     ],
     transitionsS: const [120, 90],
+  ),
+);
+
+final _triathlonXxs = Course(
+  id: 'xxs',
+  title: 'Triathlon de Démoville',
+  raceDate: calendarDate(2026, 4, 12),
+  type: CourseType.multisport,
+  distanceM: 6700,
+  durationS: 1680,
+  multisport: Multisport(
+    kind: MultisportKind.triathlon,
+    format: 'XXS',
+    legs: const [
+      Leg(sport: Sport.swim, distanceM: 200, durationS: 420),
+      Leg(sport: Sport.bike, distanceM: 5000, durationS: 780),
+      Leg(sport: Sport.run, distanceM: 1500, durationS: 480),
+    ],
+    transitionsIncluded: true,
   ),
 );
 
@@ -175,6 +196,64 @@ void main() {
     expect(saved.title, 'Semi-marathon de Démoville');
     expect(saved.documents.single.key, 'user-1/docs/facture.pdf', reason: 'la facture ne doit pas disparaître');
     expect(saved.documents.single.kind, DocumentKind.invoice);
+    await env.dispose(tester);
+  });
+
+  testWidgets('évolution : cumuls par discipline, filtre et rythme d\'une épreuve à l\'autre', (tester) async {
+    final env = TestEnv();
+    await env.seed(tester, [_triathlonS, _triathlonXxs]);
+    await env.pump(tester, home: const EvolutionScreen());
+
+    expect(find.text('TRIATHLONS : PAR DISCIPLINE'), findsOneWidget);
+    expect(find.text('950 m'), findsOneWidget);
+    expect(find.text('25 km'), findsOneWidget);
+    expect(find.text('6,5 km'), findsWidgets);
+    expect(find.text('RYTHME PAR DISCIPLINE EN TRIATHLON'), findsOneWidget);
+    // Chaque point se lit aussi sans la souris, transition comprise signalée.
+    expect(
+      find.bySemanticsLabel(
+        RegExp(r'''Triathlon de Démoville.*3'30" /100 m · 200 m · transition comprise ; .*2'00" /100 m'''),
+      ),
+      findsOneWidget,
+    );
+    await tapVisible(tester, find.descendant(of: find.byType(SegmentedButton<Sport>), matching: find.text('Vélo')));
+    expect(
+      find.bySemanticsLabel(RegExp(r'23,1 km/h · 5 km · transition comprise ; .*30,0 km/h · 20 km')),
+      findsOneWidget,
+    );
+
+    await tapVisible(tester, find.text('Triathlons'));
+    await env.settle(tester);
+    expect(find.text('TRIATHLONS : PAR DISCIPLINE'), findsOneWidget);
+    await env.dispose(tester);
+  });
+
+  testWidgets('évolution : sans épreuve enchaînée, rien ne change', (tester) async {
+    final env = TestEnv();
+    await env.seed(tester, [
+      Course(id: 'dix', title: '10 km', raceDate: calendarDate(2026, 5, 1), distanceM: 10000, durationS: 3000),
+    ]);
+    await env.pump(tester, home: const EvolutionScreen());
+    expect(find.text('Officielles'), findsOneWidget);
+    expect(find.text('Triathlons'), findsNothing);
+    expect(find.text('TRIATHLONS : PAR DISCIPLINE'), findsNothing);
+    expect(find.text('RYTHME PAR DISCIPLINE EN TRIATHLON'), findsNothing);
+    await env.dispose(tester);
+  });
+
+  testWidgets('records : meilleur rythme de chaque discipline', (tester) async {
+    final env = TestEnv();
+    await env.seed(tester, [_triathlonS, _triathlonXxs]);
+    await env.pump(tester, home: const RecordsScreen());
+
+    expect(find.text('MEILLEURS RYTHMES EN TRIATHLON'), findsOneWidget);
+    expect(find.text('2\'00" /100 m'), findsOneWidget);
+    expect(find.text('30,0 km/h'), findsOneWidget);
+    expect(find.text('5\'00" /km'), findsOneWidget);
+    // Deuxième place : le XXS, dont la natation et le vélo contiennent une transition.
+    expect(find.text('3\'30" /100 m'), findsOneWidget);
+    expect(find.textContaining(RegExp(r'Triathlon\sXXS\s+·\s+200\sm\s+·\s+transition\scomprise')), findsOneWidget);
+    expect(find.textContaining(RegExp(r'Triathlon\sXXS\s+·\s+1,5\skm')), findsOneWidget);
     await env.dispose(tester);
   });
 }

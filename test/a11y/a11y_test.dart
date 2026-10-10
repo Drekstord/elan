@@ -83,6 +83,24 @@ final _courses = [
     impactQuantity: 4,
   ),
   Course(
+    id: 'tri-xxs',
+    title: 'Triathlon de Démoville',
+    raceDate: calendarDate(2026, 4, 12),
+    type: CourseType.multisport,
+    distanceM: 6700,
+    durationS: 1680,
+    multisport: Multisport(
+      kind: MultisportKind.triathlon,
+      format: 'XXS',
+      legs: const [
+        Leg(sport: Sport.swim, distanceM: 200, durationS: 420),
+        Leg(sport: Sport.bike, distanceM: 5000, durationS: 780),
+        Leg(sport: Sport.run, distanceM: 1500, durationS: 480),
+      ],
+      transitionsIncluded: true,
+    ),
+  ),
+  Course(
     id: 'tri',
     title: 'Triathlon de Valfleuri',
     raceDate: calendarDate(2026, 6, 14),
@@ -284,7 +302,9 @@ void main() {
 
     env = await _show(tester, '/evolution');
     // Courbe du cumul : valeurs finales lisibles (dessin sans texte sinon).
-    expect(find.bySemanticsLabel(RegExp(r'^2026 : [0-9]+ km au .* ; 2025 : ')), findsOneWidget);
+    final cumulative = find.bySemanticsLabel(RegExp(r'^2026 : [0-9]+ km au .* ; 2025 : '));
+    await tester.scrollUntilVisible(cumulative, 300, scrollable: find.byType(Scrollable).first);
+    expect(cumulative, findsOneWidget);
     // Titres de section déclarés comme titres.
     expect(find.byWidgetPredicate((w) => w is Semantics && w.properties.header == true), findsWidgets);
     await env.dispose(tester);

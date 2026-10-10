@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../app/format.dart';
+import '../../../app/labels.dart';
 import '../../../app/router.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../app/theme/tokens.dart';
@@ -15,6 +16,7 @@ import '../../courses/courses_providers.dart';
 import '../../courses/domain/course.dart';
 import '../../courses/domain/course_query.dart';
 import '../../courses/domain/course_stats.dart';
+import '../../courses/presentation/multisport_view.dart';
 import '../domain/evolution_range.dart';
 
 /// Évolution sportive : un bilan chiffré de la période, puis les graphiques qui le détaillent.
@@ -82,6 +84,9 @@ class _EvolutionScreenState extends ConsumerState<EvolutionScreen> {
             ButtonSegment(value: CourseKind.all, label: Text(t.kindAll)),
             ButtonSegment(value: CourseKind.official, label: Text(t.kindOfficial)),
             ButtonSegment(value: CourseKind.challenge, label: Text(t.kindChallenge)),
+            // Proposé seulement à qui a déjà terminé une épreuve enchaînée.
+            if (_kind == CourseKind.multisport || all.any((c) => c.isCompleted && c.isMultisport))
+              ButtonSegment(value: CourseKind.multisport, label: Text(t.kindMultisport), tooltip: t.kindMultisportHint),
           ],
           selected: {_kind},
           onSelectionChanged: (s) => _update(() => _kind = s.first),
@@ -92,6 +97,10 @@ class _EvolutionScreenState extends ConsumerState<EvolutionScreen> {
     final byYear = _range == RangeKind.allYears;
     final selected = _selected == null || _selected! >= totals.length ? null : totals[_selected!];
     final paced = pacedRaces(inRange);
+    final splits = {
+      for (final sport in Sport.values)
+        if (splitRaces(inRange, sport) case final races when races.length >= 2) sport: races,
+    };
     final cumulYear = _range == RangeKind.year ? year : today.year;
 
     return Scaffold(
@@ -117,6 +126,10 @@ class _EvolutionScreenState extends ConsumerState<EvolutionScreen> {
                   const SizedBox(height: Space.lg),
                   _Summary(range: range, courses: courses, inRange: inRange, today: today),
                   const SizedBox(height: Space.md),
+                  if (inRange.any((c) => c.isMultisport)) ...[
+                    _SportsSummary(range: range, courses: courses, inRange: inRange, today: today),
+                    const SizedBox(height: Space.md),
+                  ],
                   if (_table)
                     _PeriodTable(totals: totals, byYear: byYear)
                   else
@@ -163,6 +176,7 @@ class _EvolutionScreenState extends ConsumerState<EvolutionScreen> {
                             legend: ChartLegend([(LegendMark.dot, context.palette.chartPrimary, t.legendPace, null)]),
                             children: [_PaceChart(races: paced)],
                           ),
+                        if (splits.isNotEmpty) _SportChartCard(splits: splits),
                       ],
                     ),
                 ],
@@ -256,6 +270,153 @@ class _Summary extends StatelessWidget {
           const SizedBox(height: Space.md),
           Text(compare, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: p.textMuted)),
         ],
+      ],
+    );
+  }
+}
+
+/// Les épreuves enchaînées de la période, discipline par discipline : distance et temps cumulés.
+class _SportsSummary extends StatelessWidget {
+  final EvolutionRange range;
+  final List<Course> courses;
+  final List<Course> inRange;
+  final DateTime today;
+
+  const _SportsSummary({required this.range, required this.courses, required this.inRange, required this.today});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final p = context.palette;
+    final small = Theme.of(context).textTheme.bodySmall?.copyWith(color: p.textMuted);
+    final totals = sportTotals(inRange);
+    final previous = range.previousWindow(today);
+    final before = previous == null ? null : completedBetween(courses, previous.$1, previous.$2);
+    final totalsBefore = before == null ? null : sportTotals(before);
+    final count = inRange.where((c) => c.isMultisport).length;
+    final countBefore = before?.where((c) => c.isMultisport).length;
+
+    Widget tile(String label, String value, int now, int? then, {String? note, IconData? icon, Color? color}) =>
+        MergeSemantics(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[Icon(icon, size: 20, color: color), const SizedBox(height: Space.xs)],
+              StatTile(label: label, value: value),
+              if (note != null) Text(note, style: small?.copyWith(fontFeatures: Fonts.tabular)),
+              ?(then == null ? null : _Delta.of(now, then)),
+            ],
+          ),
+        );
+
+    return SectionCard(
+      title: t.evolutionSportsTitle,
+      children: [
+        Text(t.evolutionSportsHint, style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: Space.md),
+        StatGrid(
+          minTileWidth: 110,
+          tiles: [
+            tile(t.evolutionSportsEvents, '$count', count, countBefore, icon: Icons.flag_outlined, color: p.textMuted),
+            for (final sport in Sport.values)
+              if (totals[sport] case final total?)
+                tile(
+                  sport.label(t),
+                  sport == Sport.swim ? formatMeters(total.distanceM) : formatKm(total.distanceM, decimals: 1),
+                  total.distanceM,
+                  totalsBefore == null ? null : (totalsBefore[sport]?.distanceM ?? 0),
+                  note: total.durationS > 0 ? formatLongDuration(total.durationS) : null,
+                  icon: sport.icon,
+                  color: sportColor(sport, p),
+                ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Rythme d'une discipline d'une épreuve enchaînée à l'autre. Une discipline se choisit
+/// dès que plusieurs ont assez de points.
+class _SportChartCard extends StatefulWidget {
+  /// Par discipline, les épreuves chronométrées (au moins deux), dans l'ordre chronologique.
+  final Map<Sport, List<Course>> splits;
+
+  const _SportChartCard({required this.splits});
+
+  @override
+  State<_SportChartCard> createState() => _SportChartCardState();
+}
+
+class _SportChartCardState extends State<_SportChartCard> {
+  Sport? _sport;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final p = context.palette;
+    final sports = widget.splits.keys.toList();
+    final sport = sports.contains(_sport) ? _sport! : sports.first;
+    final races = widget.splits[sport]!;
+    final color = sportColor(sport, p);
+    final note = t.multisportTransitionIncludedNote;
+
+    double day(DateTime d) => d.millisecondsSinceEpoch / Duration.millisecondsPerDay;
+    final first = races.first.raceDate;
+    final last = races.last.raceDate;
+    final years = last.year - first.year;
+
+    return _ChartCard(
+      title: t.chartSportTitle,
+      subtitle: switch (sport) {
+        Sport.swim => t.chartSportHintSwim,
+        Sport.bike => t.chartSportHintBike,
+        Sport.run => t.chartSportHintRun,
+      },
+      legend: ChartLegend([(LegendMark.dot, color, '${t.legendSport} · ${sport.label(t)}', null)]),
+      children: [
+        if (sports.length > 1) ...[
+          SegmentedButton<Sport>(
+            showSelectedIcon: false,
+            segments: [for (final s in sports) ButtonSegment(value: s, label: Text(s.label(t)))],
+            selected: {sport},
+            onSelectionChanged: (s) => setState(() => _sport = s.first),
+          ),
+          const SizedBox(height: Space.md),
+        ],
+        DotChart(
+          color: color,
+          // À vélo, la vitesse : le plus haut est le plus rapide sans rien inverser.
+          invertY: sport != Sport.bike,
+          step: sport == Sport.bike ? 2 : 15,
+          minX: day(first) - 10,
+          maxX: day(last) + 10,
+          xTicks: [
+            (day(first), years == 0 ? formatMonthShort(first) : '${first.year}'),
+            if (day(last) - day(first) > 45) (day(last), years == 0 ? formatMonthShort(last) : '${last.year}'),
+          ],
+          // Axe compact ; l'infobulle garde l'unité.
+          formatY: (v) => switch (sport) {
+            Sport.swim => formatSwimPace(v).replaceAll(' /100 m', ''),
+            Sport.bike => formatSpeed(v).replaceAll(' km/h', ''),
+            Sport.run => formatPace(v).replaceAll(' /km', ''),
+          },
+          data: [
+            for (final c in races)
+              if (c.multisport!.split(sport) case final leg?)
+                DotDatum(
+                  x: day(c.raceDate),
+                  y: sport == Sport.bike ? leg.speedKmh! : leg.effort!,
+                  tooltipTitle: '${c.title} · ${formatDay(c.raceDate)}',
+                  tooltipValue: [
+                    formatLegPace(leg),
+                    formatLegDistance(leg),
+                    if (c.multisport!.splitIncludesTransition(sport)) note,
+                  ].join(' · '),
+                ),
+          ],
+        ),
       ],
     );
   }
