@@ -135,12 +135,21 @@ class _Detail extends ConsumerWidget {
               if (status != CourseStatus.completed) StatusChip(status: status),
               for (final r in records)
                 Pill(icon: Icons.emoji_events_outlined, label: _recordLabel(r, t), color: p.record),
+              if (targetLabel(course, t) case final label?)
+                Pill(
+                  icon: (course.targetDeltaS ?? 1) <= 0 ? Icons.flag : Icons.flag_outlined,
+                  label: course.isPlanned && !course.isMultisport && course.distanceM > 0
+                      ? '$label  ·  ${formatPace(course.targetDurationS! / course.distanceKm)}'
+                      : label,
+                  color: course.isPlanned ? p.upcoming : ((course.targetDeltaS ?? 1) <= 0 ? p.record : p.textMuted),
+                ),
             ],
           ),
           gap,
           if (status != CourseStatus.completed) ...[_PlannedNotice(course: course, status: status), gap],
           _PerformanceBand(course: course),
           if (course.isMultisport) ...[gap, MultisportCard(course: course)],
+          if (course.ranking case final ranking?) ...[gap, _RankingCard(ranking: ranking)],
           const SizedBox(height: Space.md),
         ],
         right: [
@@ -202,6 +211,59 @@ class _Detail extends ConsumerWidget {
     LongestRecord() => t.recordsLongest,
     ElevationRecord() => t.recordsElevation,
   };
+}
+
+/// Classement officiel : la place, le nombre d'arrivants et ce que ça représente.
+class _RankingCard extends StatelessWidget {
+  final Ranking ranking;
+
+  const _RankingCard({required this.ranking});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final p = context.palette;
+    final small = Theme.of(context).textTheme.bodySmall?.copyWith(color: p.textMuted);
+
+    Widget row(String label, int? rank, int? total, double? percent) => MergeSemantics(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+                // Au moins 1 % : « dans les 0 % premiers » ne voudrait rien dire.
+                if (percent != null) Text(t.rankingTop(percent.ceil().clamp(1, 100)), style: small),
+              ],
+            ),
+          ),
+          const SizedBox(width: Space.sm),
+          Text(rankLabel(rank, total, t), style: TextStyles.figure(p.text, size: 22)),
+        ],
+      ),
+    );
+
+    final hasOverall = ranking.overall != null || ranking.finishers != null;
+    final hasCategory = ranking.category != null || ranking.categoryFinishers != null;
+    return SectionCard(
+      title: t.formRanking,
+      children: [
+        if (hasOverall) row(t.rankingOverall, ranking.overall, ranking.finishers, ranking.overallPercent),
+        if (hasOverall && (hasCategory || ranking.categoryName != null)) const Divider(height: Space.lg),
+        if (hasCategory)
+          row(
+            [t.rankingCategory, ?ranking.categoryName].join(' '),
+            ranking.category,
+            ranking.categoryFinishers,
+            ranking.categoryPercent,
+          )
+        else if (ranking.categoryName != null)
+          Text('${t.rankingCategory} ${ranking.categoryName}', style: const TextStyle(fontWeight: FontWeight.w700)),
+      ],
+    );
+  }
 }
 
 /// Bandeau noir : le chrono en héros, puis distance, allure, vitesse, D+.

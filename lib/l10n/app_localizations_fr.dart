@@ -1895,4 +1895,207 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recordsBySportHint => 'Par discipline, tous formats confondus (triathlons, duathlons, aquathlons).';
+
+  @override
+  String get formTarget => 'Temps visé (facultatif)';
+
+  @override
+  String get formTargetHint => 'Ton objectif pour cette course. Il reste affiché après, pour comparer.';
+
+  @override
+  String get formRanking => 'Classement';
+
+  @override
+  String get formRankingHint => 'Facultatif. Recopie ce que donne la feuille de résultats.';
+
+  @override
+  String get formRank => 'Place';
+
+  @override
+  String get formFinishers => 'Arrivants';
+
+  @override
+  String get formCategoryRank => 'Place dans la catégorie';
+
+  @override
+  String get formCategoryFinishers => 'Arrivants de la catégorie';
+
+  @override
+  String get formCategoryName => 'Catégorie';
+
+  @override
+  String get formCategoryNameHint => 'SEH, M1…';
+
+  @override
+  String get issueRankAboveFinishers => 'La place ne peut pas dépasser le nombre d\'arrivants.';
+
+  @override
+  String targetPlanned(String time) {
+    return 'Objectif $time';
+  }
+
+  @override
+  String targetBeaten(String time) {
+    return 'Objectif battu de $time';
+  }
+
+  @override
+  String targetMissed(String time) {
+    return 'Objectif manqué de $time';
+  }
+
+  @override
+  String get targetMet => 'Objectif atteint';
+
+  @override
+  String get rankingOverall => 'Général';
+
+  @override
+  String get rankingCategory => 'Catégorie';
+
+  @override
+  String rankingOf(String rank, String total) {
+    return '$rank sur $total';
+  }
+
+  @override
+  String rankingTop(int percent) {
+    return 'dans les $percent % premiers';
+  }
+
+  @override
+  String get ordinalFirst => '1er';
+
+  @override
+  String ordinalOther(int n) {
+    return '${n}e';
+  }
+
+  @override
+  String get chartRankTitle => 'Classement de chaque course';
+
+  @override
+  String get chartRankHint => 'Part des arrivants classés devant toi. Plus le point est haut, mieux tu es classé.';
+
+  @override
+  String get legendRank => 'Une course classée';
+
+  @override
+  String goalYearTitle(int year) {
+    return 'Objectif $year';
+  }
+
+  @override
+  String get goalSet => 'Fixer un objectif annuel';
+
+  @override
+  String get goalEdit => 'Modifier l\'objectif';
+
+  @override
+  String goalDialogField(int year) {
+    return 'Kilomètres à courir en $year';
+  }
+
+  @override
+  String get goalDialogHint => 'Laisse vide pour retirer l\'objectif. Il est enregistré sur cet appareil.';
+
+  @override
+  String goalProgress(String done, String goal) {
+    return '$done sur $goal';
+  }
+
+  @override
+  String goalAhead(String km) {
+    return 'En avance de $km sur le rythme de l\'année.';
+  }
+
+  @override
+  String goalBehind(String km) {
+    return 'En retard de $km sur le rythme de l\'année.';
+  }
+
+  @override
+  String get goalOnTrack => 'Pile dans le rythme de l\'année.';
+
+  @override
+  String get goalReached => 'Objectif atteint, bravo !';
+
+  @override
+  String get backupTarget => 'Temps visé';
+
+  @override
+  String get backupRanking => 'Classement';
+
+  @override
+  String get recapTitle => 'Bilan de l\'année';
+
+  @override
+  String get recapAction => 'Bilan de l\'année à partager';
+
+  @override
+  String recapKicker(int year) {
+    return 'Bilan $year';
+  }
+
+  @override
+  String get recapRun => 'courus';
+
+  @override
+  String get recapRecords => 'Records';
+
+  @override
+  String get recapLongest => 'Plus longue course';
+
+  @override
+  String recapDonations(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count associations',
+      one: '1 association',
+    );
+    return '$amount pour $_temp0';
+  }
+
+  @override
+  String recapDonationsOnly(String amount) {
+    return '$amount versés';
+  }
+
+  @override
+  String recapEmpty(int year) {
+    return 'Aucune course terminée en $year.';
+  }
+
+  @override
+  String recapBanner(int year) {
+    return 'Ton bilan $year est prêt';
+  }
+
+  @override
+  String get recapBannerHint => 'Une image à partager : kilomètres, courses, records et dons.';
+
+  @override
+  String get recapBannerOpen => 'Voir';
+
+  @override
+  String get settingsLanguage => 'Langue';
+
+  @override
+  String get languageSystem => 'Système';
+
+  @override
+  String get formImportFile => 'Importer un fichier de montre (GPX ou FIT)';
+
+  @override
+  String formFitImported(String summary) {
+    return 'Fichier importé : $summary.';
+  }
+
+  @override
+  String get formFitError => 'Ce fichier FIT est illisible.';
+
+  @override
+  String get formFitUnknown =>
+      'Enchaînement non reconnu : seules les disciplines d\'un triathlon, d\'un duathlon ou d\'un aquathlon sont importées. Saisis les temps à la main.';
 }

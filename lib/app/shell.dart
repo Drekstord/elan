@@ -8,6 +8,7 @@ import '../core/providers.dart';
 import '../features/settings/auto_backup.dart';
 import '../features/updates/update_banner.dart';
 import '../features/widget/home_screen_widget.dart';
+import '../features/courses/courses_providers.dart';
 import '../features/courses/domain/course.dart';
 import '../features/reminders/domain/race_reminders.dart';
 import '../features/reminders/reminder_service.dart';
@@ -88,7 +89,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     final courses = ref.read(coursesProvider).value;
     if (courses == null) return;
     final now = DateTime.now();
-    updateHomeWidget(homeWidgetData(courses, calendarDate(now.year, now.month, now.day)));
+    updateHomeWidget(
+      homeWidgetData(courses, calendarDate(now.year, now.month, now.day), goalM: ref.read(yearGoalProvider).value),
+    );
   }
 
   void _backupIfDue() {
@@ -117,6 +120,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       _updateWidget();
     });
     ref.listen(reminderSettingsProvider, (_, _) => _reschedule());
+    ref.listen(yearGoalProvider, (_, _) => _updateWidget());
 
     ref.listen(sessionBootstrapProvider, (_, next) {
       if (next.hasValue) {

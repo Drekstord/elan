@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../app/app.dart';
+import '../../../app/format.dart';
+import '../../../app/language.dart';
 import '../../../app/theme/theme_mode.dart';
 import '../../../app/theme/tokens.dart';
 import '../../../app/widgets/sync_badge.dart';
@@ -68,6 +70,21 @@ class SettingsScreen extends ConsumerWidget {
                     selected: {ref.watch(themeModeProvider)},
                     onSelectionChanged: (s) => ref.read(themeModeProvider.notifier).set(s.first),
                   ),
+                  const SizedBox(height: Space.md),
+                  Text(t.settingsLanguage, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: Space.sm),
+                  SegmentedButton<String>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(value: '', label: Text(t.languageSystem)),
+                      // Chaque langue s'écrit dans sa propre langue.
+                      const ButtonSegment(value: 'fr', label: Text('Français')),
+                      const ButtonSegment(value: 'en', label: Text('English')),
+                    ],
+                    selected: {ref.watch(languageProvider) ?? ''},
+                    onSelectionChanged: (s) =>
+                        ref.read(languageProvider.notifier).set(s.first.isEmpty ? null : s.first),
+                  ),
                   if (supportsReminders) ...[const SizedBox(height: Space.md), const _ReminderSettings()],
                   if (supportsWallpaperColors) ...[
                     const SizedBox(height: Space.sm),
@@ -123,7 +140,7 @@ class _SyncCard extends ConsumerWidget {
             if (last != null) ...[
               const SizedBox(height: Space.xs),
               Text(
-                t.syncLast(DateFormat('d MMM y, HH:mm', 'fr').format(last.toLocal())),
+                t.syncLast(DateFormat('d MMM y, HH:mm', formatLocale).format(last.toLocal())),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -414,7 +431,7 @@ class _AutoBackupCard extends ConsumerWidget {
                   ? t.autoBackupRunning
                   : last == null
                   ? t.autoBackupNever
-                  : t.autoBackupLast(DateFormat('d MMM y, HH:mm', 'fr').format(last)),
+                  : t.autoBackupLast(DateFormat('d MMM y, HH:mm', formatLocale).format(last)),
               style: theme.textTheme.bodySmall,
             ),
             if (result != null && !state.running) ...[

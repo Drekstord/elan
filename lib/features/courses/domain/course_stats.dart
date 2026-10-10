@@ -71,6 +71,37 @@ class CourseStats {
   double? get averagePaceSecondsPerKm => timedDistanceM > 0 ? pacedDurationS / (timedDistanceM / 1000) : null;
 }
 
+/// Avancement de l'objectif annuel de kilomètres courus.
+class GoalProgress {
+  final int goalM;
+  final int doneM;
+
+  /// Distance qu'il faudrait avoir courue aujourd'hui pour finir l'année pile sur l'objectif.
+  final int expectedM;
+
+  const GoalProgress({required this.goalM, required this.doneM, required this.expectedM});
+
+  bool get reached => doneM >= goalM;
+
+  /// Part accomplie, entre 0 et 1.
+  double get ratio => goalM <= 0 ? 0 : (doneM / goalM).clamp(0.0, 1.0);
+
+  /// Avance (positive) ou retard (négatif) sur le rythme de l'année.
+  int get aheadM => doneM - expectedM;
+}
+
+/// Kilomètres courus cette année face à l'objectif, et où l'on devrait en être au jour [today].
+GoalProgress goalProgress(Iterable<Course> courses, DateTime today, int goalM) {
+  final start = DateTime.utc(today.year);
+  final days = DateTime.utc(today.year + 1).difference(start).inDays;
+  final elapsed = today.difference(start).inDays + 1;
+  return GoalProgress(
+    goalM: goalM,
+    doneM: CourseStats.of(courses.where((c) => !c.isDeleted && c.raceDate.year == today.year)).distanceM,
+    expectedM: (goalM * elapsed / days).round(),
+  );
+}
+
 /// Cumul d'une discipline sur les épreuves enchaînées terminées.
 typedef SportTotal = ({int distanceM, int durationS});
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../format.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
@@ -64,7 +65,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
               color: p.band,
               padding: const EdgeInsets.fromLTRB(Space.lg, Space.md, Space.lg, Space.md),
               child: Text(
-                toBeginningOfSentenceCase(DateFormat('EEEE d MMMM y', 'fr').format(_selected)),
+                toBeginningOfSentenceCase(DateFormat('EEEE d MMMM y', formatLocale).format(_selected)),
                 style: TextStyles.courseTitle(p.onBand, size: 22),
               ),
             ),

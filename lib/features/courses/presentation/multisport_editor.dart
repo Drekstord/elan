@@ -52,6 +52,24 @@ class MultisportEditorController extends ChangeNotifier {
     if (initialDurationS > 0 && initialDurationS != initial.splitsTotalS) total.text = formatDuration(initialDurationS);
   }
 
+  /// Remplace toute la saisie par une épreuve lue dans un fichier de montre.
+  void load(Multisport imported) {
+    _kind = imported.kind;
+    _format = imported.format;
+    _transitionsIncluded = false;
+    _resetFields();
+    total.clear();
+    error = null;
+    for (var i = 0; i < imported.legs.length && i < distances.length; i++) {
+      distances[i].text = _distanceInput(_kind.sports[i], imported.legs[i].distanceM);
+      if (imported.legs[i].durationS > 0) durations[i].text = formatDuration(imported.legs[i].durationS);
+    }
+    for (var i = 0; i < imported.transitionsS.length && i < transitions.length; i++) {
+      if (imported.transitionsS[i] > 0) transitions[i].text = formatDuration(imported.transitionsS[i]);
+    }
+    notifyListeners();
+  }
+
   MultisportKind get kind => _kind;
   String? get format => _format;
   bool get transitionsIncluded => _transitionsIncluded;

@@ -10,6 +10,7 @@ import '../core/server/server_config.dart';
 import '../features/auth/presentation/server_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'app.dart';
+import 'language.dart';
 import 'theme/app_theme.dart';
 
 /// Racine de l'app : connectée au serveur choisi, recréée entièrement quand il change
@@ -85,7 +86,7 @@ class _ServerSetupApp extends StatelessWidget {
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light(),
     darkTheme: AppTheme.dark(),
-    locale: const Locale('fr'),
+    locale: resolveLocale(null, WidgetsBinding.instance.platformDispatcher.locales),
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     home: ServerScreen(current: null, builtIn: null, onSave: onSave),

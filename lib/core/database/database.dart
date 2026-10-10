@@ -22,6 +22,9 @@ class Courses extends Table {
 
   /// Épreuve enchaînée, en JSON ([Multisport]) ; null pour les autres types.
   TextColumn get multisport => text().nullable()();
+
+  /// Temps visé et classement, en JSON ([Course.detailsJson]) ; null si rien n'est saisi.
+  TextColumn get details => text().nullable()();
   IntColumn get teamSize => integer().nullable()();
   IntColumn get challengeDistanceM => integer().nullable()();
   BoolColumn get isCharity => boolean()();
@@ -84,7 +87,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.inMemory() => AppDatabase(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -95,7 +98,13 @@ class AppDatabase extends _$AppDatabase {
         await m.alterTable(
           TableMigration(
             courses,
-            newColumns: [courses.isPlanned, courses.fundraisingCents, courses.documents, courses.multisport],
+            newColumns: [
+              courses.isPlanned,
+              courses.fundraisingCents,
+              courses.documents,
+              courses.multisport,
+              courses.details,
+            ],
           ),
         );
       }
@@ -106,6 +115,10 @@ class AppDatabase extends _$AppDatabase {
       if (from >= 2 && from < 4) {
         // v4 : épreuves enchaînées (triathlon, duathlon, aquathlon).
         await m.addColumn(courses, courses.multisport);
+      }
+      if (from >= 2 && from < 5) {
+        // v5 : temps visé et classement.
+        await m.addColumn(courses, courses.details);
       }
     },
   );
@@ -124,36 +137,41 @@ class AppDatabase extends _$AppDatabase {
   // Conversion ligne <-> modèle
   // -------------------------------------------------------------------
 
-  static Course toCourse(CourseRow r) => Course(
-    id: r.id,
-    title: r.title,
-    raceDate: parseIsoDate(r.raceDate),
-    type: CourseType.parse(r.courseType),
-    isPlanned: r.isPlanned,
-    distanceM: r.distanceM,
-    durationS: r.durationS,
-    elevationGainM: r.elevationGainM,
-    multisport: r.multisport == null ? null : Multisport.tryFromJson(jsonDecode(r.multisport!)),
-    teamSize: r.teamSize,
-    challengeDistanceM: r.challengeDistanceM,
-    isCharity: r.isCharity,
-    associationId: r.associationId,
-    associationName: r.associationName,
-    associationCause: CauseType.tryParse(r.associationCause),
-    associationDescription: r.associationDescription,
-    sponsorCentsPerKm: r.sponsorCentsPerKm,
-    registrationDonationCents: r.registrationDonationCents,
-    fundraisingCents: r.fundraisingCents,
-    impactMetric: ImpactMetric.parse(r.impactMetric),
-    impactQuantity: r.impactQuantity,
-    bibPhotoKey: r.bibPhotoKey,
-    medalPhotoKey: r.medalPhotoKey,
-    notes: r.notes,
-    documents: CourseDocument.listFromJson(jsonDecode(r.documents)),
-    createdAt: r.createdAt,
-    updatedAt: r.updatedAt,
-    deletedAt: r.deletedAt,
-  );
+  static Course toCourse(CourseRow r) {
+    final details = r.details == null ? null : jsonDecode(r.details!);
+    return Course(
+      id: r.id,
+      title: r.title,
+      raceDate: parseIsoDate(r.raceDate),
+      type: CourseType.parse(r.courseType),
+      isPlanned: r.isPlanned,
+      distanceM: r.distanceM,
+      durationS: r.durationS,
+      elevationGainM: r.elevationGainM,
+      multisport: r.multisport == null ? null : Multisport.tryFromJson(jsonDecode(r.multisport!)),
+      targetDurationS: details is Map ? (details['target_s'] as num?)?.toInt() : null,
+      ranking: details is Map ? Ranking.tryFromJson(details['ranking']) : null,
+      teamSize: r.teamSize,
+      challengeDistanceM: r.challengeDistanceM,
+      isCharity: r.isCharity,
+      associationId: r.associationId,
+      associationName: r.associationName,
+      associationCause: CauseType.tryParse(r.associationCause),
+      associationDescription: r.associationDescription,
+      sponsorCentsPerKm: r.sponsorCentsPerKm,
+      registrationDonationCents: r.registrationDonationCents,
+      fundraisingCents: r.fundraisingCents,
+      impactMetric: ImpactMetric.parse(r.impactMetric),
+      impactQuantity: r.impactQuantity,
+      bibPhotoKey: r.bibPhotoKey,
+      medalPhotoKey: r.medalPhotoKey,
+      notes: r.notes,
+      documents: CourseDocument.listFromJson(jsonDecode(r.documents)),
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      deletedAt: r.deletedAt,
+    );
+  }
 
   static CoursesCompanion toRow(Course c, {required bool pending}) => CoursesCompanion.insert(
     id: c.id,
@@ -165,6 +183,7 @@ class AppDatabase extends _$AppDatabase {
     durationS: c.durationS,
     elevationGainM: Value(c.elevationGainM),
     multisport: Value(c.multisport == null ? null : jsonEncode(c.multisport!.toJson())),
+    details: Value(c.detailsJson == null ? null : jsonEncode(c.detailsJson)),
     teamSize: Value(c.teamSize),
     challengeDistanceM: Value(c.challengeDistanceM),
     isCharity: c.isCharity,

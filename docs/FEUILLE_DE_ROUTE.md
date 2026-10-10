@@ -29,6 +29,11 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 | 22 | Dépôt public sous licence libre (GPL-3.0) | ✅ terminé |
 | 23 | Triathlon, duathlon, aquathlon | ✅ terminé |
 | 24 | Performances de triathlon dans Évolution et Records | ✅ terminé |
+| 25 | Objectifs : temps visé par course, objectif annuel de kilomètres | ✅ terminé |
+| 26 | Classement officiel (général et catégorie) | ✅ terminé |
+| 27 | Bilan de l'année à partager | ✅ terminé |
+| 28 | App en anglais | ✅ terminé (messages de synchronisation et catalogue d'associations restés en français) |
+| 29 | Import d'un triathlon depuis un fichier de montre (FIT) | ✅ terminé, à confirmer sur un vrai fichier de montre |
 
 Écartés : objectifs annuels (non souhaités).
 
@@ -64,7 +69,7 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 
 ## 4. Export de sauvegarde (CSV + Excel) ✅
 
-- Toutes les courses (à venir comprises), 24 colonnes, en **CSV** (format français : « ; », virgule
+- Toutes les courses (à venir comprises), 26 colonnes, en **CSV** (format français : « ; », virgule
   décimale, UTF-8 avec BOM) et en **Excel** mis en forme.
 - Accès depuis Réglages. Indépendant du cloud : une copie que l'on garde soi-même.
 
@@ -252,3 +257,53 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 - Un temps qui contient une transition est signalé (« transition comprise ») partout où il apparaît.
 - Badge « Record natation / vélo / course à pied » sur la fiche, à partir de deux épreuves comparables.
 - Les kilomètres courus et les records de course à pied restent inchangés.
+
+## 25. Objectifs ✅
+
+- **Temps visé** (facultatif) sur chaque course, à venir ou terminée, épreuves enchaînées comprises.
+  Avant la course, la fiche affiche l'objectif et l'allure qu'il demande ; après, « Objectif battu de
+  1:12 », « manqué de 0:35 » ou « atteint ».
+- **Objectif annuel** de kilomètres courus, sur l'accueil : avancement, pourcentage, et avance ou
+  retard sur le rythme de l'année. Le widget Android affiche « 207 / 500 ».
+- L'objectif annuel est enregistré sur l'appareil (il ne se synchronise pas entre téléphone et PC).
+
+## 26. Classement officiel ✅
+
+- Place et nombre d'arrivants, au général et dans la catégorie (avec son nom : « SEH », « M1 »…).
+  Tout est facultatif.
+- La fiche traduit la place : « 142e sur 980, dans les 15 % premiers ».
+- **Évolution** : un graphique du classement d'une course à l'autre (part des arrivants devant soi),
+  à partir de deux courses classées sur la période.
+- Sauvegarde Excel/CSV : deux colonnes de plus, « Temps visé » et « Classement » (26 au total).
+- Serveur en ligne : exécuter une fois `supabase/004_details.sql` (voir [CLOUD.md](CLOUD.md)). Cette
+  colonne accueillera aussi les prochaines informations de ce genre : plus de script à prévoir pour elles.
+  En attendant, les courses sans objectif ni classement se synchronisent normalement.
+  Serveurs personnels : rien à faire.
+
+## 27. Bilan de l'année à partager ✅
+
+- Une image au format de la carte de partage : kilomètres courus, courses, temps, dénivelé, records,
+  plus longue course, et les dons avec le nombre d'associations.
+- Depuis **Évolution** (bouton de partage), pour n'importe quelle année.
+- En décembre et en janvier, une annonce sur l'accueil propose le bilan de l'année ; elle se ferme d'un geste.
+
+## 28. App en anglais ✅
+
+- Tous les textes de l'app traduits ; les nombres, les dates et les rangs (« 1st », « 142nd ») suivent
+  la langue.
+- **Réglages > Apparence > Langue** : Système, Français ou English. « Système » suit la langue de
+  l'appareil ; une langue que l'app ne parle pas donne le français.
+- Un test vérifie que chaque texte français a sa traduction, avec les mêmes variables.
+- Restent en français : les messages d'erreur de synchronisation, les descriptions du catalogue
+  d'associations, la taille des fichiers (« Ko », « Mo ») et le CSV (format prévu pour Excel en français).
+
+## 29. Import d'un triathlon depuis un fichier de montre ✅
+
+- Le bouton d'import du formulaire accepte désormais un fichier **GPX** ou **FIT**.
+- Un fichier FIT enregistré en mode multisport (Garmin, Coros, Suunto, Wahoo…) remplit l'épreuve, la
+  distance et le temps de chaque discipline, chaque transition, la date et le dénivelé. Le format
+  (XXS à XL) est reconnu quand les distances s'en approchent à 20 % près.
+- Un fichier FIT d'une seule activité remplit distance et temps, comme un GPX.
+- **Limite connue** : la lecture suit la spécification du format et elle est testée sur des fichiers
+  fabriqués pour les tests, pas encore sur un fichier sorti d'une montre. À confirmer sur un vrai
+  fichier ; en cas d'écart, les valeurs restent modifiables avant l'enregistrement.

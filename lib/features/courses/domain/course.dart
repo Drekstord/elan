@@ -144,6 +144,68 @@ class CourseDocument {
   ];
 }
 
+/// Classement officiel d'une course : place et nombre d'arrivants, au général et dans la catégorie.
+/// Tout est facultatif : on saisit ce que donne la feuille de résultats.
+class Ranking {
+  final int? overall;
+  final int? finishers;
+  final int? category;
+  final int? categoryFinishers;
+
+  /// Nom de la catégorie tel que l'organisateur l'écrit (« SEH », « M1 »…).
+  final String? categoryName;
+
+  const Ranking({this.overall, this.finishers, this.category, this.categoryFinishers, this.categoryName});
+
+  bool get isEmpty =>
+      overall == null && finishers == null && category == null && categoryFinishers == null && categoryName == null;
+
+  /// Part des arrivants devant soi ou à égalité, en pour cent : 15 = « dans les 15 % premiers ».
+  static double? _percent(int? rank, int? total) =>
+      rank == null || total == null || total <= 0 || rank > total ? null : rank * 100 / total;
+
+  double? get overallPercent => _percent(overall, finishers);
+  double? get categoryPercent => _percent(category, categoryFinishers);
+
+  Map<String, dynamic> toJson() => {
+    'overall': ?overall,
+    'finishers': ?finishers,
+    'category': ?category,
+    'category_finishers': ?categoryFinishers,
+    'category_name': ?categoryName,
+  };
+
+  static Ranking? tryFromJson(Object? raw) {
+    if (raw is! Map) return null;
+    int? positive(String key) {
+      final v = (raw[key] as num?)?.toInt();
+      return v != null && v > 0 ? v : null;
+    }
+
+    final name = (raw['category_name'] as String?)?.trim();
+    final ranking = Ranking(
+      overall: positive('overall'),
+      finishers: positive('finishers'),
+      category: positive('category'),
+      categoryFinishers: positive('category_finishers'),
+      categoryName: name == null || name.isEmpty ? null : name,
+    );
+    return ranking.isEmpty ? null : ranking;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is Ranking &&
+      other.overall == overall &&
+      other.finishers == finishers &&
+      other.category == category &&
+      other.categoryFinishers == categoryFinishers &&
+      other.categoryName == categoryName;
+
+  @override
+  int get hashCode => Object.hash(overall, finishers, category, categoryFinishers, categoryName);
+}
+
 /// Avancement d'une course.
 enum CourseStatus {
   /// Inscrite à l'avance, date pas encore atteinte.
@@ -178,6 +240,12 @@ class Course {
 
   /// Disciplines et transitions d'une épreuve enchaînée ; null pour les autres types.
   final Multisport? multisport;
+
+  /// Temps visé, fixé avant la course et gardé après pour comparer.
+  final int? targetDurationS;
+
+  /// Classement officiel, s'il a été saisi.
+  final Ranking? ranking;
 
   /// Défi en équipe : taille de l'équipe (null = solo) et distance totale du défi.
   final int? teamSize;
@@ -227,6 +295,8 @@ class Course {
     this.durationS = 0,
     this.elevationGainM,
     Multisport? multisport,
+    int? targetDurationS,
+    Ranking? ranking,
     this.teamSize,
     this.challengeDistanceM,
     this.isCharity = false,
@@ -247,6 +317,8 @@ class Course {
     DateTime? updatedAt,
     this.deletedAt,
   }) : multisport = type == CourseType.multisport ? multisport : null,
+       targetDurationS = (targetDurationS ?? 0) > 0 ? targetDurationS : null,
+       ranking = (ranking?.isEmpty ?? true) ? null : ranking,
        associationId = isCharity ? associationId : null,
        associationName = isCharity ? associationName : null,
        associationCause = isCharity ? associationCause : null,
@@ -287,6 +359,16 @@ class Course {
   /// Vitesse moyenne en km/h, null sans chrono ou pour une épreuve enchaînée.
   double? get speedKmh => hasTime && !isMultisport ? distanceKm / (durationS / 3600) : null;
 
+  /// Écart au temps visé, en secondes : négatif quand l'objectif est battu.
+  /// Null tant que la course n'est pas terminée et chronométrée, ou sans objectif.
+  int? get targetDeltaS => isCompleted && hasTime && targetDurationS != null ? durationS - targetDurationS! : null;
+
+  /// Objectif et classement, regroupés dans une seule colonne du serveur ; null si rien n'est saisi.
+  Map<String, dynamic>? get detailsJson {
+    final details = {'target_s': ?targetDurationS, 'ranking': ?ranking?.toJson()};
+    return details.isEmpty ? null : details;
+  }
+
   /// Argent réellement engagé pour la cause : parrainage au km + inscription + collecte.
   int get donationCents {
     if (!isCharity) return 0;
@@ -307,6 +389,8 @@ class Course {
     int? durationS,
     Object? elevationGainM = _unset,
     Object? multisport = _unset,
+    Object? targetDurationS = _unset,
+    Object? ranking = _unset,
     Object? teamSize = _unset,
     Object? challengeDistanceM = _unset,
     bool? isCharity,
@@ -337,6 +421,8 @@ class Course {
       durationS: durationS ?? this.durationS,
       elevationGainM: pick(elevationGainM, this.elevationGainM),
       multisport: pick(multisport, this.multisport),
+      targetDurationS: pick(targetDurationS, this.targetDurationS),
+      ranking: pick(ranking, this.ranking),
       teamSize: pick(teamSize, this.teamSize),
       challengeDistanceM: pick(challengeDistanceM, this.challengeDistanceM),
       isCharity: isCharity ?? this.isCharity,
@@ -370,6 +456,7 @@ class Course {
     'duration_s': durationS,
     'elevation_gain_m': elevationGainM,
     'multisport': multisport?.toJson(),
+    'details': detailsJson,
     'team_size': teamSize,
     'challenge_distance_m': challengeDistanceM,
     'is_charity': isCharity,
@@ -394,6 +481,7 @@ class Course {
   factory Course.fromRemoteJson(Map<String, dynamic> json) {
     DateTime? ts(String key) => json[key] == null ? null : DateTime.parse(json[key] as String).toUtc();
     int? integer(String key) => (json[key] as num?)?.toInt();
+    final details = json['details'];
     return Course(
       id: json['id'] as String,
       title: json['title'] as String,
@@ -404,6 +492,8 @@ class Course {
       durationS: integer('duration_s') ?? 0,
       elevationGainM: integer('elevation_gain_m'),
       multisport: Multisport.tryFromJson(json['multisport']),
+      targetDurationS: details is Map ? (details['target_s'] as num?)?.toInt() : null,
+      ranking: details is Map ? Ranking.tryFromJson(details['ranking']) : null,
       teamSize: integer('team_size'),
       challengeDistanceM: integer('challenge_distance_m'),
       isCharity: json['is_charity'] as bool? ?? false,

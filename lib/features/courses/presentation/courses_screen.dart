@@ -14,6 +14,8 @@ import '../../../app/widgets/common.dart';
 import '../../../app/widgets/sync_badge.dart';
 import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../evolution/domain/year_recap.dart';
+import '../../evolution/presentation/year_recap_card.dart';
 import '../../impact/impact_providers.dart';
 import '../courses_providers.dart';
 import '../data/file_import.dart';
@@ -35,7 +37,7 @@ class CoursesScreen extends ConsumerWidget {
       picked.tracks,
       ref.read(coursesProvider).value ?? const [],
       newId: const Uuid().v4,
-      defaultTitle: (day) => t.gpxBatchDefaultTitle(DateFormat('d MMMM y', 'fr').format(day)),
+      defaultTitle: (day) => t.gpxBatchDefaultTitle(DateFormat('d MMMM y', formatLocale).format(day)),
     );
     final repository = ref.read(courseRepositoryProvider);
     for (final course in result.created) {
@@ -104,6 +106,14 @@ class CoursesScreen extends ConsumerWidget {
                             const SliverPadding(
                               padding: EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
                               sliver: SliverToBoxAdapter(child: _Hero()),
+                            ),
+                            const SliverPadding(
+                              padding: EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+                              sliver: SliverToBoxAdapter(child: _YearGoal()),
+                            ),
+                            const SliverPadding(
+                              padding: EdgeInsets.fromLTRB(Space.md, 0, Space.md, 0),
+                              sliver: SliverToBoxAdapter(child: _RecapBanner()),
                             ),
                             const SliverPadding(
                               padding: EdgeInsets.fromLTRB(Space.md, Space.md, Space.md, 0),
@@ -208,6 +218,165 @@ class _Hero extends ConsumerWidget {
   }
 }
 
+/// Objectif annuel de kilomètres courus : où l'on en est, et l'avance ou le retard sur le rythme.
+/// Sans objectif, une simple invitation à en fixer un.
+class _YearGoal extends ConsumerWidget {
+  const _YearGoal();
+
+  Future<void> _edit(BuildContext context, WidgetRef ref, int year, int? current) async {
+    final t = AppLocalizations.of(context);
+    final controller = TextEditingController(text: current == null ? '' : '${(current / 1000).round()}');
+    final km = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.goalYearTitle(year)),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: t.goalDialogField(year),
+            suffixText: 'km',
+            helperText: t.goalDialogHint,
+            helperMaxLines: 3,
+          ),
+          onSubmitted: (v) => Navigator.pop(ctx, int.tryParse(v.trim()) ?? 0),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t.cancel)),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, int.tryParse(controller.text.trim()) ?? 0),
+            child: Text(t.save),
+          ),
+        ],
+      ),
+    );
+    if (km != null) await ref.read(yearGoalProvider.notifier).set(km <= 0 ? null : km * 1000);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
+    final p = context.palette;
+    final today = ref.watch(todayProvider).value;
+    final goal = ref.watch(yearGoalProvider);
+    if (today == null || goal.isLoading) return const SizedBox.shrink();
+    final goalM = goal.value;
+    if (goalM == null) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: () => _edit(context, ref, today.year, null),
+          icon: const Icon(Icons.flag_outlined),
+          label: Text(t.goalSet),
+        ),
+      );
+    }
+
+    final progress = goalProgress(ref.watch(coursesProvider).value ?? const [], today, goalM);
+    // En dessous d'un kilomètre d'écart, on est dans le rythme.
+    final status = progress.reached
+        ? t.goalReached
+        : progress.aheadM.abs() < 1000
+        ? t.goalOnTrack
+        : progress.aheadM > 0
+        ? t.goalAhead(formatKm(progress.aheadM, decimals: 0))
+        : t.goalBehind(formatKm(-progress.aheadM, decimals: 0));
+    final summary = t.goalProgress(formatKm(progress.doneM, decimals: 0), formatKm(goalM, decimals: 0));
+
+    return SectionCard(
+      title: t.goalYearTitle(today.year),
+      trailing: IconButton(
+        tooltip: t.goalEdit,
+        visualDensity: VisualDensity.compact,
+        icon: const Icon(Icons.edit_outlined, size: 20),
+        onPressed: () => _edit(context, ref, today.year, goalM),
+      ),
+      children: [
+        MergeSemantics(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(child: Text(summary, style: TextStyles.figure(p.text, size: 26))),
+                  Text('${(progress.ratio * 100).round()} %', style: TextStyles.figure(p.textMuted, size: 18)),
+                ],
+              ),
+              const SizedBox(height: Space.sm),
+              // Décoratif : les chiffres au-dessus disent la même chose.
+              ExcludeSemantics(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(Radii.sm),
+                  child: LinearProgressIndicator(
+                    value: progress.ratio,
+                    minHeight: 10,
+                    color: p.accent,
+                    backgroundColor: p.border,
+                  ),
+                ),
+              ),
+              const SizedBox(height: Space.sm),
+              Text(status, style: Theme.of(context).textTheme.bodySmall),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// En décembre et en janvier : le bilan de l'année est prêt à être partagé. Se ferme d'un geste.
+class _RecapBanner extends ConsumerWidget {
+  const _RecapBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
+    final p = context.palette;
+    final today = ref.watch(todayProvider).value;
+    final year = today == null ? null : YearRecap.featuredYear(today);
+    final dismissed = ref.watch(recapDismissedProvider).value;
+    if (year == null || dismissed == null || dismissed >= year) return const SizedBox.shrink();
+    final courses = ref.watch(coursesProvider).value ?? const <Course>[];
+    if (!courses.any((c) => c.isCompleted && !c.isDeleted && c.raceDate.year == year)) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: Space.sm),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.xs, Space.sm),
+          child: Row(
+            children: [
+              Icon(Icons.auto_awesome_outlined, color: p.accent),
+              const SizedBox(width: Space.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(t.recapBanner(year), style: const TextStyle(fontWeight: FontWeight.w700)),
+                    Text(t.recapBannerHint, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () => showYearRecap(context, year: year),
+                child: Text(t.recapBannerOpen),
+              ),
+              IconButton(
+                tooltip: t.close,
+                onPressed: () => ref.read(recapDismissedProvider.notifier).dismiss(year),
+                icon: const Icon(Icons.close, size: 20),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Liste en blocs : résultats à saisir, à venir, puis courses terminées par année.
 class _CourseSections extends ConsumerWidget {
   final EdgeInsets padding;
@@ -292,6 +461,9 @@ class _WideHome extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, 0, Space.xl),
                 children: const [
                   _Hero(),
+                  SizedBox(height: Space.sm),
+                  _YearGoal(),
+                  _RecapBanner(),
                   SizedBox(height: Space.md),
                   _AwaitingBanner(),
                   _NextRace(),
@@ -403,8 +575,8 @@ class _MonthlyBars extends ConsumerWidget {
               BarChart(
                 height: 140,
                 color: p.chartPrimary,
-                format: (v) => '${NumberFormat('#,##0', 'fr').format(v / 1000)} km',
-                valueLabel: (v) => NumberFormat('#,##0', 'fr').format(v / 1000),
+                format: (v) => '${NumberFormat('#,##0', formatLocale).format(v / 1000)} km',
+                valueLabel: (v) => NumberFormat('#,##0', formatLocale).format(v / 1000),
                 data: [
                   for (final m in months)
                     BarDatum(

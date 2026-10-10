@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../features/courses/domain/course.dart';
 import '../features/records/domain/personal_records.dart';
 import '../l10n/app_localizations.dart';
+import 'format.dart';
 
 /// Libellés et icônes des notions métier (le domaine reste sans Flutter).
 
@@ -115,8 +116,8 @@ String sportLabelAt(List<Sport> sports, int index, AppLocalizations t) {
 /// Détail d'une épreuve enchaînée en une ligne, pour les exports :
 /// « Natation 750 m 15:30 · Transition 1 2:10 · Vélo 20 km 40:12 · Course à pied 5 km 26:05 ».
 String multisportSummary(Multisport m, AppLocalizations t) {
-  String meters(int v) => '${NumberFormat('#,##0', 'fr').format(v)} m';
-  String km(int v) => '${NumberFormat('#,##0.##', 'fr').format(v / 1000)} km';
+  String meters(int v) => '${NumberFormat('#,##0', formatLocale).format(v)} m';
+  String km(int v) => '${NumberFormat('#,##0.##', formatLocale).format(v / 1000)} km';
   String time(int s) {
     String two(int v) => v.toString().padLeft(2, '0');
     return s >= 3600 ? '${s ~/ 3600}:${two(s % 3600 ~/ 60)}:${two(s % 60)}' : '${two(s ~/ 60)}:${two(s % 60)}';
@@ -134,6 +135,48 @@ String multisportSummary(Multisport m, AppLocalizations t) {
         '${t.multisportTransition(i + 1)} ${time(m.transitionsS[i])}',
     ],
   ].join(' · ');
+}
+
+/// « 1er », « 142e » ; en anglais « 1st », « 142nd ».
+String ordinal(int n, AppLocalizations t) {
+  if (t.localeName.startsWith('en')) {
+    final suffix = (n % 100 >= 11 && n % 100 <= 13)
+        ? 'th'
+        : switch (n % 10) {
+            1 => 'st',
+            2 => 'nd',
+            3 => 'rd',
+            _ => 'th',
+          };
+    return '$n$suffix';
+  }
+  return n == 1 ? t.ordinalFirst : t.ordinalOther(n);
+}
+
+/// « 142e sur 980 », ou la place seule sans le nombre d'arrivants.
+String rankLabel(int? rank, int? total, AppLocalizations t) {
+  final number = NumberFormat.decimalPattern(t.localeName);
+  if (rank == null) return total == null ? '' : number.format(total);
+  return total == null ? ordinal(rank, t) : t.rankingOf(ordinal(rank, t), number.format(total));
+}
+
+/// Classement en une ligne, pour les exports : « 142e sur 980 · SEH 12e sur 85 ».
+String rankingSummary(Ranking r, AppLocalizations t) => [
+  if (r.overall != null) rankLabel(r.overall, r.finishers, t),
+  if (r.category != null || r.categoryName != null)
+    [?r.categoryName, if (r.category != null) rankLabel(r.category, r.categoryFinishers, t)].join(' '),
+].join(' · ');
+
+/// Écart au temps visé : « Objectif battu de 1:12 ».
+String? targetLabel(Course c, AppLocalizations t) {
+  String time(int s) => s >= 3600
+      ? '${s ~/ 3600}:${(s % 3600 ~/ 60).toString().padLeft(2, '0')}:${(s % 60).toString().padLeft(2, '0')}'
+      : '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
+  final target = c.targetDurationS;
+  if (target == null) return null;
+  final delta = c.targetDeltaS;
+  if (delta == null) return c.isPlanned ? t.targetPlanned(time(target)) : null;
+  return delta == 0 ? t.targetMet : (delta < 0 ? t.targetBeaten(time(-delta)) : t.targetMissed(time(delta)));
 }
 
 extension CourseLabel on Course {

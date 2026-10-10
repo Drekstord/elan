@@ -20,10 +20,16 @@ class HomeWidgetData {
   final int year;
   final int yearDistanceM;
 
-  const HomeWidgetData({this.nextTitle, this.nextDate, required this.year, required this.yearDistanceM});
+  /// Objectif annuel en mètres, s'il y en a un.
+  final int? goalM;
 
-  /// Kilomètres de l'année tels qu'affichés : « 1 234 ».
-  String get yearKm => NumberFormat.decimalPattern('fr').format((yearDistanceM / 1000).round());
+  const HomeWidgetData({this.nextTitle, this.nextDate, required this.year, required this.yearDistanceM, this.goalM});
+
+  /// Kilomètres de l'année tels qu'affichés : « 1 234 », ou « 207 / 500 » avec un objectif.
+  String get yearKm {
+    String km(int meters) => NumberFormat.decimalPattern('fr').format((meters / 1000).round());
+    return goalM == null ? km(yearDistanceM) : '${km(yearDistanceM)} / ${km(goalM!)}';
+  }
 
   Map<String, Object?> toMap() => {
     'nextTitle': nextTitle,
@@ -39,14 +45,15 @@ class HomeWidgetData {
       other.nextTitle == nextTitle &&
       other.nextDate == nextDate &&
       other.year == year &&
-      other.yearDistanceM == yearDistanceM;
+      other.yearDistanceM == yearDistanceM &&
+      other.goalM == goalM;
 
   @override
-  int get hashCode => Object.hash(nextTitle, nextDate, year, yearDistanceM);
+  int get hashCode => Object.hash(nextTitle, nextDate, year, yearDistanceM, goalM);
 }
 
 /// Prochaine course à venir (la plus proche) et distance des courses terminées de l'année.
-HomeWidgetData homeWidgetData(Iterable<Course> courses, DateTime today) {
+HomeWidgetData homeWidgetData(Iterable<Course> courses, DateTime today, {int? goalM}) {
   final upcoming = courses.where((c) => c.statusOn(today) == CourseStatus.upcoming).toList()
     ..sort((a, b) => a.raceDate.compareTo(b.raceDate));
   final next = upcoming.firstOrNull;
@@ -56,6 +63,7 @@ HomeWidgetData homeWidgetData(Iterable<Course> courses, DateTime today) {
     nextDate: next?.raceDate,
     year: today.year,
     yearDistanceM: ofYear.distanceM,
+    goalM: goalM,
   );
 }
 

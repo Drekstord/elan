@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_en.dart';
 import 'app_localizations_fr.dart';
 
 // ignore_for_file: type=lint
@@ -89,7 +90,7 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('fr')];
+  static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('fr')];
 
   /// No description provided for @appTitle.
   ///
@@ -3102,6 +3103,330 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Par discipline, tous formats confondus (triathlons, duathlons, aquathlons).'**
   String get recordsBySportHint;
+
+  /// No description provided for @formTarget.
+  ///
+  /// In fr, this message translates to:
+  /// **'Temps visé (facultatif)'**
+  String get formTarget;
+
+  /// No description provided for @formTargetHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton objectif pour cette course. Il reste affiché après, pour comparer.'**
+  String get formTargetHint;
+
+  /// No description provided for @formRanking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Classement'**
+  String get formRanking;
+
+  /// No description provided for @formRankingHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif. Recopie ce que donne la feuille de résultats.'**
+  String get formRankingHint;
+
+  /// No description provided for @formRank.
+  ///
+  /// In fr, this message translates to:
+  /// **'Place'**
+  String get formRank;
+
+  /// No description provided for @formFinishers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrivants'**
+  String get formFinishers;
+
+  /// No description provided for @formCategoryRank.
+  ///
+  /// In fr, this message translates to:
+  /// **'Place dans la catégorie'**
+  String get formCategoryRank;
+
+  /// No description provided for @formCategoryFinishers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Arrivants de la catégorie'**
+  String get formCategoryFinishers;
+
+  /// No description provided for @formCategoryName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get formCategoryName;
+
+  /// No description provided for @formCategoryNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'SEH, M1…'**
+  String get formCategoryNameHint;
+
+  /// No description provided for @issueRankAboveFinishers.
+  ///
+  /// In fr, this message translates to:
+  /// **'La place ne peut pas dépasser le nombre d\'arrivants.'**
+  String get issueRankAboveFinishers;
+
+  /// No description provided for @targetPlanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif {time}'**
+  String targetPlanned(String time);
+
+  /// No description provided for @targetBeaten.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif battu de {time}'**
+  String targetBeaten(String time);
+
+  /// No description provided for @targetMissed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif manqué de {time}'**
+  String targetMissed(String time);
+
+  /// No description provided for @targetMet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif atteint'**
+  String get targetMet;
+
+  /// No description provided for @rankingOverall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Général'**
+  String get rankingOverall;
+
+  /// No description provided for @rankingCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get rankingCategory;
+
+  /// No description provided for @rankingOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{rank} sur {total}'**
+  String rankingOf(String rank, String total);
+
+  /// No description provided for @rankingTop.
+  ///
+  /// In fr, this message translates to:
+  /// **'dans les {percent} % premiers'**
+  String rankingTop(int percent);
+
+  /// No description provided for @ordinalFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'1er'**
+  String get ordinalFirst;
+
+  /// No description provided for @ordinalOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n}e'**
+  String ordinalOther(int n);
+
+  /// No description provided for @chartRankTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Classement de chaque course'**
+  String get chartRankTitle;
+
+  /// No description provided for @chartRankHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Part des arrivants classés devant toi. Plus le point est haut, mieux tu es classé.'**
+  String get chartRankHint;
+
+  /// No description provided for @legendRank.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une course classée'**
+  String get legendRank;
+
+  /// No description provided for @goalYearTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif {year}'**
+  String goalYearTitle(int year);
+
+  /// No description provided for @goalSet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fixer un objectif annuel'**
+  String get goalSet;
+
+  /// No description provided for @goalEdit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l\'objectif'**
+  String get goalEdit;
+
+  /// No description provided for @goalDialogField.
+  ///
+  /// In fr, this message translates to:
+  /// **'Kilomètres à courir en {year}'**
+  String goalDialogField(int year);
+
+  /// No description provided for @goalDialogHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Laisse vide pour retirer l\'objectif. Il est enregistré sur cet appareil.'**
+  String get goalDialogHint;
+
+  /// No description provided for @goalProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'{done} sur {goal}'**
+  String goalProgress(String done, String goal);
+
+  /// No description provided for @goalAhead.
+  ///
+  /// In fr, this message translates to:
+  /// **'En avance de {km} sur le rythme de l\'année.'**
+  String goalAhead(String km);
+
+  /// No description provided for @goalBehind.
+  ///
+  /// In fr, this message translates to:
+  /// **'En retard de {km} sur le rythme de l\'année.'**
+  String goalBehind(String km);
+
+  /// No description provided for @goalOnTrack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pile dans le rythme de l\'année.'**
+  String get goalOnTrack;
+
+  /// No description provided for @goalReached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objectif atteint, bravo !'**
+  String get goalReached;
+
+  /// No description provided for @backupTarget.
+  ///
+  /// In fr, this message translates to:
+  /// **'Temps visé'**
+  String get backupTarget;
+
+  /// No description provided for @backupRanking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Classement'**
+  String get backupRanking;
+
+  /// No description provided for @recapTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan de l\'année'**
+  String get recapTitle;
+
+  /// No description provided for @recapAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan de l\'année à partager'**
+  String get recapAction;
+
+  /// No description provided for @recapKicker.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan {year}'**
+  String recapKicker(int year);
+
+  /// No description provided for @recapRun.
+  ///
+  /// In fr, this message translates to:
+  /// **'courus'**
+  String get recapRun;
+
+  /// No description provided for @recapRecords.
+  ///
+  /// In fr, this message translates to:
+  /// **'Records'**
+  String get recapRecords;
+
+  /// No description provided for @recapLongest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus longue course'**
+  String get recapLongest;
+
+  /// No description provided for @recapDonations.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} pour {count, plural, =1{1 association} other{{count} associations}}'**
+  String recapDonations(String amount, int count);
+
+  /// No description provided for @recapDonationsOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} versés'**
+  String recapDonationsOnly(String amount);
+
+  /// No description provided for @recapEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune course terminée en {year}.'**
+  String recapEmpty(int year);
+
+  /// No description provided for @recapBanner.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton bilan {year} est prêt'**
+  String recapBanner(int year);
+
+  /// No description provided for @recapBannerHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une image à partager : kilomètres, courses, records et dons.'**
+  String get recapBannerHint;
+
+  /// No description provided for @recapBannerOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir'**
+  String get recapBannerOpen;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue'**
+  String get settingsLanguage;
+
+  /// No description provided for @languageSystem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Système'**
+  String get languageSystem;
+
+  /// No description provided for @formImportFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer un fichier de montre (GPX ou FIT)'**
+  String get formImportFile;
+
+  /// No description provided for @formFitImported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier importé : {summary}.'**
+  String formFitImported(String summary);
+
+  /// No description provided for @formFitError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce fichier FIT est illisible.'**
+  String get formFitError;
+
+  /// No description provided for @formFitUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enchaînement non reconnu : seules les disciplines d\'un triathlon, d\'un duathlon ou d\'un aquathlon sont importées. Saisis les temps à la main.'**
+  String get formFitUnknown;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -3113,7 +3438,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -3122,6 +3447,8 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
     case 'fr':
       return AppLocalizationsFr();
   }

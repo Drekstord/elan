@@ -61,6 +61,15 @@ Tant que ce n'est pas fait, tout le reste de l'app se synchronise normalement ; 
 restent sur l'appareil, avec un message qui le signale dans Réglages.
 (Une installation neuve avec `001_schema.sql` l'inclut déjà. Les serveurs personnels n'ont rien à faire.)
 
+## Mise à jour : objectifs et classements (version 2.12)
+
+Le temps visé et le classement d'une course demandent une colonne de plus. **Une seule fois :**
+SQL Editor > New query > coller le contenu de [`supabase/004_details.sql`](../supabase/004_details.sql) > **Run**.
+Tant que ce n'est pas fait, les courses sans objectif ni classement se synchronisent normalement ; les
+autres restent sur l'appareil, avec un message qui le signale dans Réglages.
+Cette colonne accueillera aussi les prochaines informations de ce genre : plus de script à prévoir pour elles.
+(Une installation neuve avec `001_schema.sql` l'inclut déjà. Les serveurs personnels n'ont rien à faire.)
+
 ## Facultatif : courses de l'ancienne table cloud
 
 Si des courses avaient été enregistrées dans Supabase avec la v1 : remplacer l'e-mail (2 fois) dans

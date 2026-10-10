@@ -10,6 +10,7 @@ import 'package:app_course/features/auth/data/auth_repository.dart';
 import 'package:app_course/features/auth/presentation/server_screen.dart';
 import 'package:app_course/features/auth/presentation/sign_in_screen.dart';
 import 'package:app_course/features/settings/presentation/server_accounts_screen.dart';
+import 'package:app_course/app/format.dart';
 import 'package:app_course/app/shell.dart';
 import 'package:app_course/app/theme/app_theme.dart';
 import 'package:app_course/features/courses/domain/course.dart';
@@ -90,6 +91,8 @@ final _sample = [
     distanceM: 10000,
     durationS: 3150,
     isCharity: true,
+    targetDurationS: 3240,
+    ranking: const Ranking(overall: 412, finishers: 1250, category: 38, categoryFinishers: 160, categoryName: 'SEH'),
     associationName: 'Les Restos du Cœur',
     associationCause: CauseType.precarite,
     associationDescription: 'Aider les personnes démunies, notamment par l\'accès à des repas gratuits.',
@@ -225,7 +228,10 @@ void main() {
     Size size = _phone,
     bool dark = false,
     Color? wallpaper,
+    String language = 'fr',
   }) async {
+    formatLocale = language;
+    addTearDown(() => formatLocale = 'fr');
     final env = TestEnv();
     await env.seed(tester, _sample);
     tester.view.physicalSize = size * 2;
@@ -322,7 +328,7 @@ void main() {
               ? AppTheme.dark()
               : AppTheme.fromWallpaper(ColorScheme.fromSeed(seedColor: wallpaper, brightness: Brightness.dark)),
           themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-          locale: const Locale('fr'),
+          locale: Locale(language),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           routerConfig: router,
@@ -358,6 +364,11 @@ void main() {
   testWidgets(
     'records triathlon',
     (t) => capture(t, 'records_triathlon', location: '/records', size: const Size(390, 3000)),
+  );
+  testWidgets('accueil en anglais', (t) => capture(t, 'accueil_anglais', location: '/courses', language: 'en'));
+  testWidgets(
+    'fiche en anglais',
+    (t) => capture(t, 'fiche_anglais', location: '/courses/restos', language: 'en', size: const Size(390, 1500)),
   );
   testWidgets('connexion', (t) => capture(t, 'connexion', location: '/connexion'));
   testWidgets('premier compte', (t) => capture(t, 'premier_compte', location: '/premier-compte'));

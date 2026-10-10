@@ -9,7 +9,7 @@ import 'core/server/server_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('fr');
+  await initializeDateFormatting();
 
   // Serveur personnel choisi dans l'app, sinon celui de la compilation (config/supabase.json).
   final prefs = await SharedPreferences.getInstance();

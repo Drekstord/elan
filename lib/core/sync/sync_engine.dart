@@ -163,6 +163,9 @@ String describeSyncError(Object error) {
     if (error.code == 'PGRST204' && error.message.contains('multisport')) {
       return 'Triathlons non enregistrés sur le serveur : base pas à jour (supabase/003_multisport.sql).';
     }
+    if (error.code == 'PGRST204' && error.message.contains('details')) {
+      return 'Objectifs et classements non enregistrés sur le serveur : base pas à jour (supabase/004_details.sql).';
+    }
     if (error.code == 'PGRST204' && error.message.contains('documents')) {
       return 'Colonne « documents » absente : base du serveur pas à jour (supabase/002_justificatifs.sql).';
     }

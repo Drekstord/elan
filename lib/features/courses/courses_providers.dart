@@ -52,6 +52,41 @@ final courseStatsProvider = Provider<CourseStats>(
   (ref) => CourseStats.of(ref.watch(coursesProvider).value ?? const []),
 );
 
+/// Objectif annuel de kilomètres courus, en mètres ; null si aucun n'est fixé.
+/// Enregistré sur l'appareil, avec les données du compte.
+class YearGoalController extends AsyncNotifier<int?> {
+  static const _key = 'goal.year_m';
+
+  @override
+  Future<int?> build() async {
+    final value = int.tryParse(await ref.watch(databaseProvider).readMeta(_key) ?? '');
+    return value != null && value > 0 ? value : null;
+  }
+
+  Future<void> set(int? meters) async {
+    final value = meters != null && meters > 0 ? meters : null;
+    await ref.read(databaseProvider).writeMeta(_key, '${value ?? 0}');
+    state = AsyncData(value);
+  }
+}
+
+final yearGoalProvider = AsyncNotifierProvider<YearGoalController, int?>(YearGoalController.new);
+
+/// Dernière année dont l'annonce « ton bilan est prêt » a été fermée (0 : aucune).
+class RecapDismissedController extends AsyncNotifier<int> {
+  static const _key = 'recap.dismissed_year';
+
+  @override
+  Future<int> build() async => int.tryParse(await ref.watch(databaseProvider).readMeta(_key) ?? '') ?? 0;
+
+  Future<void> dismiss(int year) async {
+    await ref.read(databaseProvider).writeMeta(_key, '$year');
+    state = AsyncData(year);
+  }
+}
+
+final recapDismissedProvider = AsyncNotifierProvider<RecapDismissedController, int>(RecapDismissedController.new);
+
 /// Nombre de courses dont le résultat reste à saisir (pour un rappel).
 final awaitingResultCountProvider = Provider<int>((ref) {
   final today = _today(ref);

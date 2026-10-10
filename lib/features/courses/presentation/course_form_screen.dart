@@ -18,6 +18,7 @@ import '../../impact/domain/association.dart';
 import '../../impact/presentation/association_picker.dart';
 import '../courses_providers.dart';
 import '../data/file_import.dart';
+import '../data/fit_parser.dart';
 import '../data/gpx_parser.dart';
 import '../domain/course.dart';
 import '../domain/course_rules.dart';
@@ -66,6 +67,9 @@ enum _Field {
   fundraising,
   impact,
   notes,
+  target,
+  rank,
+  categoryRank,
 }
 
 class _CourseForm extends ConsumerStatefulWidget {
@@ -93,6 +97,14 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
     text: widget.initial?.impactQuantity == null ? '' : formatQuantity(widget.initial!.impactQuantity!),
   );
   late final _notes = TextEditingController(text: widget.initial?.notes);
+  late final _target = TextEditingController(
+    text: widget.initial?.targetDurationS == null ? '' : formatDuration(widget.initial!.targetDurationS!),
+  );
+  late final _rank = TextEditingController(text: widget.initial?.ranking?.overall?.toString());
+  late final _finishers = TextEditingController(text: widget.initial?.ranking?.finishers?.toString());
+  late final _categoryRank = TextEditingController(text: widget.initial?.ranking?.category?.toString());
+  late final _categoryFinishers = TextEditingController(text: widget.initial?.ranking?.categoryFinishers?.toString());
+  late final _categoryName = TextEditingController(text: widget.initial?.ranking?.categoryName);
 
   /// Épreuve enchaînée : disciplines, transitions, temps total.
   late final _multi = MultisportEditorController(
@@ -152,6 +164,12 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
       _fundraising,
       _impactQuantity,
       _notes,
+      _target,
+      _rank,
+      _finishers,
+      _categoryRank,
+      _categoryFinishers,
+      _categoryName,
     ]) {
       c.dispose();
     }
@@ -197,26 +215,60 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
     if (picked != null) setState(() => _date = calendarDate(picked.year, picked.month, picked.day));
   }
 
-  Future<void> _importGpx() async {
+  /// Fichier de montre : une trace GPX remplit distance, temps et dénivelé ; un fichier FIT
+  /// de triathlon remplit en plus chaque discipline et chaque transition.
+  Future<void> _importFile() async {
     final t = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     try {
-      final gpx = await FileImport.pickGpx(dialogTitle: t.formImportGpx);
-      if (gpx == null || !mounted) return;
-      setState(() {
-        if (_title.text.trim().isEmpty && gpx.name != null) _title.text = gpx.name!;
-        _distance.text = metersToKmInput(gpx.distanceM);
-        if (gpx.durationS > 0) _duration.text = formatDuration(gpx.durationS);
-        if (gpx.elevationGainM > 0) _elevation.text = '${gpx.elevationGainM}';
-        final start = gpx.startTime?.toLocal();
-        if (start != null) _date = calendarDate(start.year, start.month, start.day);
-        _planned = false;
-      });
-      messenger.showSnackBar(
-        SnackBar(content: Text(t.formGpxImported(formatKm(gpx.distanceM), formatDuration(gpx.durationS)))),
-      );
+      final picked = await FileImport.pickActivity(dialogTitle: t.formImportFile);
+      if (picked == null || !mounted) return;
+      final gpx = picked.gpx;
+      final fit = picked.fit;
+      if (gpx != null) {
+        setState(() {
+          if (_title.text.trim().isEmpty && gpx.name != null) _title.text = gpx.name!;
+          _distance.text = metersToKmInput(gpx.distanceM);
+          if (gpx.durationS > 0) _duration.text = formatDuration(gpx.durationS);
+          if (gpx.elevationGainM > 0) _elevation.text = '${gpx.elevationGainM}';
+          final start = gpx.startTime?.toLocal();
+          if (start != null) _date = calendarDate(start.year, start.month, start.day);
+          _planned = false;
+        });
+        messenger.showSnackBar(
+          SnackBar(content: Text(t.formGpxImported(formatKm(gpx.distanceM), formatDuration(gpx.durationS)))),
+        );
+      } else if (fit != null) {
+        final multisport = fit.multisport;
+        final single = fit.legs.length == 1 ? fit.legs.single : null;
+        if (multisport == null && (single == null || single.distanceM <= 0)) {
+          messenger.showSnackBar(SnackBar(content: Text(t.formFitUnknown)));
+          return;
+        }
+        setState(() {
+          if (_title.text.trim().isEmpty) _title.text = picked.name;
+          if (multisport != null) {
+            _type = CourseType.multisport;
+            _multi.load(multisport);
+            _errors.remove(_Field.distance);
+          } else {
+            _distance.text = metersToKmInput(single!.distanceM);
+            if (single.durationS > 0) _duration.text = formatDuration(single.durationS);
+          }
+          if (fit.elevationGainM > 0) _elevation.text = '${fit.elevationGainM}';
+          final start = fit.startTime?.toLocal();
+          if (start != null) _date = calendarDate(start.year, start.month, start.day);
+          _planned = false;
+        });
+        final summary = multisport != null
+            ? '${multisport.title(t)}, ${formatDuration(fit.durationS)}'
+            : '${formatKm(single!.distanceM)}, ${formatDuration(single.durationS)}';
+        messenger.showSnackBar(SnackBar(content: Text(t.formFitImported(summary))));
+      }
     } on GpxFormatException {
       messenger.showSnackBar(SnackBar(content: Text(t.formGpxError)));
+    } on FitFormatException {
+      messenger.showSnackBar(SnackBar(content: Text(t.formFitError)));
     }
   }
 
@@ -285,6 +337,25 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
     if (_charity && _metric != ImpactMetric.euroDirect && _impactQuantity.text.trim().isNotEmpty && quantity == null) {
       _errors[_Field.impact] = t.issueInvalidNumber;
     }
+
+    // Temps visé et classement : facultatifs, sans objet pour un défi virtuel.
+    final target = isConqueror || _target.text.trim().isEmpty ? 0 : parseDuration(_target.text);
+    if (target == null) _errors[_Field.target] = t.issueInvalidDuration;
+    int? place(TextEditingController c, _Field f) {
+      if (isConqueror || _planned || c.text.trim().isEmpty) return null;
+      final v = int.tryParse(c.text.trim());
+      if (v == null || v <= 0) _errors[f] = t.issueInvalidNumber;
+      return v;
+    }
+
+    final rank = place(_rank, _Field.rank);
+    final finishers = place(_finishers, _Field.rank);
+    final categoryRank = place(_categoryRank, _Field.categoryRank);
+    final categoryFinishers = place(_categoryFinishers, _Field.categoryRank);
+    if (rank != null && finishers != null && rank > finishers) _errors[_Field.rank] = t.issueRankAboveFinishers;
+    if (categoryRank != null && categoryFinishers != null && categoryRank > categoryFinishers) {
+      _errors[_Field.categoryRank] = t.issueRankAboveFinishers;
+    }
     if (_errors.isNotEmpty) return null;
 
     final initial = widget.initial;
@@ -298,6 +369,16 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
       durationS: duration!,
       elevationGainM: elevation,
       multisport: multi?.multisport,
+      targetDurationS: target,
+      ranking: isConqueror || _planned
+          ? null
+          : Ranking(
+              overall: rank,
+              finishers: finishers,
+              category: categoryRank,
+              categoryFinishers: categoryFinishers,
+              categoryName: _categoryName.text.trim().isEmpty ? null : _categoryName.text.trim(),
+            ),
       teamSize: teamSize,
       challengeDistanceM: challengeKm == null ? null : (challengeKm * 1000).round(),
       isCharity: _charity,
@@ -505,18 +586,88 @@ class _CourseFormState extends ConsumerState<_CourseForm> {
                   if (!_planned && !isMultisport) ...[
                     gap,
                     field(_duration, t.formDuration, _Field.duration, hint: '1:05:30'),
+                  ],
+                  if (!_planned && !isConqueror) ...[
                     const SizedBox(height: Space.sm),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: TextButton.icon(
-                        onPressed: _importGpx,
-                        icon: const Icon(Icons.route_outlined),
-                        label: Text(t.formImportGpx),
+                        onPressed: _importFile,
+                        icon: const Icon(Icons.watch_outlined),
+                        label: Text(t.formImportFile),
+                      ),
+                    ),
+                  ],
+                  if (!isConqueror) ...[
+                    gap,
+                    TextField(
+                      controller: _target,
+                      onChanged: (_) => setState(() => _errors.remove(_Field.target)),
+                      decoration: InputDecoration(
+                        labelText: t.formTarget,
+                        hintText: '1:05:30',
+                        helperText: t.formTargetHint,
+                        helperMaxLines: 2,
+                        prefixIcon: const Icon(Icons.flag_outlined),
+                        errorText: _errors[_Field.target],
                       ),
                     ),
                   ],
                 ],
               ),
+              if (!_planned && !isConqueror) ...[
+                gap,
+                SectionCard(
+                  title: t.formRanking,
+                  children: [
+                    Text(t.formRankingHint, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: p.textMuted)),
+                    gap,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: field(_rank, t.formRank, _Field.rank, keyboard: TextInputType.number)),
+                        const SizedBox(width: Space.md),
+                        Expanded(
+                          child: TextField(
+                            controller: _finishers,
+                            keyboardType: TextInputType.number,
+                            onChanged: (_) => setState(() {}),
+                            decoration: InputDecoration(labelText: t.formFinishers),
+                          ),
+                        ),
+                      ],
+                    ),
+                    gap,
+                    TextField(
+                      controller: _categoryName,
+                      decoration: InputDecoration(labelText: t.formCategoryName, hintText: t.formCategoryNameHint),
+                    ),
+                    gap,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: field(
+                            _categoryRank,
+                            t.formCategoryRank,
+                            _Field.categoryRank,
+                            keyboard: TextInputType.number,
+                          ),
+                        ),
+                        const SizedBox(width: Space.md),
+                        Expanded(
+                          child: TextField(
+                            controller: _categoryFinishers,
+                            keyboardType: TextInputType.number,
+                            onChanged: (_) => setState(() {}),
+                            decoration: InputDecoration(labelText: t.formCategoryFinishers),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
               gap,
               SectionCard(
                 children: [

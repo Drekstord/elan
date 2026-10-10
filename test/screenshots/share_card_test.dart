@@ -5,6 +5,8 @@ library;
 import 'package:app_course/app/theme/app_theme.dart';
 import 'package:app_course/features/courses/domain/course.dart';
 import 'package:app_course/features/courses/presentation/share_card.dart';
+import 'package:app_course/features/evolution/domain/year_recap.dart';
+import 'package:app_course/features/evolution/presentation/year_recap_card.dart';
 import 'package:app_course/features/report/domain/engagement_report.dart';
 import 'package:app_course/features/report/presentation/report_card.dart';
 import 'package:app_course/l10n/app_localizations.dart';
@@ -43,6 +45,63 @@ void main() {
     await expectLater(find.byType(ShareCard), matchesGoldenFile('out/$name.png'));
     await env.dispose(tester);
   }
+
+  testWidgets('bilan annuel', (tester) async {
+    final env = TestEnv();
+    tester.view.physicalSize = kShareCardSize * 3;
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    final recap = YearRecap.of([
+      Course(
+        id: 'a',
+        title: '10 km de Valfleuri',
+        raceDate: calendarDate(2026, 5, 17),
+        distanceM: 10000,
+        durationS: 2900,
+      ),
+      Course(
+        id: 'b',
+        title: '10 km de Bois-Joli',
+        raceDate: calendarDate(2025, 10, 12),
+        distanceM: 10000,
+        durationS: 3010,
+      ),
+      Course(
+        id: 'c',
+        title: 'Trail des Monts Imaginaires',
+        raceDate: calendarDate(2026, 6, 14),
+        distanceM: 173400,
+        durationS: 31260,
+        elevationGainM: 730,
+        isCharity: true,
+        associationName: 'Les Amis de Démoville',
+        registrationDonationCents: 24500,
+      ),
+      Course(
+        id: 'd',
+        title: 'Semi de Démoville',
+        raceDate: calendarDate(2026, 3, 8),
+        distanceM: 21100,
+        durationS: 6130,
+      ),
+    ], 2026);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: env.container,
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(),
+          locale: const Locale('fr'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Material(child: YearRecapCard(recap: recap)),
+        ),
+      ),
+    );
+    await env.settle(tester);
+    await expectLater(find.byType(YearRecapCard), matchesGoldenFile('out/bilan_annee.png'));
+    await env.dispose(tester);
+  });
 
   testWidgets(
     'carte solidaire',

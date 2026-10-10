@@ -4,9 +4,13 @@ import '../features/courses/domain/multisport.dart';
 
 /// Formats d'affichage communs (français, chiffres lisibles).
 
+/// Langue des nombres et des dates affichés : celle de l'app (« fr » ou « en »).
+/// Réglée par l'app au démarrage et à chaque changement de langue.
+String formatLocale = 'fr';
+
 /// Distance sans zéros superflus : « 42,2 km », « 10 km », « 21,18 km ».
 String formatKm(int meters, {int decimals = 2}) =>
-    '${NumberFormat(decimals == 0 ? '#,##0' : '#,##0.${'#' * decimals}', 'fr').format(meters / 1000)} km';
+    '${NumberFormat(decimals == 0 ? '#,##0' : '#,##0.${'#' * decimals}', formatLocale).format(meters / 1000)} km';
 
 String formatDuration(int seconds) {
   if (seconds <= 0) return '--:--';
@@ -48,24 +52,27 @@ String formatLegPace(Leg leg) => switch (leg.sport) {
   Sport.run => formatPace(leg.secondsPerKm),
 };
 
-String formatSpeed(double? kmh) => kmh == null ? '--' : '${NumberFormat('0.0', 'fr').format(kmh)} km/h';
+String formatSpeed(double? kmh) => kmh == null ? '--' : '${NumberFormat('0.0', formatLocale).format(kmh)} km/h';
 
-String formatMeters(int meters) => '${NumberFormat('#,##0', 'fr').format(meters)} m';
+String formatMeters(int meters) => '${NumberFormat('#,##0', formatLocale).format(meters)} m';
 
-String formatEuros(int cents) =>
-    NumberFormat.currency(locale: 'fr', symbol: '€', decimalDigits: cents % 100 == 0 ? 0 : 2).format(cents / 100);
+String formatEuros(int cents) => NumberFormat.currency(
+  locale: formatLocale,
+  symbol: '€',
+  decimalDigits: cents % 100 == 0 ? 0 : 2,
+).format(cents / 100);
 
 /// Montant sans le symbole, pour les chiffres héros où « € » est affiché à part : « 1 240 ».
 String formatEurosAmount(int cents) => formatEuros(cents).replaceAll(RegExp(r'\s?€'), '');
 
 /// Quantité déclarée : entière si possible.
 String formatQuantity(double value) => value == value.roundToDouble()
-    ? NumberFormat('#,##0', 'fr').format(value)
-    : NumberFormat('#,##0.#', 'fr').format(value);
+    ? NumberFormat('#,##0', formatLocale).format(value)
+    : NumberFormat('#,##0.#', formatLocale).format(value);
 
-String formatDay(DateTime date) => DateFormat('d MMM y', 'fr').format(date);
+String formatDay(DateTime date) => DateFormat('d MMM y', formatLocale).format(date);
 
-String formatLongDay(DateTime date) => DateFormat('EEEE d MMMM y', 'fr').format(date);
+String formatLongDay(DateTime date) => DateFormat('EEEE d MMMM y', formatLocale).format(date);
 
 // ---------------------------------------------------------------------
 // Saisie
@@ -98,15 +105,16 @@ int? parseEurosToCents(String input) {
 }
 
 /// Valeur de champ pour un montant en centimes (vide si 0).
-String centsToInput(int cents) => cents == 0 ? '' : NumberFormat('0.##', 'fr').format(cents / 100);
+String centsToInput(int cents) => cents == 0 ? '' : NumberFormat('0.##', formatLocale).format(cents / 100);
 
 /// Valeur de champ pour une distance en mètres.
-String metersToKmInput(int meters) => meters == 0 ? '' : NumberFormat('0.###', 'fr').format(meters / 1000);
+String metersToKmInput(int meters) => meters == 0 ? '' : NumberFormat('0.###', formatLocale).format(meters / 1000);
 
 const _monthShort = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEP', 'OCT', 'NOV', 'DÉC'];
+const _monthShortEn = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
 /// Mois abrégé pour les axes : « JAN », « FÉV », « JUIN », « JUIL »…
-String formatMonthShort(DateTime d) => _monthShort[d.month - 1];
+String formatMonthShort(DateTime d) => (formatLocale == 'en' ? _monthShortEn : _monthShort)[d.month - 1];
 
 /// Mois en toutes lettres : « Avril 2026 ».
-String formatMonthYear(DateTime d) => toBeginningOfSentenceCase(DateFormat('MMMM y', 'fr').format(d));
+String formatMonthYear(DateTime d) => toBeginningOfSentenceCase(DateFormat('MMMM y', formatLocale).format(d));

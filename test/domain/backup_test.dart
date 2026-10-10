@@ -75,12 +75,12 @@ void main() {
     return rows;
   }
 
-  test('CSV : BOM, 24 colonnes, toutes les courses non supprimées, format français', () {
+  test('CSV : BOM, 26 colonnes, toutes les courses non supprimées, format français', () {
     final bytes = backupCsv(courses, t, today: today);
     expect(bytes.take(3), [0xEF, 0xBB, 0xBF]);
     final rows = parse(utf8.decode(bytes.skip(3).toList()));
     expect(rows, hasLength(4)); // en-tête + 3 courses
-    expect(rows.every((r) => r.length == 24), isTrue);
+    expect(rows.every((r) => r.length == 26), isTrue);
     expect(rows[0].take(5), ['Date', 'Course', 'Type', 'Statut', 'Distance (km)']);
     // Plus récente d'abord : la course à venir, puis les terminées.
     expect(rows[1][1], 'Marathon');
@@ -99,7 +99,7 @@ void main() {
     expect(semi[20], 'Ligne 1\nLigne 2');
   });
 
-  test('Excel : classeur valide, une ligne par course, 24 colonnes', () {
+  test('Excel : classeur valide, une ligne par course, 26 colonnes', () {
     final zip = ZipDecoder().decodeBytes(backupWorkbook(courses, t, today: today));
     for (final f in zip.files) {
       XmlDocument.parse(String.fromCharCodes(f.content));
@@ -109,8 +109,8 @@ void main() {
     );
     final rows = sheet.findAllElements('row').toList();
     expect(rows, hasLength(2 + 1 + 3)); // titre, sous-titre, en-tête, 3 courses
-    expect(rows[2].findElements('c'), hasLength(24));
-    expect(rows.last.findElements('c').last.getAttribute('r'), 'X7');
+    expect(rows[2].findElements('c'), hasLength(26));
+    expect(rows.last.findElements('c').last.getAttribute('r'), 'Z7');
   });
 
   test('écriture des fichiers d\'exemple pour vérification manuelle', () {

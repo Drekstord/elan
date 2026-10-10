@@ -7,8 +7,9 @@ import '../courses/domain/course.dart';
 import 'domain/engagement_report.dart';
 
 /// « 1er septembre 2025 », « 20 septembre 2026 ».
-String formatFullDate(DateTime d) =>
-    d.day == 1 ? '1er ${DateFormat('MMMM y', 'fr').format(d)}' : DateFormat('d MMMM y', 'fr').format(d);
+String formatFullDate(DateTime d) => d.day == 1 && formatLocale == 'fr'
+    ? '1er ${DateFormat('MMMM y', formatLocale).format(d)}'
+    : DateFormat('d MMMM y', formatLocale).format(d);
 
 /// Équivalence d'une course ou d'un total : « 4 arbres plantés ».
 String declaredLabel(AppLocalizations t, ImpactMetric metric, double quantity) =>
@@ -142,7 +143,8 @@ String reportText(EngagementReport r, AppLocalizations t) {
 
 /// Les courses en tableau séparé par tabulations : se colle en tableau dans Word ou Excel.
 String reportTable(EngagementReport r, AppLocalizations t) {
-  String num(double v, {int decimals = 2}) => NumberFormat(decimals == 0 ? '0' : '0.${'#' * decimals}', 'fr').format(v);
+  String num(double v, {int decimals = 2}) =>
+      NumberFormat(decimals == 0 ? '0' : '0.${'#' * decimals}', formatLocale).format(v);
   String clean(String v) => v.replaceAll(RegExp(r'[\t\r\n]+'), ' ');
   return [
     t.reportTableHeader,

@@ -69,6 +69,14 @@ List<_Column> _columns(AppLocalizations t, DateTime today) {
     _Column(t.backupUpdated, 12, (c) => XCell.date(c.updatedAt)),
     // En dernier : les colonnes existantes gardent leur place dans les classeurs déjà faits.
     _Column(t.backupDisciplines, 44, (c) => txt(c.multisport == null ? '' : multisportSummary(c.multisport!, t))),
+    _Column(
+      t.backupTarget,
+      11,
+      (c) => c.targetDurationS == null
+          ? const XCell.empty(XFormat.center)
+          : XCell.text(formatDuration(c.targetDurationS!), center: true),
+    ),
+    _Column(t.backupRanking, 30, (c) => txt(c.ranking == null ? '' : rankingSummary(c.ranking!, t))),
   ];
 }
 

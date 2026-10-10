@@ -18,6 +18,7 @@ import '../../courses/domain/course_query.dart';
 import '../../courses/domain/course_stats.dart';
 import '../../courses/presentation/multisport_view.dart';
 import '../domain/evolution_range.dart';
+import 'year_recap_card.dart';
 
 /// Évolution sportive : un bilan chiffré de la période, puis les graphiques qui le détaillent.
 /// Les dons sont dans l'onglet Impact.
@@ -97,6 +98,8 @@ class _EvolutionScreenState extends ConsumerState<EvolutionScreen> {
     final byYear = _range == RangeKind.allYears;
     final selected = _selected == null || _selected! >= totals.length ? null : totals[_selected!];
     final paced = pacedRaces(inRange);
+    final ranked = inRange.where((c) => c.ranking?.overallPercent != null).toList()
+      ..sort((a, b) => a.raceDate.compareTo(b.raceDate));
     final splits = {
       for (final sport in Sport.values)
         if (splitRaces(inRange, sport) case final races when races.length >= 2) sport: races,
@@ -107,6 +110,12 @@ class _EvolutionScreenState extends ConsumerState<EvolutionScreen> {
       appBar: AppBar(
         title: Text(t.evolutionTitle.toUpperCase()),
         actions: [
+          if (all.any((c) => c.isCompleted))
+            IconButton(
+              tooltip: t.recapAction,
+              onPressed: () => showYearRecap(context, year: _range == RangeKind.year ? year : null),
+              icon: const Icon(Icons.ios_share),
+            ),
           IconButton(
             tooltip: _table ? t.viewChart : t.viewTable,
             onPressed: () => setState(() => _table = !_table),
@@ -142,8 +151,8 @@ class _EvolutionScreenState extends ConsumerState<EvolutionScreen> {
                           children: [
                             BarChart(
                               color: context.palette.chartPrimary,
-                              format: (v) => '${NumberFormat('#,##0', 'fr').format(v / 1000)} km',
-                              valueLabel: (v) => NumberFormat('#,##0', 'fr').format(v / 1000),
+                              format: (v) => '${NumberFormat('#,##0', formatLocale).format(v / 1000)} km',
+                              valueLabel: (v) => NumberFormat('#,##0', formatLocale).format(v / 1000),
                               selected: _selected,
                               onSelect: (i) => setState(() => _selected = _selected == i ? null : i),
                               data: [
@@ -177,6 +186,13 @@ class _EvolutionScreenState extends ConsumerState<EvolutionScreen> {
                             children: [_PaceChart(races: paced)],
                           ),
                         if (splits.isNotEmpty) _SportChartCard(splits: splits),
+                        if (ranked.length >= 2)
+                          _ChartCard(
+                            title: t.chartRankTitle,
+                            subtitle: t.chartRankHint,
+                            legend: ChartLegend([(LegendMark.dot, context.palette.chartPrimary, t.legendRank, null)]),
+                            children: [_RankChart(races: ranked)],
+                          ),
                       ],
                     ),
                 ],
@@ -233,7 +249,10 @@ class _Summary extends StatelessWidget {
     };
     final compare = switch (previous?.$3) {
       CompareKind.previous12Months => t.compareLast12,
-      CompareKind.previousYearToDate => t.compareYearToDate(range.year - 1, DateFormat('d MMMM', 'fr').format(today)),
+      CompareKind.previousYearToDate => t.compareYearToDate(
+        range.year - 1,
+        DateFormat('d MMMM', formatLocale).format(today),
+      ),
       CompareKind.previousYear => t.compareYear(range.year - 1),
       null => null,
     };
@@ -449,7 +468,7 @@ class _Delta extends StatelessWidget {
     final text = isNew
         ? t.deltaNew
         : pct >= 200
-        ? '×${NumberFormat('#,##0.#', 'fr').format(1 + pct / 100)}'
+        ? '×${NumberFormat('#,##0.#', formatLocale).format(1 + pct / 100)}'
         : '${pct > 0
               ? '+'
               : pct < 0
@@ -562,7 +581,7 @@ class _PeriodCourses extends StatelessWidget {
                     SizedBox(
                       width: 64,
                       child: Text(
-                        DateFormat('d MMM', 'fr').format(c.raceDate),
+                        DateFormat('d MMM', formatLocale).format(c.raceDate),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
@@ -615,7 +634,7 @@ class _CumulativeChart extends StatelessWidget {
           color: p.chartPrimary,
           points: points(year),
           endX: endDay.toDouble(),
-          note: current ? t.cumulativeAt(DateFormat('d MMM', 'fr').format(today)) : t.cumulativeYear,
+          note: current ? t.cumulativeAt(DateFormat('d MMM', formatLocale).format(today)) : t.cumulativeYear,
         ),
         LineSeries(
           name: '${year - 1}',
@@ -625,8 +644,8 @@ class _CumulativeChart extends StatelessWidget {
           note: t.cumulativeYear,
         ),
       ],
-      formatY: (v) => '${NumberFormat('#,##0', 'fr').format(v / 1000)} km',
-      formatX: (x) => DateFormat('d MMMM', 'fr').format(DateTime.utc(year).add(Duration(days: x.round() - 1))),
+      formatY: (v) => '${NumberFormat('#,##0', formatLocale).format(v / 1000)} km',
+      formatX: (x) => DateFormat('d MMMM', formatLocale).format(DateTime.utc(year).add(Duration(days: x.round() - 1))),
       xTicks: [
         for (var m = 1; m <= 12; m++)
           (DateTime.utc(year, m).difference(DateTime.utc(year)).inDays + 1.0, formatMonthShort(DateTime.utc(year, m))),
@@ -671,6 +690,45 @@ class _PaceChart extends StatelessWidget {
             y: c.paceSecondsPerKm!,
             tooltipTitle: '${c.title} · ${formatDay(c.raceDate)}',
             tooltipValue: '${formatPace(c.paceSecondsPerKm)} · ${formatKm(c.distanceM, decimals: 1)}',
+          ),
+      ],
+    );
+  }
+}
+
+/// Classement général de chaque course, en part des arrivants : le haut du graphique est la tête de course.
+class _RankChart extends StatelessWidget {
+  final List<Course> races;
+
+  const _RankChart({required this.races});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    double day(DateTime d) => d.millisecondsSinceEpoch / Duration.millisecondsPerDay;
+    final first = races.first.raceDate;
+    final last = races.last.raceDate;
+    final sameYear = first.year == last.year;
+    return DotChart(
+      color: context.palette.chartPrimary,
+      invertY: true,
+      step: 10,
+      minX: day(first) - 10,
+      maxX: day(last) + 10,
+      xTicks: [
+        (day(first), sameYear ? formatMonthShort(first) : '${first.year}'),
+        if (day(last) - day(first) > 45) (day(last), sameYear ? formatMonthShort(last) : '${last.year}'),
+      ],
+      formatY: (v) => '${v.round().clamp(0, 100)} %',
+      data: [
+        for (final c in races)
+          DotDatum(
+            x: day(c.raceDate),
+            y: c.ranking!.overallPercent!,
+            tooltipTitle: '${c.title} · ${formatDay(c.raceDate)}',
+            tooltipValue:
+                '${rankLabel(c.ranking!.overall, c.ranking!.finishers, t)} · '
+                '${t.rankingTop(c.ranking!.overallPercent!.ceil().clamp(1, 100))}',
           ),
       ],
     );

@@ -137,6 +137,8 @@ void main() {
       title: 'Triathlon de Démoville',
       raceDate: calendarDate(2026, 6, 14),
       type: CourseType.multisport,
+      targetDurationS: 1800,
+      ranking: const Ranking(overall: 42, finishers: 180, category: 7, categoryFinishers: 30, categoryName: 'SEH'),
       distanceM: 6700,
       durationS: 1680,
       multisport: Multisport(
@@ -154,6 +156,8 @@ void main() {
     final back = (await owner.gateway.pullSince(null)).singleWhere((r) => r.course.id == 'app-triathlon').course;
     expect(back.type, CourseType.multisport);
     expect(back.multisport, triathlon.multisport);
+    expect(back.targetDurationS, 1800);
+    expect(back.ranking, triathlon.ranking);
     expect(back.runDistanceM, 1500);
     expect(back.durationS, 1680);
   });

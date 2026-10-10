@@ -21,7 +21,11 @@
 - Toutes tes courses officielles et tes défis (The Conqueror…), avec temps, allure, dénivelé, photos du dossard et de la médaille.
 - **Triathlons, duathlons, aquathlons** : un temps par discipline et par transition, chaque discipline dans son unité.
 - **Courses à venir** : inscris-les à l'avance ; le jour J, elles passent en « résultat à saisir ».
-- Import d'un fichier **GPX** (distance, durée, dénivelé).
+- **Objectifs** : un temps visé par course, et un objectif annuel de kilomètres avec l'avance ou le retard sur le rythme.
+- **Classement officiel** : place au général et dans la catégorie, traduite en « dans les 15 % premiers ».
+- Import d'un fichier de montre **GPX** ou **FIT** (distance, durée, dénivelé ; disciplines et transitions d'un triathlon).
+- **Bilan de l'année** à partager en image.
+- App en **français** et en **anglais**.
 - Liste en blocs (à saisir, à venir, puis par année), recherche et filtres : *Officielles / Défis* et *Solidaires / par cause*.
 
 **Évolution**

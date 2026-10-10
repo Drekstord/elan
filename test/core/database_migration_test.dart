@@ -123,6 +123,42 @@ void main() {
     expect(reread.multisport!.transitionsIncluded, isTrue);
     expect(reread.runDistanceM, 1500);
   });
+
+  test('migration v4 -> v5 : données conservées, objectif et classement enregistrables', () async {
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(_v2Courses);
+          raw.execute("ALTER TABLE courses ADD COLUMN documents TEXT NOT NULL DEFAULT '[]'");
+          raw.execute('ALTER TABLE courses ADD COLUMN multisport TEXT');
+          raw.execute('CREATE TABLE photo_ops (photo_key TEXT NOT NULL PRIMARY KEY, kind TEXT NOT NULL)');
+          raw.execute('CREATE TABLE meta (name TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)');
+          raw.execute(
+            '''INSERT INTO courses VALUES ('a', 'Semi de Démoville', '2026-03-08', 'officialRace', 0, 21100, 6100,
+        NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'euroDirect', NULL, NULL, NULL, NULL,
+        '2026-03-08T10:00:00.000Z', '2026-03-08T10:00:00.000Z', NULL, 0, '[]', NULL)''',
+          );
+          raw.execute('PRAGMA user_version = 4');
+        },
+      ),
+    );
+    addTearDown(db.close);
+
+    final course = AppDatabase.toCourse(await db.select(db.courses).getSingle());
+    expect(course.title, 'Semi de Démoville');
+    expect(course.targetDurationS, isNull);
+    expect(course.ranking, isNull);
+
+    final updated = course.copyWith(
+      targetDurationS: 6000,
+      ranking: const Ranking(overall: 142, finishers: 980, category: 12, categoryFinishers: 85, categoryName: 'SEH'),
+    );
+    await db.into(db.courses).insertOnConflictUpdate(AppDatabase.toRow(updated, pending: true));
+    final reread = AppDatabase.toCourse(await db.select(db.courses).getSingle());
+    expect(reread.targetDurationS, 6000);
+    expect(reread.ranking, updated.ranking);
+    expect(reread.targetDeltaS, 100);
+  });
 }
 
 /// Base créée par la version 2 du schéma (avant les justificatifs).

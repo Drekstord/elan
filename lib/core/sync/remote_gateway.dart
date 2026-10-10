@@ -50,8 +50,26 @@ class SupabaseGateway implements RemoteGateway {
       for (final c in courses)
         if (c.isMultisport) {...c.toRemoteJson(), 'user_id': uid},
     ];
-    if (plain.isNotEmpty) await client.from('courses').upsert(plain, onConflict: 'user_id,id');
-    if (multisport.isNotEmpty) await client.from('courses').upsert(multisport, onConflict: 'user_id,id');
+    await _upsert(plain);
+    await _upsert(multisport);
+  }
+
+  /// La colonne « details » (temps visé, classement) date de la version 2.12
+  /// (supabase/004_details.sql). Sur une base pas encore à jour, les courses qui n'ont ni l'un
+  /// ni l'autre partent sans elle ; les autres attendent, et l'erreur remonte pour être expliquée.
+  Future<void> _upsert(List<Map<String, dynamic>> rows) async {
+    if (rows.isEmpty) return;
+    try {
+      await client.from('courses').upsert(rows, onConflict: 'user_id,id');
+    } on PostgrestException catch (error) {
+      if (!(error.code == 'PGRST204' && error.message.contains('details'))) rethrow;
+      final without = [
+        for (final row in rows)
+          if (row['details'] == null) {...row}..remove('details'),
+      ];
+      if (without.isNotEmpty) await client.from('courses').upsert(without, onConflict: 'user_id,id');
+      if (without.length < rows.length) rethrow;
+    }
   }
 
   @override
