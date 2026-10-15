@@ -110,12 +110,13 @@ void main() {
       ]);
     });
 
-    test('plafonds The Conqueror : 4 arbres, 40 bouteilles', () {
+    test('plafonds The Conqueror : 5 arbres, 50 bouteilles', () {
       Course tc(ImpactMetric m, double q) =>
           run('t', type: CourseType.theConqueror, charity: true, metric: m, quantity: q, durationS: 0);
-      expect(validateCourse(tc(ImpactMetric.trees, 4), today: today), isEmpty);
-      expect(validateCourse(tc(ImpactMetric.trees, 5), today: today), [CourseIssue.impactAboveCap]);
-      expect(validateCourse(tc(ImpactMetric.oceanBottles, 41), today: today), [CourseIssue.impactAboveCap]);
+      expect(validateCourse(tc(ImpactMetric.trees, 5), today: today), isEmpty);
+      expect(validateCourse(tc(ImpactMetric.trees, 6), today: today), [CourseIssue.impactAboveCap]);
+      expect(validateCourse(tc(ImpactMetric.oceanBottles, 50), today: today), isEmpty);
+      expect(validateCourse(tc(ImpactMetric.oceanBottles, 51), today: today), [CourseIssue.impactAboveCap]);
     });
 
     test('part personnelle d\'un défi en équipe', () {

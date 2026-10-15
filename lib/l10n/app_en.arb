@@ -111,7 +111,7 @@
   "formFundraising": "Fundraising (€)",
   "formDonationTotal": "Total raised: {amount}",
   "formImpact": "Equivalence announced by the organiser",
-  "formImpactHint": "Optional. Only if the organiser announces it (e.g. 4 trees planted).",
+  "formImpactHint": "Optional. Only if the organiser announces it (e.g. 5 trees planted).",
   "formImpactUnit": "Unit",
   "formImpactQuantity": "Quantity",
   "formPhotos": "Keepsakes",

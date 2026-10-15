@@ -390,7 +390,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get formImpact => 'Equivalence announced by the organiser';
 
   @override
-  String get formImpactHint => 'Optional. Only if the organiser announces it (e.g. 4 trees planted).';
+  String get formImpactHint => 'Optional. Only if the organiser announces it (e.g. 5 trees planted).';
 
   @override
   String get formImpactUnit => 'Unit';

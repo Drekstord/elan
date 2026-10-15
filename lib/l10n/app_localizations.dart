@@ -761,7 +761,7 @@ abstract class AppLocalizations {
   /// No description provided for @formImpactHint.
   ///
   /// In fr, this message translates to:
-  /// **'Facultatif. Uniquement si l\'organisateur l\'annonce (ex. 4 arbres plantés).'**
+  /// **'Facultatif. Uniquement si l\'organisateur l\'annonce (ex. 5 arbres plantés).'**
   String get formImpactHint;
 
   /// No description provided for @formImpactUnit.

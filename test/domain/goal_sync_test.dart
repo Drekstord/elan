@@ -103,6 +103,11 @@ void main() {
       );
       expect(associationDescription(id: '', stored: 'Texte saisi.', language: 'en'), 'Texte saisi.');
       expect(associationDescription(id: 'restos-du-coeur', stored: null, language: 'en'), isNull);
+      // Course déjà saisie avec l'ancien texte du catalogue : le texte corrigé s'affiche.
+      expect(
+        associationDescription(id: 'the-conqueror', stored: 'Ancien texte : jusqu\'à 4 arbres.', language: 'fr'),
+        contains('jusqu\'à 5'),
+      );
       // Chaque association du catalogue a sa description anglaise.
       for (final a in associationCatalog) {
         expect(
@@ -114,12 +119,12 @@ void main() {
     });
   });
 
-  test('en français, rien ne change', () {
+  test("en français : textes d'origine, catalogue à jour", () {
     expect(describeSyncError(const SocketException('x')), startsWith('Pas de connexion.'));
     expect(formatBytes(1258291), '1,2 Mo');
     expect(
       associationDescription(id: 'restos-du-coeur', stored: 'Aider les personnes démunies.', language: 'fr'),
-      'Aider les personnes démunies.',
+      startsWith('Aider les personnes démunies, notamment'),
     );
   });
 }

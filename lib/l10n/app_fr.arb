@@ -180,7 +180,7 @@
     }
   },
   "formImpact": "Équivalence annoncée par l'organisateur",
-  "formImpactHint": "Facultatif. Uniquement si l'organisateur l'annonce (ex. 4 arbres plantés).",
+  "formImpactHint": "Facultatif. Uniquement si l'organisateur l'annonce (ex. 5 arbres plantés).",
   "formImpactUnit": "Unité",
   "formImpactQuantity": "Quantité",
   "formPhotos": "Souvenirs",

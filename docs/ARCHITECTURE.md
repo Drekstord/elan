@@ -102,7 +102,7 @@ sont recréés si le compte change (une base SQLite `elan_<uid>.sqlite` par util
 | Règle | Décision |
 |---|---|
 | Impact | Mesure principale : euros réellement engagés (parrainage au km + inscription + collecte). Une équivalence (arbres, repas…) n'existe que si l'organisateur l'annonce et qu'elle est saisie ; rien n'est extrapolé des kilomètres. |
-| The Conqueror | Plafonds 4 arbres / 40 bouteilles par défi ; part personnelle = distance du défi / taille de l'équipe. |
+| The Conqueror | Plafonds 5 arbres / 50 bouteilles par défi ; part personnelle = distance du défi / taille de l'équipe. |
 | Courses à venir | `isPlanned` : « à venir » avant la date, « résultat à saisir » à partir du jour J (remonte en tête de liste). Ne compte nulle part tant que le résultat n'est pas saisi. |
 | Records | Par distance de référence (5 km, 10 km, semi, marathon, avec tolérance de mesure), plus longue distance, plus gros D+. Courses terminées et chronométrées, défis virtuels exclus. Badge seulement face à au moins une autre course comparable. |
 | Annuaire | Catalogue intégré (hors ligne) + répertoire officiel SIRENE (`recherche-entreprises.api.gouv.fr`, associations actives). Cause déduite du nom puis du code NAF. |

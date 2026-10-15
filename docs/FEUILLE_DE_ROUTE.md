@@ -37,6 +37,7 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 | 30 | Comparaison d'une édition à l'autre | ✅ terminé |
 | 31 | Courses à venir vers l'agenda (.ics) | ✅ terminé |
 | 32 | Finitions : classement à la saisie du résultat, objectif annuel synchronisé, anglais complet | ✅ terminé |
+| 33 | Plafonds The Conqueror corrigés : 5 arbres et 50 bouteilles par défi | ✅ terminé |
 
 Écartés : objectifs annuels (non souhaités).
 

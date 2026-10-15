@@ -2,8 +2,8 @@ import 'course.dart';
 
 /// Plafonds d'impact annoncés par The Conqueror pour un défi.
 class ConquerorRules {
-  static const double maxTrees = 4;
-  static const double maxBottles = 40;
+  static const double maxTrees = 5;
+  static const double maxBottles = 50;
 
   static double? capFor(ImpactMetric metric) => switch (metric) {
     ImpactMetric.trees => maxTrees,

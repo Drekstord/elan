@@ -10,8 +10,8 @@ const List<Association> associationCatalog = [
     name: 'The Conqueror (Eden Reforestation & Plastic Bank)',
     cause: CauseType.environnement,
     description:
-        'Défis virtuels : chaque défi terminé finance la plantation d\'arbres (jusqu\'à 4) '
-        'et le retrait de bouteilles plastiques (jusqu\'à 40).',
+        'Défis virtuels : chaque défi terminé finance la plantation d\'arbres (jusqu\'à 5) '
+        'et le retrait de bouteilles plastiques (jusqu\'à 50).',
     declaredMetrics: [ImpactMetric.trees, ImpactMetric.oceanBottles],
   ),
   Association(
@@ -94,8 +94,8 @@ const List<Association> associationCatalog = [
 /// Les mêmes descriptions en anglais, par identifiant du catalogue.
 const Map<String, String> _descriptionsEn = {
   'the-conqueror':
-      'Virtual challenges: each completed challenge funds tree planting (up to 4) '
-      'and the removal of plastic bottles (up to 40).',
+      'Virtual challenges: each completed challenge funds tree planting (up to 5) '
+      'and the removal of plastic bottles (up to 50).',
   'afm-telethon': 'Curing rare genetic and neuromuscular diseases through biomedical research.',
   'wings-for-life': 'Finding a cure for spinal cord injury. Entry fees go to research.',
   'restos-du-coeur': 'Helping people in need, in particular through free meals.',
@@ -110,7 +110,12 @@ const Map<String, String> _descriptionsEn = {
       'Supporting families, medical care and rehabilitation for people with Rett syndrome, and funding research.',
 };
 
-/// Description d'une association dans la langue de l'app : celle du catalogue en anglais quand
-/// elle existe, sinon le texte enregistré avec la course.
-String? associationDescription({required String? id, required String? stored, required String language}) =>
-    language == 'en' && id != null && stored != null ? (_descriptionsEn[id] ?? stored) : stored;
+/// Description d'une association, dans la langue de l'app. Pour une association du catalogue,
+/// c'est toujours le texte actuel du catalogue : une correction (un plafond qui change…) vaut
+/// aussi pour les courses déjà saisies. Sinon, le texte enregistré avec la course.
+String? associationDescription({required String? id, required String? stored, required String language}) {
+  if (stored == null || id == null) return stored;
+  final entry = associationCatalog.where((a) => a.id == id).firstOrNull;
+  if (entry == null) return stored;
+  return language == 'en' ? (_descriptionsEn[id] ?? entry.description ?? stored) : (entry.description ?? stored);
+}
