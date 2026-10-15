@@ -38,6 +38,7 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
 | 31 | Courses à venir vers l'agenda (.ics) | ✅ terminé |
 | 32 | Finitions : classement à la saisie du résultat, objectif annuel synchronisé, anglais complet | ✅ terminé |
 | 33 | Plafonds The Conqueror corrigés : 5 arbres et 50 bouteilles par défi | ✅ terminé |
+| 34 | Audit de sécurité et corrections | ✅ terminé |
 
 Écartés : objectifs annuels (non souhaités).
 
@@ -337,3 +338,33 @@ chacun est marqué ✅ (avec sa version) une fois terminé, avant de passer au s
   1.1, voir son guide) ; sans cela l'objectif reste sur chaque appareil, comme avant.
 - **Anglais complet** : messages de synchronisation, tailles de fichier et descriptions des
   associations du catalogue.
+
+## 34. Audit de sécurité et corrections ✅
+
+Audit de toute l'app (app, serveur personnel, schéma Supabase, Android, Windows, publication).
+Corrigé :
+
+1. **Fichiers venus du serveur** : une clé de fichier qui ne suit pas le format de l'app est
+   refusée (rien n'est lu ni écrit hors du dossier de l'app) ; seuls les PDF et les images
+   s'ouvrent, avec leur vraie extension (un « facture.pdf.exe » ne se lance jamais).
+2. **Mot de passe du propriétaire perdu** : commande `/pb/mot-de-passe-proprietaire`, sans compte
+   d'administration à créer ni à oublier.
+3. **Publication** : actions GitHub figées sur leur empreinte, droits réduits par tâche, clé de
+   signature Android présente sur le disque le temps de la construction seulement, image pandoc figée.
+4. **Sauvegarde Android** : la session de connexion n'est plus copiée dans la sauvegarde Google.
+5. **App publique sans serveur intégré** : l'adresse et la clé publique d'un projet Supabase se
+   saisissent dans l'app (écran « Serveur »), une fois par appareil ; la clé secrète est refusée.
+6. **Lien de mise à jour** : seulement vers GitHub, en https.
+7. **Notes personnelles** (`Idee_app.txt`, `*.protondoc`) ignorées par git et bloquées par `publier.sh`.
+8. **Horloge d'un appareil en avance** plafonnée par les deux serveurs (`supabase/005_securite.sql`).
+9. **Sessions** : 60 jours sur le serveur personnel ; **Réglages > Déconnecter mes autres appareils**.
+10. **Premier compte** : code d'installation (fichier `donnees/code-premier-compte.txt`).
+11. **https à la maison** : section du guide du serveur (proxy inversé du NAS).
+12. **Image Docker** : empreintes de PocketBase notées dans le Dockerfile ; serveur sans droits
+    d'administrateur (repli automatique si le NAS l'interdit).
+13. **Volumes** : 500 courses par envoi, 20 000 courses et 10 000 fichiers par compte.
+14. **Signature de l'installateur Windows** : documentée (payante), pas mise en place.
+
+Testé de bout en bout sur un vrai serveur (GitHub) : code d'installation, horloge, quotas, serveur
+sans droits d'administrateur, mise à jour d'un serveur installé avant, commande de secours,
+déconnexion des autres appareils.

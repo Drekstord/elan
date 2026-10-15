@@ -9,6 +9,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _server = ServerConfig.personal('http://192.168.1.20:8000');
 
+// Clés de test (jamais de vraies clés ici : publier.sh bloquerait la publication).
+const _publishable = 'sb_publishable_cle-de-test-publique';
+const _anonJwt = 'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiJ9.signature';
+const _serviceJwt = 'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.signature';
+const _online = ServerConfig.online(url: 'https://projet-test.exemple.fr', key: _publishable);
+
 /// Faux serveur : réponse de GET /api/elan/etat.
 MockClient _respond(int status, String body) => MockClient((request) async {
   expect(request.url.path, '/api/elan/etat');
@@ -55,7 +61,7 @@ void main() {
 
     test('serveur personnel : adresse seule, session propre à chaque serveur', () {
       expect(_server.kind, ServerKind.elan);
-      expect(_server.builtIn, isFalse);
+      expect(_server.isOnline, isFalse);
       expect(_server.key, isEmpty);
       expect(_server.displayAddress, '192.168.1.20:8000');
       expect(const ServerConfig.personal('https://elan.exemple.fr').displayAddress, 'elan.exemple.fr');
@@ -97,6 +103,52 @@ void main() {
         await checkServer(_server, client: slow, timeout: const Duration(milliseconds: 10)),
         ServerCheck.unreachable,
       );
+    });
+  });
+
+  group('serveur en ligne (Supabase) saisi dans l\'app', () {
+    test('seule la clé publique est acceptée, jamais la clé secrète', () {
+      expect(validateOnlineKey(_publishable), isNull);
+      expect(validateOnlineKey(' $_anonJwt '), isNull);
+      expect(validateOnlineKey('sb_secret_cle-de-test'), OnlineKeyError.secret);
+      expect(validateOnlineKey(_serviceJwt), OnlineKeyError.secret);
+      expect(validateOnlineKey(''), OnlineKeyError.invalid);
+      expect(validateOnlineKey('sb_publishable_'), OnlineKeyError.invalid);
+      expect(validateOnlineKey('n-importe-quoi'), OnlineKeyError.invalid);
+      expect(validateOnlineKey('a.b.c'), OnlineKeyError.invalid);
+    });
+
+    test('vérification : le projet répond avec la clé, la refuse, ou n\'est pas Supabase', () async {
+      MockClient answer(int status, String body) => MockClient((request) async {
+        expect(request.url.toString(), 'https://projet-test.exemple.fr/auth/v1/settings');
+        expect(request.headers['apikey'], _publishable);
+        return http.Response(body, status);
+      });
+      expect(await checkServer(_online, client: answer(200, '{"external":{"email":true}}')), ServerCheck.ok);
+      expect(await checkServer(_online, client: answer(401, '{"message":"Invalid API key"}')), ServerCheck.badKey);
+      expect(await checkServer(_online, client: answer(404, 'introuvable')), ServerCheck.notElan);
+      expect(await checkServer(_online, client: answer(200, '<html>')), ServerCheck.notElan);
+      final offline = MockClient((_) => throw const SocketException('hors ligne'));
+      expect(await checkServer(_online, client: offline), ServerCheck.unreachable);
+    });
+
+    test('gardé sur l\'appareil avec sa clé ; une clé secrète enregistrée n\'est jamais relue', () async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final store = ServerStore(prefs);
+      await store.save(_online);
+      expect(store.custom, _online);
+      expect(store.custom!.isOnline, isTrue);
+
+      // Retour à un serveur personnel : la clé est effacée.
+      await store.save(_server);
+      expect(store.custom, _server);
+      expect(prefs.getString('server.key'), isNull);
+
+      await prefs.setString('server.url', 'https://projet-test.exemple.fr');
+      await prefs.setString('server.kind', 'supabase');
+      await prefs.setString('server.key', _serviceJwt);
+      expect(store.custom, isNull);
     });
   });
 

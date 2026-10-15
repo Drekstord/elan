@@ -7,6 +7,7 @@ import 'package:drift/drift.dart';
 import 'package:pocketbase/pocketbase.dart' as pb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../features/courses/domain/course.dart' show isSafeFileKey;
 import '../database/database.dart';
 import '../media/media_store.dart';
 import 'remote_gateway.dart';
@@ -58,6 +59,7 @@ class SyncEngine {
       final store = media;
       if (store != null) {
         for (final key in {op.photoKey, MediaStore.thumbKeyOf(op.photoKey)}) {
+          if (!isSafeFileKey(key)) continue;
           final file = store.fileFor(key);
           if (await file.exists()) await remote.uploadPhoto(key, file);
         }
@@ -128,7 +130,7 @@ class SyncEngine {
   /// Fichier local d'une photo, téléchargé depuis le bucket si absent du cache.
   Future<File?> photoFile(String key) async {
     final store = media;
-    if (store == null) return null;
+    if (store == null || !isSafeFileKey(key)) return null;
     final file = store.fileFor(key);
     if (await file.exists()) return file;
     try {

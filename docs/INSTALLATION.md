@@ -34,6 +34,13 @@ Désinstallation : **Paramètres** > **Applications** > **ÉLAN** > **Désinstal
 Pas besoin de droits administrateur. L'installateur remplace sans conflit une installation faite
 avec `Installer ELAN.cmd` (même dossier, mêmes raccourcis).
 
+#### Signer l'installateur (facultatif, payant)
+Sans signature, Windows avertit à chaque installation et rien ne prouve que le fichier vient bien
+du projet. La solution la moins chère est **Azure Trusted Signing** (environ 10 € par mois, avec une
+vérification d'identité par Microsoft). Une fois le compte ouvert, il suffit d'ajouter au workflow
+« Version » une étape de signature après « Installateur », avec l'action officielle de Microsoft,
+figée sur son empreinte comme les autres. Rien n'est prévu tant que le compte n'existe pas.
+
 ### Depuis le code
 
 #### Prérequis (une seule fois, sur un nouveau PC)
@@ -133,8 +140,10 @@ La première construction prend 5 à 10 minutes. Résultat : **`dist\ELAN.apk`**
 Construction à la demande, sans étiquette : onglet **Actions** > **Version** > **Run workflow** ;
 l'APK (et l'installateur Windows) se téléchargent ensuite depuis la page de l'exécution (rubrique *Artifacts*, 30 jours).
 
-Les secrets nécessaires (configuration Supabase, clé de signature d'ÉLAN) sont enregistrés dans le dépôt :
+Les secrets nécessaires (clé de signature d'ÉLAN) sont enregistrés dans le dépôt :
 *Settings > Secrets and variables > Actions*. Ils ne sont jamais écrits dans le code.
+Depuis la version 2.14, l'app publiée n'intègre plus de serveur : les anciens secrets `SUPABASE_URL`
+et `SUPABASE_ANON_KEY` ne servent plus et peuvent être supprimés.
 
 **Ou depuis le PC** : refaire l'étape 3, puis réinstaller `ELAN.apk` (méthode A ou B) : Android propose
 **Mettre à jour**, tes données sont conservées.

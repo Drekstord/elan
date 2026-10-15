@@ -230,6 +230,29 @@ class _AccountCard extends ConsumerWidget {
     }
   }
 
+  Future<void> _signOutOthers(BuildContext context, WidgetRef ref) async {
+    final t = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.signOutOthers),
+        content: Text(t.signOutOthersBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t.signOutOthers)),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ref.read(authRepositoryProvider).signOutOtherDevices();
+      messenger.showSnackBar(SnackBar(content: Text(t.signOutOthersDone)));
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(t.signOutOthersFailed)));
+    }
+  }
+
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
     final t = AppLocalizations.of(context);
     final pending = ref.read(pendingCountProvider).value ?? 0;
@@ -261,9 +284,12 @@ class _AccountCard extends ConsumerWidget {
             const SizedBox(height: Space.sm),
             Text(t.settingsSignedInAs(email)),
             // Pour changer de serveur : se déconnecter, puis « Serveur » sur l'écran de connexion.
-            if (ref.watch(serverChoiceProvider)?.current case final server?) ...[
+            if (ref.watch(serverChoiceProvider) case final choice?) ...[
               const SizedBox(height: Space.xs),
-              Text(t.serverLabel(serverName(t, server)), style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                t.serverLabel(serverName(t, choice.current, builtIn: choice.builtIn)),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
             const SizedBox(height: Space.md),
             Wrap(
@@ -284,6 +310,11 @@ class _AccountCard extends ConsumerWidget {
                     icon: const Icon(Icons.group_outlined),
                     label: Text(t.accountsManage),
                   ),
+                OutlinedButton.icon(
+                  onPressed: () => _signOutOthers(context, ref),
+                  icon: const Icon(Icons.devices_other_outlined),
+                  label: Text(t.signOutOthers),
+                ),
                 OutlinedButton.icon(
                   onPressed: () => _signOut(context, ref),
                   icon: const Icon(Icons.logout),

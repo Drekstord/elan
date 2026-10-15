@@ -34,7 +34,7 @@ git rev-parse -q --verify "refs/tags/$etiquette" >/dev/null && arret "l'étiquet
 if git grep -nIE "passmail|supabase\.co/|sb_(publishable|secret)_[A-Za-z0-9]{8}|BEGIN (RSA |EC )?PRIVATE KEY" -- . ':!scripts/publier.sh' ':!docs/CLOUD.md' ':!config/supabase.example.json'; then
   arret "le code contient une adresse ou une clé qui ne doit pas être publiée (lignes ci-dessus)."
 fi
-if git ls-files | grep -iE "(^|/)(supabase\.json|key\.properties|.*\.jks|.*\.keystore|\.env|Idee_app\.txt)$"; then
+if git ls-files | grep -iE "(^|/)(supabase\.json|key\.properties|.*\.jks|.*\.keystore|\.env|Idee_app\.txt|.*\.protondoc)$"; then
   arret "un fichier secret ou personnel est suivi par git (ci-dessus)."
 fi
 

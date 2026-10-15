@@ -19,7 +19,7 @@ class DocumentEntry {
   String exportName({String? kindLabel}) {
     String clean(String v) => v.replaceAll(RegExp(r'[\\/:*?"<>|\r\n\t]+'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
     final ext = document.extension;
-    final file = kindLabel == null ? document.name : (ext.isEmpty ? kindLabel : '$kindLabel.$ext');
+    final file = kindLabel == null ? document.safeName : (ext.isEmpty ? kindLabel : '$kindLabel.$ext');
     return '${formatIsoDate(course.raceDate)} ${clean(course.title)} - ${clean(file)}';
   }
 }

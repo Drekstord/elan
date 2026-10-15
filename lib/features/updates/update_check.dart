@@ -58,16 +58,27 @@ Future<AvailableUpdate?> fetchUpdate({
     final asset = assetSuffix == null
         ? null
         : assets.where((a) => (a['name'] as String? ?? '').endsWith(assetSuffix)).firstOrNull;
+    // Seulement des liens https vers GitHub : une réponse altérée n'enverrait pas ailleurs.
+    final download = asset?['browser_download_url'] as String?;
+    if (!isGitHubUrl(page)) return null;
     return AvailableUpdate(
       version: tag.replaceFirst(RegExp('^v'), ''),
       pageUrl: page,
-      downloadUrl: asset?['browser_download_url'] as String? ?? page,
+      downloadUrl: download != null && isGitHubUrl(download) ? download : page,
     );
   } catch (_) {
     return null; // pas de réseau, réponse inattendue : on réessaiera plus tard
   } finally {
     if (client == null) c.close();
   }
+}
+
+/// Adresse https de GitHub (pages et fichiers des versions).
+bool isGitHubUrl(String url) {
+  final uri = Uri.tryParse(url);
+  return uri != null &&
+      uri.isScheme('https') &&
+      (uri.host == 'github.com' || uri.host.endsWith('.githubusercontent.com'));
 }
 
 String? get _assetSuffix {

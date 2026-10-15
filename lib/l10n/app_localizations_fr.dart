@@ -1434,7 +1434,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get serverIntroCustomOnly =>
-      'Indique le serveur où ÉLAN enregistre tes courses, par exemple installé sur un NAS.';
+      'Indique le serveur où ÉLAN enregistre tes courses : ton serveur personnel (par exemple sur un NAS) ou ton projet Supabase.';
 
   @override
   String get serverBuiltIn => 'Serveur ÉLAN';
@@ -2136,4 +2136,60 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get resultRanking => 'Classement (facultatif)';
+
+  @override
+  String get setupCodeLabel => 'Code d\'installation';
+
+  @override
+  String get setupCodeHint => 'Dans le dossier « donnees » du serveur : fichier code-premier-compte.txt.';
+
+  @override
+  String get setupCodeMissing => 'Saisis le code d\'installation du serveur.';
+
+  @override
+  String get setupCodeWrong =>
+      'Code d\'installation incorrect. Il est dans le fichier code-premier-compte.txt du dossier « donnees ».';
+
+  @override
+  String get signOutOthers => 'Déconnecter mes autres appareils';
+
+  @override
+  String get signOutOthersBody =>
+      'Tes autres téléphones et ordinateurs devront se reconnecter avec ton mot de passe. Cet appareil reste connecté.';
+
+  @override
+  String get signOutOthersDone => 'Tes autres appareils sont déconnectés.';
+
+  @override
+  String get signOutOthersFailed => 'Impossible pour le moment. Vérifie la connexion, ou mets le serveur à jour.';
+
+  @override
+  String get serverOnline => 'Serveur en ligne (Supabase)';
+
+  @override
+  String get serverOnlineHint => 'Ton propre projet Supabase';
+
+  @override
+  String get serverOnlineKey => 'Clé publique';
+
+  @override
+  String get serverOnlineKeyHelp =>
+      'Dans Supabase : Project Settings > API Keys, la clé « publishable » (ou « anon »). Jamais la clé secrète.';
+
+  @override
+  String get serverOnlineAddressHint => 'https://ton-projet.supabase.co';
+
+  @override
+  String get serverErrorKey =>
+      'Colle la clé publique du projet : elle commence par sb_publishable_ (ou eyJ pour l\'ancienne clé « anon »).';
+
+  @override
+  String get serverErrorSecretKey =>
+      'C\'est une clé secrète : elle ouvrirait tous les comptes du projet. Colle la clé publique (publishable ou anon).';
+
+  @override
+  String get serverBadKey => 'Le serveur refuse cette clé. Vérifie la clé publique dans Supabase.';
+
+  @override
+  String get serverNotSupabase => 'Cette adresse répond, mais ce n\'est pas un projet Supabase.';
 }

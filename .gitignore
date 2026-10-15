@@ -61,3 +61,8 @@ app.*.map.json
 
 # Serveur ÉLAN : données créées par un essai local
 /serveur/donnees/
+
+# Notes personnelles (idées, documents Proton) : jamais dans le dépôt
+/Idee_app.txt
+/Id*e app*
+*.protondoc

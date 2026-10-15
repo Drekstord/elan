@@ -35,6 +35,9 @@ class SupabaseBackend implements Backend {
   Future<void> signOut() => _client.auth.signOut();
 
   @override
+  Future<void> signOutOtherDevices() => _guard(() => _client.auth.signOut(scope: SignOutScope.others));
+
+  @override
   bool get needsCurrentPassword => false;
 
   @override
@@ -45,7 +48,7 @@ class SupabaseBackend implements Backend {
   Future<bool> needsFirstAccount() async => false;
 
   @override
-  Future<void> createFirstAccount(String email, String password) =>
+  Future<void> createFirstAccount(String email, String password, {required String setupCode}) =>
       throw const AuthError(AuthFailure.unknown, 'Les comptes de ce serveur sont créés par son administrateur.');
 
   // Serveur en ligne : les préférences vivent dans les données du compte, sans table à créer.

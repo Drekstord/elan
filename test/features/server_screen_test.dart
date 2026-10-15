@@ -89,4 +89,58 @@ void main() {
     await tester.pump();
     expect(saved, [null]);
   });
+
+  Future<void> fillOnline(WidgetTester tester, String address, String key) async {
+    await tester.tap(find.text('Serveur en ligne (Supabase)'));
+    await tester.pump();
+    await tester.enterText(find.widgetWithText(TextField, 'Adresse du serveur'), address);
+    await tester.enterText(find.widgetWithText(TextField, 'Clé publique'), key);
+    await tester.ensureVisible(find.text('Vérifier et enregistrer'));
+    await tester.tap(find.text('Vérifier et enregistrer'));
+    await tester.pump();
+  }
+
+  testWidgets('serveur en ligne : adresse et clé publique, vérifiées puis enregistrées', (tester) async {
+    await show(tester);
+    await fillOnline(tester, 'https://projet-test.exemple.fr/', 'sb_publishable_cle-de-test-publique');
+    const expected = ServerConfig.online(
+      url: 'https://projet-test.exemple.fr',
+      key: 'sb_publishable_cle-de-test-publique',
+    );
+    expect(checked, [expected]);
+    expect(saved, [expected]);
+  });
+
+  testWidgets('serveur en ligne : une clé secrète est refusée avant tout contact', (tester) async {
+    await show(tester);
+    await fillOnline(tester, 'https://projet-test.exemple.fr', 'sb_secret_cle-de-test');
+    expect(find.textContaining("C'est une clé secrète"), findsOneWidget);
+    expect(checked, isEmpty);
+    expect(saved, isEmpty);
+  });
+
+  testWidgets('serveur en ligne : clé refusée par le projet, message clair', (tester) async {
+    await show(tester, result: ServerCheck.badKey);
+    await fillOnline(tester, 'https://projet-test.exemple.fr', 'sb_publishable_cle-de-test-publique');
+    expect(find.textContaining('Le serveur refuse cette clé'), findsOneWidget);
+    expect(saved, isEmpty);
+  });
+
+  testWidgets('app sans serveur intégré : serveur personnel par défaut, serveur en ligne proposé', (tester) async {
+    saved = [];
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        locale: const Locale('fr'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: ServerScreen(current: null, builtIn: null, onSave: (s) async => saved.add(s)),
+      ),
+    );
+    expect(find.text('Serveur ÉLAN'), findsNothing);
+    expect(find.text('Mon serveur'), findsOneWidget);
+    expect(find.text('Serveur en ligne (Supabase)'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Adresse du serveur'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Clé publique'), findsNothing);
+  });
 }

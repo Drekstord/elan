@@ -39,7 +39,17 @@ demarrer() {
   docker compose up -d
   attendre
   curl -fsS "$URL/" | grep -q "Serveur personnel" || echec "page d'accueil absente"
-  attendu "état initial" "$(json "$URL/api/elan/etat" | jq -cS .)" '{"premierCompte":true,"serveur":"elan","version":1}'
+  attendu "état initial" "$(json "$URL/api/elan/etat" | jq -cS .)" '{"code":true,"premierCompte":true,"serveur":"elan","version":1}'
+
+  etape "Code d'installation : dans donnees et dans le journal ; serveur sans droits d'administrateur"
+  sudo test -s donnees/code-premier-compte.txt || echec "fichier du code d'installation absent"
+  # Journal lu en entier d'abord : « grep -q » couperait la lecture et ferait échouer la commande.
+  local journal
+  journal=$(docker compose logs elan)
+  grep -q "code d'installation $(sudo cat donnees/code-premier-compte.txt | tr -d '[:space:]')" <<<"$journal" \
+    || echec "code d'installation absent du journal"
+  attendu "propriétaire des données" "$(docker compose exec -T elan stat -c %U /donnees/data.db)" elan
+  attendu "utilisateur du serveur" "$(docker compose exec -T elan ps -o user,pid | awk '$2 == 1 {print $1}')" elan
 }
 
 verifier() {
@@ -50,10 +60,17 @@ verifier() {
     -d "{\"email\":\"intrus@exemple.fr\",\"password\":\"$MDP\",\"passwordConfirm\":\"$MDP\"}")" 400
   attendu "mot de passe trop court" "$(code -X POST "$URL/api/elan/premier-compte" -H 'Content-Type: application/json' \
     -d "{\"email\":\"$PROPRIO\",\"password\":\"court\"}")" 400
+  local installation
+  installation=$(sudo cat donnees/code-premier-compte.txt | tr -d '[:space:]')
+  attendu "premier compte sans code" "$(code -X POST "$URL/api/elan/premier-compte" -H 'Content-Type: application/json' \
+    -d "{\"email\":\"intrus@exemple.fr\",\"password\":\"$MDP\"}")" 401
+  attendu "premier compte, mauvais code" "$(code -X POST "$URL/api/elan/premier-compte" -H 'Content-Type: application/json' \
+    -d "{\"email\":\"intrus@exemple.fr\",\"password\":\"$MDP\",\"code\":\"ABCD2345\"}")" 401
   attendu "premier compte" "$(code -X POST "$URL/api/elan/premier-compte" -H 'Content-Type: application/json' \
-    -d "{\"email\":\"$PROPRIO\",\"password\":\"$MDP\"}")" 204
+    -d "{\"email\":\"$PROPRIO\",\"password\":\"$MDP\",\"code\":\"${installation,,}\"}")" 204
+  sudo test ! -e donnees/code-premier-compte.txt || echec "code d'installation encore présent après le premier compte"
   attendu "second « premier compte »" "$(code -X POST "$URL/api/elan/premier-compte" -H 'Content-Type: application/json' \
-    -d "{\"email\":\"intrus@exemple.fr\",\"password\":\"$MDP\"}")" 403
+    -d "{\"email\":\"intrus@exemple.fr\",\"password\":\"$MDP\",\"code\":\"$installation\"}")" 401
   attendu "état" "$(json "$URL/api/elan/etat" | jq .premierCompte)" false
   read -r jp ip < <(connexion "$PROPRIO" "$MDP")
   [ -n "$ip" ] && [ "$ip" != null ] || echec "connexion du propriétaire"
@@ -89,6 +106,17 @@ verifier() {
   attendu "« a » intacte" "$(json "$URL/api/elan/courses" -H "Authorization: $jp" | jq -r '.courses[] | select(.donnees.id=="a") | .donnees.title')" "Semi de Démoville"
   attendu "courses du proche" "$(json "$URL/api/elan/courses" -H "Authorization: $jq_" | jq '.courses | length')" 0
   attendu "pagination" "$(json "$URL/api/elan/courses?limite=1" -H "Authorization: $jp" | jq '.courses | length')" 1
+
+  etape "Horloge d'un appareil en avance : elle ne bloque pas les modifications suivantes"
+  json -X POST "$URL/api/elan/courses" -H "Authorization: $jp" -d '{"courses":[
+    {"id":"c","modifie_ms":9999999999999,"donnees":{"id":"c","race_date":"2026-06-01","title":"Horloge en avance"}}]}'
+  json -X POST "$URL/api/elan/courses" -H "Authorization: $jp" -d "{\"courses\":[
+    {\"id\":\"c\",\"modifie_ms\":$(( $(date +%s) * 1000 + 600000 )),\"donnees\":{\"id\":\"c\",\"race_date\":\"2026-06-01\",\"title\":\"Corrigée ailleurs\"}}]}"
+  attendu "modification acceptée" "$(json "$URL/api/elan/courses" -H "Authorization: $jp" | jq -r '.courses[] | select(.donnees.id=="c") | .donnees.title')" "Corrigée ailleurs"
+
+  etape "Envoi trop gros refusé"
+  attendu "501 courses d'un coup" "$(code -X POST "$URL/api/elan/courses" -H "Authorization: $jp" -H 'Content-Type: application/json' \
+    -d "$(jq -nc '{courses: [range(501) | {id: "x\(.)", modifie_ms: 1, donnees: {}}]}')")" 400
 
   etape "Fichiers : chacun les siens, illisibles sans jeton"
   printf '%%PDF-1.4 facture de test' > /tmp/facture.pdf
@@ -134,7 +162,24 @@ durer() {
   read -r jp ip < <(connexion "$PROPRIO" "$MDP")
   [ "$(json "$URL/api/elan/courses" -H "Authorization: $jp" | jq '.courses | length')" -ge 2 ] || echec "courses perdues au redémarrage"
 
-  etape "Sauvegarde complète dans donnees/backups (commande de secours du guide)"
+  etape "Mise à jour d'un serveur installé avant la 1.2 (données à l'administrateur) : rien n'est perdu"
+  docker compose down
+  sudo chown -R root:root donnees
+  docker compose up -d
+  attendre
+  attendu "données confiées au serveur" "$(docker compose exec -T elan stat -c %U /donnees/data.db)" elan
+  read -r jp ip < <(connexion "$PROPRIO" "$MDP")
+  [ "$(json "$URL/api/elan/courses" -H "Authorization: $jp" | jq '.courses | length')" -ge 2 ] || echec "courses perdues à la mise à jour"
+
+  etape "Mot de passe du propriétaire perdu : la commande de secours du guide"
+  docker compose exec -T elan /pb/mot-de-passe-proprietaire "$MDP2"
+  read -r jp ip < <(connexion "$PROPRIO" "$MDP2")
+  [ -n "$ip" ] && [ "$ip" != null ] || echec "connexion avec le nouveau mot de passe"
+  docker compose exec -T elan /pb/mot-de-passe-proprietaire "$MDP"
+  read -r jp ip < <(connexion "$PROPRIO" "$MDP")
+  attendu "données après la commande" "$(docker compose exec -T elan stat -c %U /donnees/data.db)" elan
+
+  etape "Sauvegarde complète dans donnees/backups (compte d'administration temporaire, neutralisé ensuite)"
   docker compose exec -T elan /pb/pocketbase superuser upsert secours@exemple.fr "$MDP" --dir=/donnees
   local js
   js=$(json -X POST "$URL/api/collections/_superusers/auth-with-password" -d "{\"identity\":\"secours@exemple.fr\",\"password\":\"$MDP\"}" | jq -r .token)
@@ -142,6 +187,8 @@ durer() {
   for _ in $(seq 1 30); do sudo test -s donnees/backups/essai.zip && break; sleep 1; done
   sudo test -s donnees/backups/essai.zip || echec "sauvegarde absente"
   attendu "sauvegarde programmée" "$(json "$URL/api/settings" -H "Authorization: $js" | jq -c '[.backups.cron, .backups.cronMaxKeep]')" '["0 3 * * *",7]'
+  attendu "essais du premier compte" "$(json "$URL/api/settings" -H "Authorization: $js"     | jq '.rateLimits.rules[] | select(.label == "/api/elan/premier-compte") | .maxRequests')" 10
+  attendu "durée des sessions" "$(json "$URL/api/collections/users" -H "Authorization: $js" | jq .authToken.duration)" 5184000
 
   etape "Suppression d'un compte : ses données partent avec lui, pas celles des autres"
   read -r jq_ iq < <(connexion "$PROCHE" "$MDP")
@@ -152,6 +199,11 @@ durer() {
   attendu "suppression du proche" "$(code -X DELETE "$URL/api/collections/users/records/$iq" -H "Authorization: $jp")" 204
   attendu "courses du compte supprimé" "$(json "$URL/api/collections/courses/records?filter=(cle='z')" -H "Authorization: $js" | jq '.items | length')" 0
   attendu "courses du propriétaire" "$(json "$URL/api/elan/courses?limite=1000" -H "Authorization: $jp" | jq '.courses | length')" "$avant"
+
+  etape "Compte d'administration neutralisé (commande de secours du guide)"
+  docker compose exec -T elan /pb/fermer-administration
+  attendu "connexion d'administration" "$(code -X POST "$URL/api/collections/_superusers/auth-with-password" -H 'Content-Type: application/json' \
+    -d "{\"identity\":\"secours@exemple.fr\",\"password\":\"$MDP\"}")" 400
 
   etape "Tout est bon"
 }

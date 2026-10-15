@@ -65,6 +65,18 @@ DateTime parseIsoDate(String value) {
 
 const Object _unset = Object();
 
+/// Types de fichiers que l'app range et ouvre : photos et PDF. Aucun ne s'exécute.
+const safeFileExtensions = {'jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'gif', 'bmp', 'pdf'};
+
+/// Clé d'un fichier telle que l'app la fabrique : `compte/identifiant.ext` pour une photo
+/// (miniature : `identifiant_t.jpg`), `compte/docs/identifiant.ext` pour un justificatif.
+/// Toute autre forme (« .. », chemin absolu, extension inconnue) vient de données altérées :
+/// l'app n'en tire jamais un chemin sur le disque.
+bool isSafeFileKey(String key) {
+  final match = RegExp(r'^[A-Za-z0-9_-]{1,64}/(?:docs/)?[A-Za-z0-9_-]{1,80}\.([a-z0-9]{1,5})$').firstMatch(key);
+  return match != null && safeFileExtensions.contains(match[1]);
+}
+
 /// Type d'un justificatif : il sert de titre dans l'app et nomme le fichier à l'export.
 enum DocumentKind {
   confirmation,
@@ -114,12 +126,23 @@ class CourseDocument {
   CourseDocument withKind(DocumentKind kind) =>
       CourseDocument(key: key, name: name, sizeBytes: sizeBytes, addedAt: addedAt, kind: kind);
 
-  String get extension {
-    final dot = name.lastIndexOf('.');
-    return dot < 0 ? '' : name.substring(dot + 1).toLowerCase();
-  }
+  /// Extension du fichier, tirée de sa clé et non du nom affiché : un nom trompeur
+  /// (« facture.pdf.exe ») ne change pas la nature du fichier. Vide si la clé est altérée.
+  String get extension => isSafeFileKey(key) ? key.substring(key.lastIndexOf('.') + 1) : '';
 
   bool get isPdf => extension == 'pdf';
+
+  /// Nom à donner au fichier hors de l'app (ouverture, export) : le nom choisi, sans caractère
+  /// interdit, toujours terminé par la vraie extension.
+  String get safeName {
+    final dot = name.lastIndexOf('.');
+    final base = (dot <= 0 ? name : name.substring(0, dot))
+        .replaceAll(RegExp(r'[\\/:*?"<>|\x00-\x1f]+'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    final short = base.length > 80 ? base.substring(0, 80).trim() : base;
+    return '${short.isEmpty ? 'justificatif' : short}.${extension.isEmpty ? 'bin' : extension}';
+  }
 
   Map<String, dynamic> toJson() => {
     'key': key,

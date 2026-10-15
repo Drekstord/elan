@@ -1421,7 +1421,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'ÉLAN stores your races on a server. By default it is the ÉLAN one; you can also use your own server, for example installed on a NAS.';
 
   @override
-  String get serverIntroCustomOnly => 'Enter the server where ÉLAN stores your races, for example installed on a NAS.';
+  String get serverIntroCustomOnly =>
+      'Enter the server where ÉLAN stores your races: your personal server (for example on a NAS) or your Supabase project.';
 
   @override
   String get serverBuiltIn => 'ÉLAN server';
@@ -2115,4 +2116,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resultRanking => 'Ranking (optional)';
+
+  @override
+  String get setupCodeLabel => 'Setup code';
+
+  @override
+  String get setupCodeHint => 'In the server\'s “donnees” folder: file code-premier-compte.txt.';
+
+  @override
+  String get setupCodeMissing => 'Enter the server\'s setup code.';
+
+  @override
+  String get setupCodeWrong => 'Wrong setup code. It is in the file code-premier-compte.txt of the “donnees” folder.';
+
+  @override
+  String get signOutOthers => 'Sign out my other devices';
+
+  @override
+  String get signOutOthersBody =>
+      'Your other phones and computers will have to sign in again with your password. This device stays signed in.';
+
+  @override
+  String get signOutOthersDone => 'Your other devices are signed out.';
+
+  @override
+  String get signOutOthersFailed => 'Not possible right now. Check the connection, or update the server.';
+
+  @override
+  String get serverOnline => 'Online server (Supabase)';
+
+  @override
+  String get serverOnlineHint => 'Your own Supabase project';
+
+  @override
+  String get serverOnlineKey => 'Public key';
+
+  @override
+  String get serverOnlineKeyHelp =>
+      'In Supabase: Project Settings > API Keys, the “publishable” key (or “anon”). Never the secret key.';
+
+  @override
+  String get serverOnlineAddressHint => 'https://your-project.supabase.co';
+
+  @override
+  String get serverErrorKey =>
+      'Paste the project\'s public key: it starts with sb_publishable_ (or eyJ for the legacy “anon” key).';
+
+  @override
+  String get serverErrorSecretKey =>
+      'This is a secret key: it would open every account of the project. Paste the public key (publishable or anon).';
+
+  @override
+  String get serverBadKey => 'The server refuses this key. Check the public key in Supabase.';
+
+  @override
+  String get serverNotSupabase => 'This address answers, but it is not a Supabase project.';
 }

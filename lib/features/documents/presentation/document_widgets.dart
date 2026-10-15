@@ -111,7 +111,7 @@ class DocumentTile extends ConsumerWidget {
         messenger.showSnackBar(SnackBar(content: Text(t.docUnavailable)));
         return;
       }
-      await openLocalFile(file, displayName: document.name);
+      await openLocalFile(file, displayName: document.safeName);
     }
 
     Future<void> export() async {
@@ -126,8 +126,8 @@ class DocumentTile extends ConsumerWidget {
         context,
         bytes,
         fileName: documentExportName(t, entry),
-        mimeType: mimeOf(document.name),
-        extension: document.extension.isEmpty ? 'pdf' : document.extension,
+        mimeType: mimeOf(document.safeName),
+        extension: document.extension.isEmpty ? 'bin' : document.extension,
       );
     }
 

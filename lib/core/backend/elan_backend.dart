@@ -74,6 +74,18 @@ class ElanBackend implements Backend {
   @override
   Future<void> signOut() async => pb.authStore.clear();
 
+  /// Le serveur change la clé des sessions du compte, puis renvoie une session neuve pour cet
+  /// appareil : toutes les autres deviennent invalides.
+  @override
+  Future<void> signOutOtherDevices() => _guard(() async {
+    final response = await pb.send<Map<String, dynamic>>('/api/elan/deconnecter-partout', method: 'POST');
+    pb.authStore.save(
+      response['token'] as String,
+      RecordModel.fromJson((response['record'] as Map).cast<String, dynamic>()),
+    );
+    return null;
+  });
+
   @override
   bool get needsCurrentPassword => true;
 
@@ -95,13 +107,15 @@ class ElanBackend implements Backend {
       (await fetchElanStatus(pb.baseURL, client: _http))?.needsFirstAccount ?? false;
 
   @override
-  Future<void> createFirstAccount(String email, String password) async {
+  Future<void> createFirstAccount(String email, String password, {required String setupCode}) async {
     await _guard(
       () => pb.send<dynamic>(
         '/api/elan/premier-compte',
         method: 'POST',
-        body: {'email': email.trim(), 'password': password},
+        body: {'email': email.trim(), 'password': password, 'code': setupCode.trim().toUpperCase()},
       ),
+      // 401 : code d'installation absent ou faux.
+      onUnauthorized: AuthFailure.wrongSetupCode,
     );
     await signIn(email, password);
   }
@@ -132,7 +146,11 @@ class ElanBackend implements Backend {
   }
 
   /// Traduit les erreurs du serveur en erreurs lisibles par les écrans.
-  static Future<void> _guard(Future<Object?> Function() action, {AuthFailure onRefused = AuthFailure.unknown}) async {
+  static Future<void> _guard(
+    Future<Object?> Function() action, {
+    AuthFailure onRefused = AuthFailure.unknown,
+    AuthFailure? onUnauthorized,
+  }) async {
     try {
       await action();
     } on ClientException catch (e) {
@@ -141,6 +159,7 @@ class ElanBackend implements Backend {
       final message = e.response['message'] as String?;
       if (e.statusCode == 0) throw AuthError(AuthFailure.offline, e.originalError?.toString());
       if (e.statusCode == 429) throw AuthError(AuthFailure.rateLimited, message);
+      if (e.statusCode == 401 && onUnauthorized != null) throw AuthError(onUnauthorized, message);
       if (code('oldPassword') != null) throw AuthError(AuthFailure.wrongCredentials, message);
       if (code('email') == 'validation_not_unique') throw AuthError(AuthFailure.emailTaken, message);
       if (code('password') != null || code('passwordConfirm') != null) {

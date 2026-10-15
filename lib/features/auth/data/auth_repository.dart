@@ -15,13 +15,15 @@ class AuthRepository {
 
   /// Serveur personnel tout neuf : le premier compte se crée depuis l'app.
   Future<bool> needsFirstAccount() => _backend.needsFirstAccount();
-  Future<void> createFirstAccount(String email, String password) => _backend.createFirstAccount(email, password);
+  Future<void> createFirstAccount(String email, String password, {required String setupCode}) =>
+      _backend.createFirstAccount(email, password, setupCode: setupCode);
 
   bool get needsCurrentPassword => _backend.needsCurrentPassword;
   Future<void> changePassword(String newPassword, {String? current}) =>
       _backend.changePassword(newPassword, current: current);
 
   Future<void> signOut() => _backend.signOut();
+  Future<void> signOutOtherDevices() => _backend.signOutOtherDevices();
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository(ref.watch(backendProvider)));

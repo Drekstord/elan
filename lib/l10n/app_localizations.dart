@@ -2375,7 +2375,7 @@ abstract class AppLocalizations {
   /// No description provided for @serverIntroCustomOnly.
   ///
   /// In fr, this message translates to:
-  /// **'Indique le serveur où ÉLAN enregistre tes courses, par exemple installé sur un NAS.'**
+  /// **'Indique le serveur où ÉLAN enregistre tes courses : ton serveur personnel (par exemple sur un NAS) ou ton projet Supabase.'**
   String get serverIntroCustomOnly;
 
   /// No description provided for @serverBuiltIn.
@@ -3487,6 +3487,108 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Classement (facultatif)'**
   String get resultRanking;
+
+  /// No description provided for @setupCodeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d\'installation'**
+  String get setupCodeLabel;
+
+  /// No description provided for @setupCodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans le dossier « donnees » du serveur : fichier code-premier-compte.txt.'**
+  String get setupCodeHint;
+
+  /// No description provided for @setupCodeMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisis le code d\'installation du serveur.'**
+  String get setupCodeMissing;
+
+  /// No description provided for @setupCodeWrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d\'installation incorrect. Il est dans le fichier code-premier-compte.txt du dossier « donnees ».'**
+  String get setupCodeWrong;
+
+  /// No description provided for @signOutOthers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déconnecter mes autres appareils'**
+  String get signOutOthers;
+
+  /// No description provided for @signOutOthersBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes autres téléphones et ordinateurs devront se reconnecter avec ton mot de passe. Cet appareil reste connecté.'**
+  String get signOutOthersBody;
+
+  /// No description provided for @signOutOthersDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tes autres appareils sont déconnectés.'**
+  String get signOutOthersDone;
+
+  /// No description provided for @signOutOthersFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible pour le moment. Vérifie la connexion, ou mets le serveur à jour.'**
+  String get signOutOthersFailed;
+
+  /// No description provided for @serverOnline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Serveur en ligne (Supabase)'**
+  String get serverOnline;
+
+  /// No description provided for @serverOnlineHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ton propre projet Supabase'**
+  String get serverOnlineHint;
+
+  /// No description provided for @serverOnlineKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clé publique'**
+  String get serverOnlineKey;
+
+  /// No description provided for @serverOnlineKeyHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans Supabase : Project Settings > API Keys, la clé « publishable » (ou « anon »). Jamais la clé secrète.'**
+  String get serverOnlineKeyHelp;
+
+  /// No description provided for @serverOnlineAddressHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'https://ton-projet.supabase.co'**
+  String get serverOnlineAddressHint;
+
+  /// No description provided for @serverErrorKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Colle la clé publique du projet : elle commence par sb_publishable_ (ou eyJ pour l\'ancienne clé « anon »).'**
+  String get serverErrorKey;
+
+  /// No description provided for @serverErrorSecretKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'C\'est une clé secrète : elle ouvrirait tous les comptes du projet. Colle la clé publique (publishable ou anon).'**
+  String get serverErrorSecretKey;
+
+  /// No description provided for @serverBadKey.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le serveur refuse cette clé. Vérifie la clé publique dans Supabase.'**
+  String get serverBadKey;
+
+  /// No description provided for @serverNotSupabase.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette adresse répond, mais ce n\'est pas un projet Supabase.'**
+  String get serverNotSupabase;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -124,6 +124,12 @@ Si la page ne s'affiche pas, va à la section [Si quelque chose ne va pas](#si-q
 4. Touche **Vérifier et enregistrer**. L'app contacte ton serveur.
 5. L'app te propose de créer le **premier compte** : choisis ton e-mail et un mot de passe
    (8 caractères au moins). Ce compte est le **propriétaire du serveur**.
+   Elle te demande aussi le **code d'installation** : huit lettres et chiffres, rangés dans le
+   fichier **`code-premier-compte.txt`** du dossier `donnees` (sur Synology : **File Station** >
+   `docker` > `elan` > `donnees`). Il prouve que c'est bien toi qui installes le serveur, et pas
+   quelqu'un d'autre connecté au même réseau. Le fichier disparaît une fois le compte créé.
+   (Le code est aussi écrit dans le **journal** du conteneur : Container Manager > Conteneur >
+   `elan` > **Journal**.)
 
 Tu es connecté : tes courses s'enregistrent maintenant chez toi.
 
@@ -158,6 +164,24 @@ L'adresse `192.168.…` ne fonctionne que **chez toi**, sur ton réseau.
 > **N'ouvre pas le port 8000 sur Internet** (pas de « redirection de port » sur ta box). Ton mot de
 > passe y circulerait en clair. L'app refuse d'ailleurs une adresse `http://` qui n'est pas celle
 > d'un réseau privé.
+
+### Facultatif : chiffrer aussi à la maison (https)
+
+Avec une adresse `http://`, ce qui passe entre l'app et le serveur n'est pas chiffré sur le Wi-Fi de
+la maison (le VPN, lui, chiffre déjà). Pour la plupart des foyers, c'est acceptable. Si tu préfères
+tout chiffrer, le NAS peut servir ÉLAN en `https://` avec un certificat gratuit. Sur un Synology :
+
+1. **Panneau de configuration** > **Accès externe** > **DDNS** : crée une adresse du type
+   `ton-nom.synology.me`.
+2. **Panneau de configuration** > **Sécurité** > **Certificat** : **Ajouter** > certificat
+   **Let's Encrypt** pour cette adresse.
+3. **Panneau de configuration** > **Portail de connexion** > **Avancé** > **Proxy inversé** >
+   **Créer** : source `HTTPS`, nom d'hôte `ton-nom.synology.me`, port `8443` ; destination `HTTP`,
+   `localhost`, port `8000`.
+4. Dans l'app, l'adresse du serveur devient `https://ton-nom.synology.me:8443`.
+
+Les intitulés varient selon la version du NAS ; ces étapes n'ont pas été essayées sur chaque modèle.
+Là encore, **n'ouvre pas ce port sur Internet** : garde le VPN pour l'extérieur.
 
 ## Tes données et leur sauvegarde
 
@@ -204,6 +228,25 @@ Les mises à jour sont rares. Tes données ne bougent pas : elles sont dans `don
 téléphone à l'ordinateur. Sans cette mise à jour, tout fonctionne comme avant : l'objectif reste
 simplement sur chaque appareil.
 
+**Version 1.2 (avec l'app 2.14)** : sécurité renforcée.
+- Le serveur ne tourne plus avec les droits d'administrateur. Au premier démarrage, il devient
+  propriétaire du dossier `donnees` (rien ne bouge dans tes données).
+- Les sessions durent 60 jours au lieu de 180, renouvelées à chaque ouverture de l'app : tu restes
+  connecté tant que tu t'en sers.
+- **Réglages** > **Déconnecter mes autres appareils** ferme ton compte partout ailleurs (téléphone
+  perdu, ordinateur prêté).
+- Le mot de passe du propriétaire se récupère avec une seule commande (voir plus bas).
+
+Si tu avais utilisé l'ancienne procédure « mot de passe perdu », un compte d'administration
+`secours@exemple.fr` est resté sur ton serveur : il voit les données de tout le monde. Neutralise-le
+(même endroit que la commande de secours, plus bas) :
+
+```bash
+/pb/fermer-administration
+```
+
+Il reçoit un mot de passe aléatoire que personne ne connaît. Les comptes de l'app ne changent pas.
+
 Si l'app affiche « Ce serveur est plus récent que l'app », mets l'app à jour.
 Si elle affiche « Serveur pas à jour », mets le serveur à jour.
 
@@ -225,15 +268,16 @@ Si elle affiche « Serveur pas à jour », mets le serveur à jour.
 ### Mot de passe du propriétaire perdu
 
 C'est le seul cas qui demande une commande. Sur Synology : **Container Manager** > **Conteneur** >
-`elan` > **Action** > **Ouvrir le terminal** > **Créer**, puis tape (en choisissant ton propre mot de passe) :
+`elan` > **Action** > **Ouvrir le terminal** > **Créer**, puis tape la commande ci-dessous en
+remplaçant `NouveauMotDePasse` par le tien (8 caractères au moins, sans espace) :
 
 ```bash
-/pb/pocketbase superuser upsert secours@exemple.fr UnMotDePasseDeSecours --dir=/donnees
+/pb/mot-de-passe-proprietaire NouveauMotDePasse
 ```
 
-Ouvre ensuite `http://192.168.1.20:8000/_/` dans ton navigateur, connecte-toi avec
-`secours@exemple.fr` et ce mot de passe. Dans **users**, clique sur ton compte, saisis un nouveau
-mot de passe dans **Password** et **Password confirm**, puis **Save changes**.
+Le serveur répond « Mot de passe changé pour … ». Connecte-toi dans l'app avec ce mot de passe.
+(En ligne de commande : `docker compose exec elan /pb/mot-de-passe-proprietaire NouveauMotDePasse`.)
+Aucun compte d'administration n'est créé : il n'y a rien à nettoyer ensuite.
 
 ## Questions fréquentes
 
@@ -245,7 +289,12 @@ photos : environ 0,5 Mo. Compte quelques Go pour mille courses, les 7 sauvegarde
 **Qui peut voir mes courses ?** Dans l'app, seulement toi : chaque compte ne voit que ses propres
 courses et ses propres fichiers. Le propriétaire gère les comptes, il ne lit pas les courses des
 autres. En revanche, la personne qui administre le NAS a accès aux fichiers de son disque, comme
-pour tout ce qui y est rangé.
+pour tout ce qui y est rangé. L'app, elle, ne fait jamais confiance aveuglément à ce que renvoie le
+serveur : elle ne range un fichier que dans son propre dossier et n'ouvre que des PDF et des images.
+
+**Y a-t-il des limites ?** Chaque compte peut garder jusqu'à 20 000 courses et 10 000 photos ou
+justificatifs (15 Mo par fichier) : de quoi courir toute une vie, sans qu'un compte puisse remplir
+le disque du NAS.
 
 **Et si mon NAS est éteint ?** L'app continue de fonctionner sur chaque appareil. La synchronisation
 entre tes appareils reprend quand le NAS est rallumé.

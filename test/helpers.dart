@@ -58,6 +58,11 @@ class FakeBackend implements Backend, ServerAccounts {
   @override
   Future<void> signOut() async {}
 
+  int signOutOthersCount = 0;
+
+  @override
+  Future<void> signOutOtherDevices() async => signOutOthersCount++;
+
   @override
   bool get needsCurrentPassword => true;
 
@@ -81,8 +86,13 @@ class FakeBackend implements Backend, ServerAccounts {
   @override
   Future<bool> needsFirstAccount() async => firstAccount;
 
+  /// Code d'installation attendu par le faux serveur.
+  String setupCode = 'ABCD2345';
+
   @override
-  Future<void> createFirstAccount(String email, String password) async {}
+  Future<void> createFirstAccount(String email, String password, {required String setupCode}) async {
+    if (setupCode.trim().toUpperCase() != this.setupCode) throw const AuthError(AuthFailure.wrongSetupCode);
+  }
 
   @override
   ServerAccounts? get accounts => this;

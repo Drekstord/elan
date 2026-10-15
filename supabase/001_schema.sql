@@ -120,6 +120,10 @@ returns trigger
 language plpgsql
 as $$
 begin
+  -- Horloge d'un appareil en avance : plafonnée à 5 minutes après l'heure du serveur.
+  if new.updated_at > now() + interval '5 minutes' then
+    new.updated_at := now();
+  end if;
   if tg_op = 'UPDATE' then
     if new.updated_at < old.updated_at then
       return null;  -- version plus ancienne : ignorée

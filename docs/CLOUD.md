@@ -32,17 +32,14 @@ Même procédure pour chaque proche (ils pourront changer leur mot de passe dans
    - *Data API* : copier l'**URL du projet** (`https://xxxx.supabase.co`) ;
    - *API Keys* : copier la clé **publishable** (`sb_publishable_…`), à défaut la clé **anon**.
      Jamais la clé *secret* / *service_role*.
-2. Coller ces deux valeurs dans `config/supabase.json` (fichier ignoré par git) :
-   ```json
-   {
-     "SUPABASE_URL": "https://xxxx.supabase.co",
-     "SUPABASE_ANON_KEY": "sb_publishable_xxxx"
-   }
-   ```
-3. Lancer :
-   ```bash
-   flutter run -d windows --dart-define-from-file=config/supabase.json
-   ```
+2. Dans l'app, sur l'écran de connexion : **Serveur** > **Serveur en ligne (Supabase)**, coller
+   l'adresse et la clé publique, **Vérifier et enregistrer**, puis se connecter. Une fois par
+   appareil. L'app refuse la clé secrète.
+   (L'app publiée n'intègre aucun serveur depuis la version 2.14 : sa clé serait lisible par
+   quiconque télécharge l'app, et l'app proposerait ton serveur à des inconnus.)
+3. Pour développer, on peut encore intégrer le serveur à la compilation : coller ces deux valeurs
+   dans `config/supabase.json` (fichier ignoré par git), puis
+   `flutter run -d windows --dart-define-from-file=config/supabase.json`.
    À la première connexion, les courses et photos de la v1 présentes sur l'appareil sont importées automatiquement.
 
 ## Mise à jour : justificatifs (version 2.6)
@@ -69,6 +66,36 @@ Tant que ce n'est pas fait, les courses sans objectif ni classement se synchroni
 autres restent sur l'appareil, avec un message qui le signale dans Réglages.
 Cette colonne accueillera aussi les prochaines informations de ce genre : plus de script à prévoir pour elles.
 (Une installation neuve avec `001_schema.sql` l'inclut déjà. Les serveurs personnels n'ont rien à faire.)
+
+## Mise à jour : sécurité (version 2.14)
+
+**Une seule fois :** SQL Editor > New query > coller le contenu de
+[`supabase/005_securite.sql`](../supabase/005_securite.sql) > **Run**. Le script :
+- plafonne l'heure acceptée d'un appareil (un téléphone réglé dans le futur ne bloque plus les
+  modifications faites ailleurs) ;
+- affiche deux contrôles, qui doivent être **vides** (voir ci-dessous).
+
+## Vérifier la sécurité
+
+L'app publiée contient l'adresse du serveur en ligne et sa clé **publique** (c'est normal : c'est la
+clé prévue pour cela). Les données restent protégées par les règles d'accès du schéma : chacun ne lit
+et n'écrit que ses courses et ses fichiers. À vérifier une fois, puis après chaque changement dans
+le tableau de bord :
+
+1. **Les inscriptions sont fermées** : Authentication > Sign In / Providers > **Allow new users to
+   sign up** désactivé. **Allow anonymous sign-ins** désactivé aussi.
+2. **Aucune table n'est ouverte** : les deux résultats de `005_securite.sql` sont vides. Le tableau
+   de bord le confirme : **Advisors** > **Security Advisor**, aucune erreur.
+3. **Plus d'anciennes tables** : si `courses_legacy`, `courses_backup_v1` ou `courses_backup_v2`
+   existent encore (Table Editor) et que leurs courses sont bien dans l'app, les supprimer :
+
+   ```sql
+   drop table if exists public.courses_legacy;
+   drop table if exists public.courses_backup_v1;
+   drop table if exists public.courses_backup_v2;
+   ```
+4. **Sessions** : Authentication > Sessions (selon l'offre) permet de limiter leur durée. L'app
+   propose aussi **Réglages** > **Déconnecter mes autres appareils**.
 
 ## Facultatif : courses de l'ancienne table cloud
 

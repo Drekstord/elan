@@ -6,6 +6,8 @@ import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
+import '../../features/courses/domain/course.dart';
+
 /// Photos de course sur le disque, rangées comme dans le bucket `course-media` :
 /// `<racine>/<user_id>/<uuid>.jpg` et sa miniature `<uuid>_t.jpg`.
 ///
@@ -22,7 +24,15 @@ class MediaStore {
 
   static String thumbKeyOf(String key) => key.replaceFirst(RegExp(r'\.[^./]+$'), '_t.jpg');
 
-  File fileFor(String key) => File(p.joinAll([root.path, ...key.split('/')]));
+  /// Fichier local d'une clé. Une clé qui ne suit pas le format de l'app (données altérées sur
+  /// le serveur : « ../ », chemin absolu, extension exécutable) est refusée : rien n'est lu ni
+  /// écrit hors du dossier des photos.
+  File fileFor(String key) {
+    if (!isSafeFileKey(key)) throw UnsafeFileKey(key);
+    final path = p.joinAll([root.path, ...key.split('/')]);
+    if (!p.isWithin(root.path, path)) throw UnsafeFileKey(key);
+    return File(path);
+  }
 
   /// Importe une image : redimensionnée (2000 px max, JPEG), plus une miniature.
   /// Si le format n'est pas décodable (ex. HEIC), l'original est conservé tel quel.
@@ -32,8 +42,7 @@ class MediaStore {
     final encoded = await Isolate.run(() => _encode(bytes));
 
     if (encoded == null) {
-      final ext = p.extension(source.path).toLowerCase();
-      final key = '$userId/$id${ext.isEmpty ? '.jpg' : ext}';
+      final key = '$userId/$id${_extensionOf(source.path, fallback: '.jpg')}';
       await _write(key, bytes);
       return key;
     }
@@ -51,10 +60,15 @@ class MediaStore {
   Future<String?> importDocument(File source) async {
     final length = await source.length();
     if (length > maxDocumentBytes) return null;
-    final ext = p.extension(source.path).toLowerCase();
-    final key = '$userId/docs/${const Uuid().v4()}${ext.isEmpty ? '.pdf' : ext}';
+    final key = '$userId/docs/${const Uuid().v4()}${_extensionOf(source.path, fallback: '.pdf')}';
     await _write(key, await source.readAsBytes());
     return key;
+  }
+
+  /// Extension d'un fichier importé, si c'est un type connu ; sinon [fallback].
+  static String _extensionOf(String path, {required String fallback}) {
+    final ext = p.extension(path).toLowerCase();
+    return safeFileExtensions.contains(ext.replaceFirst('.', '')) ? ext : fallback;
   }
 
   Future<void> _write(String key, List<int> bytes) async {
@@ -67,11 +81,21 @@ class MediaStore {
 
   /// Supprime la photo et sa miniature du cache local.
   Future<void> deleteLocal(String key) async {
+    if (!isSafeFileKey(key)) return;
     for (final k in {key, thumbKeyOf(key)}) {
       final file = fileFor(k);
       if (await file.exists()) await file.delete();
     }
   }
+}
+
+/// Clé de fichier refusée : elle ne suit pas le format de l'app.
+class UnsafeFileKey implements Exception {
+  final String key;
+  const UnsafeFileKey(this.key);
+
+  @override
+  String toString() => 'UnsafeFileKey($key)';
 }
 
 class _Encoded {

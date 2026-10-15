@@ -19,6 +19,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
+  final _setupCode = TextEditingController();
   bool _busy = false;
   bool _obscure = true;
   String? _error;
@@ -46,6 +47,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     _email.dispose();
     _password.dispose();
     _confirm.dispose();
+    _setupCode.dispose();
     super.dispose();
   }
 
@@ -56,6 +58,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     if (_firstAccount) {
       if (_password.text.length < 8) return setState(() => _error = t.settingsPasswordTooShort);
       if (_password.text != _confirm.text) return setState(() => _error = t.passwordMismatch);
+      if (_setupCode.text.trim().isEmpty) return setState(() => _error = t.setupCodeMissing);
     }
 
     setState(() {
@@ -66,7 +69,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     try {
       // En cas de succès, le routeur bascule vers l'accueil.
       if (_firstAccount) {
-        await auth.createFirstAccount(_email.text, _password.text);
+        await auth.createFirstAccount(_email.text, _password.text, setupCode: _setupCode.text);
       } else {
         await auth.signIn(_email.text, _password.text);
       }
@@ -78,6 +81,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             AuthFailure.rateLimited => t.signInRateLimited,
             AuthFailure.offline => t.signInOffline,
             AuthFailure.weakPassword => t.settingsPasswordTooShort,
+            AuthFailure.wrongSetupCode => t.setupCodeWrong,
             // Quelqu'un a créé le premier compte entre-temps : retour à la connexion.
             _ => _firstAccount ? t.firstAccountTaken : (e.detail ?? t.signInOffline),
           };
@@ -94,7 +98,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final t = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final server = ref.watch(serverChoiceProvider);
-    final personal = !(server?.current.builtIn ?? true);
+    final personal = server != null && !server.current.isOnline;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -161,6 +165,20 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           prefixIcon: const Icon(Icons.lock_outline),
                         ),
                       ),
+                      const SizedBox(height: Space.md),
+                      TextField(
+                        controller: _setupCode,
+                        enabled: !_busy,
+                        textCapitalization: TextCapitalization.characters,
+                        autocorrect: false,
+                        onSubmitted: (_) => _submit(),
+                        decoration: InputDecoration(
+                          labelText: t.setupCodeLabel,
+                          helperText: t.setupCodeHint,
+                          helperMaxLines: 3,
+                          prefixIcon: const Icon(Icons.pin_outlined),
+                        ),
+                      ),
                     ],
                     if (_error != null) ...[
                       const SizedBox(height: Space.md),
@@ -202,7 +220,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                   ),
                                 ),
                           icon: const Icon(Icons.dns_outlined, size: 18),
-                          label: Text(t.serverLabel(serverName(t, server.current))),
+                          label: Text(t.serverLabel(serverName(t, server.current, builtIn: server.builtIn))),
                         ),
                       ),
                     ],

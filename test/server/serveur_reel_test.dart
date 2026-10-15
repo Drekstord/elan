@@ -56,8 +56,25 @@ void main() {
     expect(owner.currentUser!.email, email);
     expect(owner.currentUser!.isOwner, isTrue);
     expect(owner.accounts, isNotNull);
-    await expectLater(other.createFirstAccount('intrus@exemple.fr', 'mot-de-passe-intrus'), throwsA(isA<AuthError>()));
+    await expectLater(
+      other.createFirstAccount('intrus@exemple.fr', 'mot-de-passe-intrus', setupCode: 'ABCD2345'),
+      _fails(AuthFailure.wrongSetupCode),
+    );
     expect(other.currentUser, isNull);
+  });
+
+  test('déconnecter mes autres appareils : les autres sessions tombent, celle-ci reste', () async {
+    // Une seule connexion de plus : le serveur limite les connexions en rafale.
+    final computer = ElanBackend(url);
+    addTearDown(computer.dispose);
+    await computer.signIn(email, password);
+
+    await owner.signOutOtherDevices();
+    expect(owner.currentUser!.email, email);
+    await owner.gateway.pullSince(null);
+
+    await computer.refreshSession();
+    expect(computer.currentUser, isNull, reason: "session de l'ordinateur fermée");
   });
 
   test('synchro : envoi, lecture, repère, la plus récente gagne', () async {

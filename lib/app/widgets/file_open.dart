@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../features/courses/domain/course.dart';
+
 /// Canal vers MainActivity.kt (ouverture d'un fichier par l'application adaptée).
 const _android = MethodChannel('elan/share');
 
@@ -20,8 +22,14 @@ String mimeOf(String name) => switch (name.split('.').last.toLowerCase()) {
 
 /// Ouvre [file] avec l'application par défaut (lecteur PDF, visionneuse…).
 /// [displayName] donne le nom (et l'extension) du fichier présenté à l'utilisateur.
+/// Seuls les PDF et les images s'ouvrent : un programme (« .exe », « .bat »…) ne serait
+/// jamais lancé, même si des données altérées le présentaient comme un justificatif.
 Future<void> openLocalFile(File file, {required String displayName}) async {
   if (kIsWeb) return;
+  final dot = displayName.lastIndexOf('.');
+  if (dot < 0 || !safeFileExtensions.contains(displayName.substring(dot + 1).toLowerCase())) {
+    throw ArgumentError.value(displayName, 'displayName', 'type de fichier non ouvert par l\'app');
+  }
   if (Platform.isWindows) {
     // Copie au nom d'origine : la visionneuse affiche « facture.pdf » plutôt qu'un identifiant.
     // Ouverture comme un double-clic (ShellExecute) : l'application par défaut du type de fichier.

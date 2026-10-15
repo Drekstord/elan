@@ -5,7 +5,7 @@ import '../sync/remote_gateway.dart';
 import 'elan_backend.dart';
 import 'supabase_backend.dart';
 
-enum AuthFailure { wrongCredentials, rateLimited, offline, weakPassword, emailTaken, unknown }
+enum AuthFailure { wrongCredentials, rateLimited, offline, weakPassword, emailTaken, wrongSetupCode, unknown }
 
 class AuthError implements Exception {
   final AuthFailure reason;
@@ -67,13 +67,17 @@ abstract class Backend {
   Future<void> signIn(String email, String password);
   Future<void> signOut();
 
+  /// Ferme les sessions du compte sur tous les autres appareils ; celui-ci reste connecté.
+  Future<void> signOutOtherDevices();
+
   /// Vrai si le changement de mot de passe demande l'actuel.
   bool get needsCurrentPassword;
   Future<void> changePassword(String newPassword, {String? current});
 
-  /// Serveur personnel tout neuf : le premier compte se crée depuis l'app.
+  /// Serveur personnel tout neuf : le premier compte se crée depuis l'app, avec le code
+  /// d'installation du serveur (fichier code-premier-compte.txt de son dossier de données).
   Future<bool> needsFirstAccount();
-  Future<void> createFirstAccount(String email, String password);
+  Future<void> createFirstAccount(String email, String password, {required String setupCode});
 
   /// Préférences du compte gardées par le serveur, pour qu'elles suivent d'un appareil à l'autre
   /// (objectif annuel…). Null si le serveur n'en a pas, ou s'il est trop ancien pour les garder.

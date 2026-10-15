@@ -10,15 +10,16 @@ import '../config.dart';
 
 /// Nature du serveur : elle décide de la façon de lui parler (voir core/backend).
 enum ServerKind {
-  /// Serveur ÉLAN en ligne (Supabase), intégré à la compilation.
+  /// Serveur en ligne (Supabase) : intégré à la compilation, ou saisi dans l'app (adresse et
+  /// clé publique du projet).
   supabase,
 
   /// Serveur personnel : le « serveur ÉLAN » du dossier serveur, par exemple sur un NAS.
   elan,
 }
 
-/// Serveur utilisé par l'app : celui intégré à la compilation (par défaut, [key] requis)
-/// ou un serveur personnel, désigné par sa seule adresse.
+/// Serveur utilisé par l'app : un serveur en ligne (Supabase : adresse et clé publique),
+/// intégré à la compilation ou saisi dans l'app, ou un serveur personnel, désigné par sa seule adresse.
 class ServerConfig {
   final String url;
 
@@ -29,17 +30,20 @@ class ServerConfig {
   /// Serveur personnel.
   const ServerConfig.personal(this.url) : key = '', kind = ServerKind.elan;
 
-  const ServerConfig._online({required this.url, required this.key}) : kind = ServerKind.supabase;
+  /// Serveur en ligne (projet Supabase) : adresse et clé publique.
+  const ServerConfig.online({required this.url, required this.key}) : kind = ServerKind.supabase;
 
-  /// Serveur fourni à la compilation (config/supabase.json), s'il y en a un.
+  /// Serveur fourni à la compilation (config/supabase.json), s'il y en a un. L'app publiée n'en a
+  /// pas : chacun saisit le sien.
   static ServerConfig? get compiled => AppConfig.isSupabaseConfigured
-      ? const ServerConfig._online(url: AppConfig.supabaseUrl, key: AppConfig.supabaseKey)
+      ? const ServerConfig.online(url: AppConfig.supabaseUrl, key: AppConfig.supabaseKey)
       : null;
 
   /// Serveur en ligne factice, pour les tests d'écrans.
   const ServerConfig.onlineForTest(this.url) : key = 'cle-publique-de-test', kind = ServerKind.supabase;
 
-  bool get builtIn => kind == ServerKind.supabase;
+  /// Serveur en ligne (Supabase), intégré ou saisi.
+  bool get isOnline => kind == ServerKind.supabase;
 
   /// Adresse courte pour l'affichage : « 192.168.1.20:8000 ».
   String get displayAddress {
@@ -109,6 +113,27 @@ bool isPrivateHost(String host) {
   return ip.isLoopback || ip.isLinkLocal || (b[0] & 0xfe) == 0xfc; // fc00::/7 : adresses privées
 }
 
+enum OnlineKeyError { invalid, secret }
+
+/// Clé d'un projet Supabase : seule la clé publique est acceptée. La clé secrète (« sb_secret_ »,
+/// ou l'ancienne « service_role ») contourne toutes les règles d'accès : elle ne doit jamais
+/// être enregistrée dans une app.
+OnlineKeyError? validateOnlineKey(String input) {
+  final key = input.trim();
+  if (key.startsWith('sb_secret_')) return OnlineKeyError.secret;
+  if (key.startsWith('sb_publishable_')) return key.length > 20 ? null : OnlineKeyError.invalid;
+  final parts = key.split('.');
+  if (parts.length != 3) return OnlineKeyError.invalid;
+  try {
+    final payload = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
+    final role = payload is Map ? payload['role'] : null;
+    if (role == 'service_role') return OnlineKeyError.secret;
+    return role == 'anon' ? null : OnlineKeyError.invalid;
+  } on FormatException {
+    return OnlineKeyError.invalid;
+  }
+}
+
 // ---------------------------------------------------------------------
 // Vérification avant d'enregistrer
 // ---------------------------------------------------------------------
@@ -162,6 +187,9 @@ enum ServerCheck {
 
   /// Rien ne répond (adresse, VPN, serveur arrêté).
   unreachable,
+
+  /// Serveur en ligne : le projet répond, mais refuse la clé.
+  badKey,
 }
 
 /// Vérifie qu'un serveur ÉLAN répond à cette adresse.
@@ -170,6 +198,7 @@ Future<ServerCheck> checkServer(
   http.Client? client,
   Duration timeout = const Duration(seconds: 8),
 }) async {
+  if (server.isOnline) return _checkOnline(server, client: client, timeout: timeout);
   try {
     final status = await fetchElanStatus(server.url, client: client, timeout: timeout);
     if (status == null) return ServerCheck.notElan;
@@ -185,33 +214,70 @@ Future<ServerCheck> checkServer(
   }
 }
 
+/// Projet Supabase : la page publique des réglages de connexion répond avec la clé publique.
+Future<ServerCheck> _checkOnline(ServerConfig server, {http.Client? client, required Duration timeout}) async {
+  final c = client ?? http.Client();
+  try {
+    final response = await c
+        .get(Uri.parse('${server.url}/auth/v1/settings'), headers: {'apikey': server.key})
+        .timeout(timeout);
+    if (response.statusCode == 401 || response.statusCode == 403) return ServerCheck.badKey;
+    if (response.statusCode != 200) return ServerCheck.notElan;
+    final Object? data = jsonDecode(utf8.decode(response.bodyBytes));
+    return data is Map && data.containsKey('external') ? ServerCheck.ok : ServerCheck.notElan;
+  } on FormatException {
+    return ServerCheck.notElan;
+  } on TimeoutException {
+    return ServerCheck.unreachable;
+  } on SocketException {
+    return ServerCheck.unreachable;
+  } on http.ClientException {
+    return ServerCheck.unreachable;
+  } on HandshakeException {
+    return ServerCheck.unreachable;
+  } finally {
+    if (client == null) c.close();
+  }
+}
+
 // ---------------------------------------------------------------------
 // Choix enregistré sur l'appareil
 // ---------------------------------------------------------------------
 
 class ServerStore {
   static const _url = 'server.url';
+  static const _kind = 'server.kind';
+  static const _key = 'server.key';
 
   final SharedPreferences prefs;
 
   const ServerStore(this.prefs);
 
-  /// Serveur personnel enregistré, ou null (serveur intégré).
+  /// Serveur choisi dans l'app (personnel ou en ligne), ou null (serveur intégré).
   ServerConfig? get custom {
     final url = prefs.getString(_url);
-    return url == null ? null : ServerConfig.personal(url);
+    if (url == null) return null;
+    if (prefs.getString(_kind) != ServerKind.supabase.name) return ServerConfig.personal(url);
+    final key = prefs.getString(_key) ?? '';
+    return validateOnlineKey(key) == null ? ServerConfig.online(url: url, key: key) : null;
   }
 
-  /// Serveur à utiliser : le personnel s'il y en a un, sinon l'intégré, sinon aucun.
+  /// Serveur à utiliser : celui choisi dans l'app s'il y en a un, sinon l'intégré, sinon aucun.
   ServerConfig? get active => custom ?? ServerConfig.compiled;
 
   Future<void> save(ServerConfig? custom) async {
-    // Clé d'un ancien serveur personnel de type Supabase (versions 2.8) : plus utilisée.
-    await prefs.remove('server.key');
     if (custom == null) {
       await prefs.remove(_url);
+      await prefs.remove(_kind);
+      await prefs.remove(_key);
+      return;
+    }
+    await prefs.setString(_url, custom.url);
+    await prefs.setString(_kind, custom.kind.name);
+    if (custom.isOnline) {
+      await prefs.setString(_key, custom.key);
     } else {
-      await prefs.setString(_url, custom.url);
+      await prefs.remove(_key);
     }
   }
 }

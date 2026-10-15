@@ -5,8 +5,16 @@ import 'package:app_course/features/documents/documents.dart';
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-CourseDocument doc(String key, String name) =>
-    CourseDocument(key: key, name: name, sizeBytes: 10, addedAt: DateTime.utc(2026, 1, 1));
+/// Justificatif [id], rangé comme le fait l'app : `u/docs/id.extension-du-nom`.
+CourseDocument doc(String id, String name) => CourseDocument(
+  key: 'u/docs/$id.${name.split('.').last.toLowerCase()}',
+  name: name,
+  sizeBytes: 10,
+  addedAt: DateTime.utc(2026, 1, 1),
+);
+
+/// Identifiant d'une clé de justificatif (« u/docs/k1.pdf » -> « k1 »).
+String idOf(String key) => key.split('/').last.split('.').first;
 
 Course course(String id, DateTime date, List<CourseDocument> docs, {DateTime? deletedAt}) =>
     Course(id: id, title: 'Course $id', raceDate: date, distanceM: 10000, documents: docs, deletedAt: deletedAt);
@@ -20,9 +28,13 @@ void main() {
   ];
 
   test('justificatifs par période, course la plus récente d\'abord, courses supprimées exclues', () {
-    expect(documentsOf(courses).map((e) => e.document.key), ['k2', 'k3', 'k1']);
+    expect(documentsOf(courses).map((e) => idOf(e.document.key)), ['k2', 'k3', 'k1']);
     expect(
-      documentsOf(courses, from: calendarDate(2026, 1, 1), to: calendarDate(2026, 12, 31)).map((e) => e.document.key),
+      documentsOf(
+        courses,
+        from: calendarDate(2026, 1, 1),
+        to: calendarDate(2026, 12, 31),
+      ).map((e) => idOf(e.document.key)),
       ['k2', 'k3'],
     );
     // Bornes incluses.
@@ -51,7 +63,7 @@ void main() {
       DocumentEntry(same, doc('k2', 'facture.pdf')),
       DocumentEntry(same, doc('absent', 'perdu.pdf')),
     ];
-    final (bytes, missing) = await zipDocuments(entries, (key) async => files[key]);
+    final (bytes, missing) = await zipDocuments(entries, (key) async => files[idOf(key)]);
     expect(missing, 1);
     final zip = ZipDecoder().decodeBytes(bytes);
     expect(zip.files.map((f) => f.name), ['2026-04-01 Trail - facture.pdf', '2026-04-01 Trail - facture (2).pdf']);
@@ -61,11 +73,11 @@ void main() {
   test('justificatifs : aller-retour JSON avec le serveur', () {
     final c = courses[1];
     final back = Course.fromRemoteJson(c.toRemoteJson());
-    expect(back.documents.map((d) => (d.key, d.name, d.sizeBytes)), [
+    expect(back.documents.map((d) => (idOf(d.key), d.name, d.sizeBytes)), [
       ('k2', 'facture.pdf', 10),
       ('k3', 'reçu don.jpg', 10),
     ]);
-    expect(back.fileKeys, ['k2', 'k3']);
+    expect(back.fileKeys.map(idOf), ['k2', 'k3']);
     // Ancienne ligne sans la colonne : aucun justificatif.
     expect(Course.fromRemoteJson({...c.toRemoteJson()}..remove('documents')).documents, isEmpty);
     expect(doc('k', 'Facture.PDF').isPdf, isTrue);

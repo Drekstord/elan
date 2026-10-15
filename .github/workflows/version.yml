@@ -6,12 +6,19 @@
 # Aussi à la main, sans release : onglet Actions > Version > Run workflow (fichiers dans l'onglet Actions).
 #
 # Secrets du dépôt requis (Settings > Secrets and variables > Actions), voir docs/INSTALLATION.md :
-#   SUPABASE_URL, SUPABASE_ANON_KEY            serveur intégré à l'app (clé publique « anon »)
+# (Aucun serveur n'est intégré à l'app publiée : chacun saisit le sien dans l'app, écran « Serveur ».)
 #   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
 #                                              clé de signature : la même que celle de l'app déjà installée,
 #                                              sinon Android refuse la mise à jour.
 # Ne tourne que dans le dépôt public Drekstord/elan (voir scripts/publier.sh) : dans le dépôt de
 # travail privé, les tâches sont ignorées.
+#
+# Sécurité de la chaîne de publication :
+#   - chaque action tierce est figée sur l'empreinte d'un commit (« @<sha> # vX.Y.Z ») : une
+#     étiquette déplacée par un pirate ne changerait rien ici. Pour mettre une action à jour :
+#     gh api repos/<action>/commits/<étiquette> -q .sha, puis remplacer l'empreinte et le commentaire ;
+#   - chaque tâche n'a que les droits dont elle a besoin ;
+#   - la clé de signature Android n'existe sur le disque que le temps de la construction.
 name: Version
 
 on:
@@ -20,7 +27,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # publier la release
+  contents: read
 
 env:
   FLUTTER_VERSION: '3.47.6'
@@ -31,31 +38,27 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: '17'
 
-      - uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
-      - name: Serveur intégré (depuis les secrets)
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::Secrets SUPABASE_URL / SUPABASE_ANON_KEY manquants (voir docs/INSTALLATION.md)."
-            exit 1
-          fi
-          jq -n --arg url "$SUPABASE_URL" --arg key "$SUPABASE_ANON_KEY" \
-            '{SUPABASE_URL: $url, SUPABASE_ANON_KEY: $key}' > config/supabase.json
+      - run: flutter pub get
 
+      - name: Tests
+        run: flutter test
+
+      # La clé n'est écrite qu'ici, après les tests, et effacée dès l'APK construit.
       - name: Clé de signature (depuis les secrets)
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -75,17 +78,16 @@ jobs:
             echo "keyPassword=$KEY_PASSWORD"
           } > android/key.properties
 
-      - run: flutter pub get
-
-      - name: Tests
-        run: flutter test
-
       - name: Construction de l'APK
         run: |
-          flutter build apk --release --dart-define-from-file=config/supabase.json
+          flutter build apk --release
           cp build/app/outputs/flutter-apk/app-release.apk "ELAN-${GITHUB_REF_NAME}.apk"
 
-      - uses: actions/upload-artifact@v7
+      - name: Effacement de la clé de signature
+        if: always()
+        run: rm -f android/app/elan-signature.jks android/key.properties
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: android
           path: ELAN-${{ github.ref_name }}.apk
@@ -99,26 +101,20 @@ jobs:
       run:
         shell: pwsh
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
-      - name: Serveur intégré (depuis les secrets)
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: |
-          @{ SUPABASE_URL = $env:SUPABASE_URL; SUPABASE_ANON_KEY = $env:SUPABASE_ANON_KEY } |
-            ConvertTo-Json | Set-Content -Encoding utf8NoBOM config/supabase.json
-
       - name: Construction de l'app Windows
         run: |
           flutter pub get
-          flutter build windows --release --dart-define-from-file=config/supabase.json
+          flutter build windows --release
 
       # Sans ces bibliothèques de Microsoft (souvent déjà présentes, pas toujours), l'app ne démarre pas.
       - name: Bibliothèques C++ de Microsoft jointes à l'app
@@ -157,7 +153,7 @@ jobs:
           Start-Sleep 3
           if (Test-Path "$app\elan.exe") { throw 'désinstallation incomplète' }
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: windows
           path: ELAN-Installation-${{ github.ref_name }}.exe
@@ -174,13 +170,15 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
 
-      - uses: docker/setup-buildx-action@v4
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
-      - uses: docker/login-action@v4
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         if: startsWith(github.ref, 'refs/tags/')
         with:
           registry: ghcr.io
@@ -193,7 +191,7 @@ jobs:
           numero=$(sed -nE 's/^version: *([0-9.]+).*/\1/p' pubspec.yaml)
           echo "numero=$numero" >> "$GITHUB_OUTPUT"
 
-      - uses: docker/build-push-action@v7
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: serveur/image
           platforms: linux/amd64,linux/arm64,linux/arm/v7
@@ -206,8 +204,12 @@ jobs:
   publication:
     needs: [android, windows, image-serveur]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # publier la release
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # Ce que reçoit la personne qui installe le serveur : le guide (une page à ouvrir dans le
       # navigateur) et le dossier « elan » à déposer tel quel sur le NAS.
@@ -220,7 +222,8 @@ jobs:
             "Ce dossier contient les données de ton serveur ÉLAN : comptes, courses, photos, justificatifs." \
             "Ne supprime et ne modifie rien ici. Pense à inclure ce dossier dans la sauvegarde de ton NAS." \
             > "$paquet/elan/donnees/A LIRE.txt"
-          docker run --rm -v "$PWD:/data" pandoc/core:latest serveur/LISEZMOI.md \
+          docker run --rm -v "$PWD:/data" \
+            pandoc/core:3.11@sha256:62518bfb6833705dc90a1634d8d879299bd820b3f74ad3b32fba8b618452553a serveur/LISEZMOI.md \
             --standalone --embed-resources --from gfm --to html5 \
             --metadata lang=fr --metadata pagetitle="Guide du serveur ÉLAN" \
             --include-in-header .github/scripts/guide-style.html \
@@ -228,11 +231,11 @@ jobs:
           (cd paquet && zip -qr "../ELAN-serveur-${GITHUB_REF_NAME}.zip" .)
           unzip -l "ELAN-serveur-${GITHUB_REF_NAME}.zip"
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           merge-multiple: true
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: serveur
           path: ELAN-serveur-${{ github.ref_name }}.zip
@@ -240,7 +243,7 @@ jobs:
 
       - name: Publication dans la release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           files: |
             ELAN-${{ github.ref_name }}.apk
